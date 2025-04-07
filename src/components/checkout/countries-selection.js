@@ -9,8 +9,8 @@ const CountriesSelection = () => {
   return (
     <select>
       {countries.map((country) => (
-        <option key={country.code} value={country.code}>
-          {country.name}
+        <option key={country} value={country}>
+          {country}
         </option>
       ))}
     </select>
