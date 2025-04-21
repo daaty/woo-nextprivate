@@ -1,0 +1,94 @@
+.homeContent {
+  padding: 20px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.homeContent h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.homeContent p {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.benefitsSection {
+  display: flex;
+  justify-content: space-between;
+  margin: 40px 0;
+  padding: 20px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.benefit {
+  flex: 1;
+  text-align: center;
+  padding: 0 15px;
+}
+
+.benefit h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.benefit p {
+  font-size: 14px;
+  color: #666;
+}
+
+.categoriesSection {
+  margin: 30px 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.category {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.category:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.category h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+/* Responsive styles */
+@media (max-width: 991px) {
+  .categoriesSection {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .benefitsSection {
+    flex-direction: column;
+  }
+  
+  .benefit {
+    margin-bottom: 20px;
+  }
+  
+  .categoriesSection {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .categoriesSection {
+    grid-template-columns: 1fr;
+  }
+}

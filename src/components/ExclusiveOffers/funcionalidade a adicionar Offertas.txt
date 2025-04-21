@@ -1,0 +1,13 @@
+Funcionalidades Adicionais a Considerar:
+Data de Expiração Dinâmica:
+
+Armazenar a data de expiração no banco de dados ou em um CMS
+Permitir que administradores definam quando a oferta termina
+Estoque Limitado:
+
+Exibir quantidade disponível para criar urgência
+Atualizar em tempo real quando produtos forem adicionados ao carrinho
+Integração com Google Analytics:
+
+Rastrear cliques e conversões de produtos em oferta especial
+Medir eficácia da estratégia de ofertas por tempo limitado

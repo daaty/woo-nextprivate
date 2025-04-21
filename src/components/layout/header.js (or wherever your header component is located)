@@ -1,0 +1,7 @@
+<div class="account">
+    <a href="/minha-conta" title="Minha Conta">
+        <svg role="img" class="user">
+            <use xlink:href="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#user"></use>
+        </svg>
+    </a>
+</div>

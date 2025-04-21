@@ -1,0 +1,138 @@
+/* Estilos refinados para os ícones SVG */
+
+/* Configurações base para todos os ícones SVG */
+svg[role="img"] {
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentColor;
+}
+
+/* Tamanhos específicos por contexto */
+.menu-all-categories {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+}
+
+.arrow-right {
+  width: 10px; /* Reduzido de 12px para 10px */
+  height: 10px; /* Reduzido de 12px para 10px */
+}
+
+.search {
+  width: 16px;
+  height: 16px;
+}
+
+.user {
+  width: 16px;
+  height: 16px;
+}
+
+.cart {
+  width: 16px;
+  height: 16px;
+}
+
+.close-menu-mobile {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+/* Alinhamentos específicos para containers */
+.title svg {
+  position: relative;
+  top: -1px;
+}
+
+.icon svg {
+  position: relative;
+  top: -1px;
+  margin-left: 2px; /* Adicionado para dar espaço entre o texto e o ícone */
+}
+
+/* Ajustes específicos para a barra superior */
+.top-bar {
+  margin-top: 40px;
+  height: 70px;
+  transition: all 300ms ease;
+  background-color: #fff;
+  width: 100%;
+  position: fixed;
+  z-index: 10;
+  font-size: 12px !important;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.15);
+}
+
+/* Ajustes para o wrapper dentro da barra superior */
+.top-bar .wrapper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Estilos para easy-access (busca, conta, carrinho) */
+.easy-access {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.easy-access svg {
+  margin-top: 0;
+  transition: transform 0.2s ease;
+}
+
+.easy-access svg:hover {
+  transform: scale(1.1);
+}
+
+/* Ajustes para o logo */
+#logo {
+  margin-right: 15px;
+}
+
+#logo h1 {
+  margin: 0;
+  line-height: 0;
+}
+
+#logo img {
+  height: 30px;
+  width: auto;
+}
+
+/* Ajustes para o menu all-categories */
+.all-categories .title {
+  padding: 3px 5px;
+  border-radius: 4px;
+  font-size: 6px;
+  display: flex;
+  align-items: center;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 989px) {
+  .top-bar {
+    height: 60px;
+  }
+  
+  .menu-all-categories {
+    width: 12px;
+    height: 12px;
+  }
+  
+  #logo img {
+    height: 25px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .top-bar {
+    height: 70px;
+  }
+}

@@ -4,3 +4,82 @@
 
 // NProgress style.
 @import 'nprogress/nprogress.css';
+
+// Import header styles
+@import './header.scss';
+
+// Import home styles
+@import './home.scss';
+
+/* Seus estilos SCSS globais aqui */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+// Ajustes de z-index globais
+.site-header {
+  position: relative;
+  z-index: 1000; // Valor alto para ficar acima de outros elementos
+}
+
+// Correções para imagens e posicionamento de elementos
+.product-categories-wrapper {
+  position: relative;
+  z-index: 5;
+  margin-top: 20px;
+}
+
+.product-categories-container {
+  position: relative;
+  z-index: 5; // Valor menor que o header
+}
+
+// Corrigir imagens de categorias que usam posicionamento absoluto
+.product-image-container {
+  position: relative;
+  overflow: hidden;
+  
+  img {
+    position: relative !important; // Sobrescrever o position: absolute
+    height: auto !important;
+    max-height: 250px;
+    object-fit: cover;
+    width: 100%;
+  }
+}
+
+/* Correção para imagens com posicionamento absoluto */
+img[style*="position:absolute"], 
+img[style*="position: absolute"] {
+  position: relative !important;
+  max-width: 100%;
+  max-height: 300px;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Sobrescrever estilos inline problemáticos */
+[style*="width:0;height:0;min-width:100%;max-width:100%;min-height:100%;max-height:100%"] {
+  width: 100% !important;
+  height: auto !important;
+  min-height: auto !important;
+  max-height: 250px !important;
+}
+
+// Correção para imagens que podem estar estourando o layout
+img {
+  max-width: 100%;
+  height: auto;
+}

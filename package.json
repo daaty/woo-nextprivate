@@ -3,9 +3,9 @@
   "version": "2.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "set NODE_OPTIONS=--openssl-legacy-provider && next dev",
+    "build": "set NODE_OPTIONS=--openssl-legacy-provider && next build",
+    "start": "set NODE_OPTIONS=--openssl-legacy-provider && next start",
     "svg": "svgr -d src/components/icons src/components/icons/svgs"
   },
   "dependencies": {
@@ -14,7 +14,9 @@
     "@svgr/cli": "^5.5.0",
     "@woocommerce/woocommerce-rest-api": "^1.0.1",
     "axios": "^0.21.1",
+    "caniuse-lite": "^1.0.30001712",
     "classnames": "^2.3.1",
+    "dompurify": "^3.2.5",
     "graphql": "^15.4.0",
     "lodash": "^4.17.20",
     "micro": "^9.3.4",
@@ -23,8 +25,8 @@
     "node-fetch": "^2.6.1",
     "nprogress": "^0.2.0",
     "prop-types": "^15.7.2",
-    "react": "17.0.1",
-    "react-dom": "17.0.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
     "sass": "^1.29.0",
     "stripe": "^8.148.0",
     "uuid": "^8.3.1",

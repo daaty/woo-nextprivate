@@ -1,0 +1,166 @@
+/* Estilos para os cards promocionais em grid */
+
+.root-grid {
+    display: grid;
+    max-width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    background-position: center;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    gap: 1rem;
+    margin: 1rem;
+}
+
+/* Estilos comuns para os cards */
+.card-banner-01,
+.card-banner-02,
+.card-banner-03,
+.card-banner-04 {
+    max-width: 100%;
+    height: 15rem;
+    width: 30rem;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+/* Cores específicas para cada card */
+.card-banner-01 {
+    background: #ff6900;
+}
+
+.card-banner-02 {
+    background: #1f79ff;
+}
+
+.card-banner-03 {
+    background: #ff6900;
+}
+
+.card-banner-04 {
+    background: #1f79ff;
+}
+
+/* Estilos para imagens dentro dos cards */
+.card-banner-01 img,
+.card-banner-02 img,
+.card-banner-03 img,
+.card-banner-04 img {
+    max-width: 100%;
+    width: 30rem;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Estilos para o conteúdo interno dos cards */
+.contents {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.contents h2 {
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 25px;
+    line-height: 1em;
+    max-width: 100%;
+}
+
+.contents h3 {
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 25px;
+    line-height: 1em;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.contents p {
+    color: #fff;
+}
+
+/* Estilo para os botões/links dentro dos cards */
+.contents a {
+    position: relative;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: #fff;
+    color: #ff6900;
+    margin-top: 10px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 700;
+    transition: 0.5s;
+}
+
+.contents a:hover {
+    background: #f5f5f5;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .root-grid {
+        display: flex;
+        background-position: center;
+        justify-content: flex-start;
+        align-items: center;
+        justify-items: stretch;
+        gap: 1rem;
+        margin: 1rem;
+        overflow-x: auto;
+        padding-bottom: 15px; /* Espaço para a scrollbar */
+    }
+    
+    /* Estilização da scrollbar horizontal */
+    .root-grid::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        background-color: #F5F5F5;
+        border-radius: 10px;
+    }
+
+    .root-grid::-webkit-scrollbar {
+        height: 8px;
+        background-color: #F5F5F5;    
+    }
+
+    .root-grid::-webkit-scrollbar-thumb {
+        background-color: #FF6900;    
+        background-image: -webkit-linear-gradient(
+            225deg,
+            rgba(255, 255, 255, .2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, .2) 50%,
+            rgba(255, 255, 255, .2) 75%,
+            transparent 75%,
+            transparent
+        );
+    }
+    
+    /* Ajustes para mobile */
+    .card-banner-01,
+    .card-banner-02,
+    .card-banner-03,
+    .card-banner-04 {
+        min-width: 280px;
+        width: 85vw;
+        max-width: 30rem;
+    }
+    
+    .contents {
+        padding: 0 10px;
+    }
+    
+    .contents h2,
+    .contents h3 {
+        font-size: 20px;
+    }
+}

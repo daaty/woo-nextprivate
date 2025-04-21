@@ -1,0 +1,888 @@
+/* Estilos específicos para o cabeçalho do site */
+
+/* Barra de benefícios superior */
+.benefits-top-bar {
+    background-color: #092046;
+    color: white;
+    width: 100%;
+    padding: 10px 0;
+    max-height: 40px;
+    font-size: 12px;
+}
+
+.topo-mibrasil {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.grid-icon-info {
+    display: flex;
+    gap: 0.3rem !important;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 12px;
+}
+
+.img-header-mi {
+    width: 16px;
+    height: 16px;
+}
+
+/* Top bar - barra principal do cabeçalho */
+.top-bar {
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    height: 70px;
+    width: 100%;
+    position: fixed;
+    margin-top: 40px;
+    z-index: 10;
+    transition: all 300ms ease;
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.15);
+    font-size: 12px !important;
+}
+
+/* Wrapper adjustments to balance elements */
+.wrapper {
+    display: flex;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+    position: relative;
+    height: 100%;
+    justify-content: flex-start; /* Changed to flex-start to align elements to the left */
+}
+
+/* Logo adjustments */
+#logo {
+    margin-right: 15px; /* Increased margin */
+}
+
+#logo h1 {
+    margin: 0;
+    line-height: 0;
+}
+
+#logo h1 a {
+    display: block;
+}
+
+#logo h1 a img {
+    max-height: 30px;
+}
+
+/* Menu de todas as categorias - FOCO PRINCIPAL */
+.all-categories {
+    position: relative;
+    margin-right: 15px; /* Increased margin */
+}
+
+.all-categories .title {
+    background-color: #ff6900;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    font-size: 12px;
+    height: 30px;
+}
+
+.all-categories .title:hover {
+    background-color: #e55e00;
+}
+
+.all-categories .title svg {
+    margin-right: 6px;
+    fill: white;
+    width: 14px;
+    height: 14px;
+}
+
+/* Dropdown de todas as categorias */
+.all-categories .wd-category-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    width: 240px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    border-radius: 4px;
+    padding-top: 5px; /* Reduzido de 10px para 5px */
+    margin-top: -5px; /* Ajustado para corresponder ao padding-top */
+}
+
+/* Importante: Esta é a chave para resolver o problema do menu desaparecendo */
+.all-categories:hover .wd-category-menu {
+    display: block;
+}
+
+/* Lista de categorias no dropdown */
+.section.level-1 {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.section.level-1 > li {
+    position: relative;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.section.level-1 > li > h3 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.section.level-1 > li > h3 > a {
+    padding: 8px 12px; /* Reduzido de 10px 15px para 8px 12px */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #333;
+    text-decoration: none;
+}
+
+.section.level-1 > li > h3 > a:hover {
+    background: #f9f9f9;
+    color: #ff6700;
+}
+
+.section.level-1 > li > h3 > a .icon {
+    margin-left: 5px;
+}
+
+.section.level-1 > li > h3 > a .icon svg {
+    width: 10px; /* Reduzido de 14px para 10px */
+    height: 10px; /* Reduzido de 14px para 10px */
+}
+
+.section.level-1 > li > a.ver-tudo {
+    display: block;
+    font-size: 10px; /* Reduzido de 11px para 10px */
+    color: #ff6700;
+    text-decoration: none;
+    padding: 0 12px 4px; /* Ajustado de 0 15px 8px para 0 12px 4px */
+}
+
+/* Submenu de subcategorias - MAIOR FOCO: Precisa de um gap para mouse navegar */
+.section.level-1 > li > .sub-section.level-2 {
+    display: none;
+    position: absolute;
+    left: 230px; /* Ajustado de 220px para 230px */
+    top: 0;
+    width: 240px;
+    background: white;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    margin: 0;
+    padding: 5px 0; /* Reduzido de 10px 0 para 5px 0 */
+    z-index: 1001;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Adicionar um "corredor" para o mouse navegar até o submenu */
+.section.level-1 > li:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px; /* Reduzido de 20px para 10px */
+    height: 100%;
+    background: transparent;
+    z-index: 1002;
+}
+
+.section.level-1 > li:hover > .sub-section.level-2 {
+    display: block;
+}
+
+.sub-section.level-2 li {
+    list-style: none;
+}
+
+.sub-section.level-2 li h4 {
+    margin: 0;
+    font-weight: normal;
+    font-size: 11px; /* Reduzido de 12px para 11px */
+}
+
+.sub-section.level-2 li h4 a {
+    padding: 6px 12px; /* Reduzido de 8px 15px para 6px 12px */
+    display: block;
+    color: #333;
+    text-decoration: none;
+}
+
+.sub-section.level-2 li h4 a:hover {
+    color: #ff6700;
+    background: #f9f9f9;
+}
+
+.sub-section.level-2 li h4 a .icon {
+    display: none;
+}
+
+/* Menu de categorias principal (horizontal) */
+.main-categories {
+    flex: 0 1 auto; /* Changed from flex: 1 to give only necessary space */
+    margin-right: 15px; /* Increased margin */
+}
+
+.main-categories .section.level-1 {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-left: 0;
+}
+
+.main-categories .section.level-1::-webkit-scrollbar {
+    height: 0;
+    width: 0;
+    background: transparent;
+}
+
+.main-categories .section.level-1 > li {
+    border: none;
+    position: relative;
+}
+
+.main-categories .section.level-1 > li > h3 {
+    margin: 0;
+    font-size: 12px;
+}
+
+.main-categories .section.level-1 > li > h3 > a {
+    padding: 8px 12px;
+    white-space: nowrap;
+    color: #333;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.main-categories .section.level-1 > li > h3 > a:hover {
+    color: #ff6700;
+}
+
+.main-categories .section.level-1 > li > h3 > a .icon {
+    display: none;
+}
+
+/* Submenu do menu principal horizontal - mesmo princípio do "corredor" */
+.main-categories .section.level-1 > li > .sub-section.level-2 {
+    display: none;
+    position: absolute;
+    top: 90%;
+    left: 0;
+    min-width: 600px;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    border-radius: 0 0 4px 4px;
+    padding: 20px;
+    margin-top: 10px; /* Cria espaço para mouse navegar */
+}
+
+/* Área para facilitar navegação ao submenu */
+.main-categories .section.level-1 > li::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: transparent;
+    z-index: 1001;
+}
+
+.main-categories .section.level-1 > li:hover > .sub-section.level-2 {
+    display: flex;
+}
+
+.main-categories .sub-section-content {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.main-categories .sub-section-content .ver-tudo {
+    display: block;
+    margin-bottom: 15px;
+    color: #ff6700;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.main-categories .sub-section-content li {
+    margin: 5px 0;
+}
+
+.main-categories .sub-section-content li h4 a {
+    padding: 6px 0;
+    font-size: 12px;
+}
+
+.main-categories .category-banner {
+    flex: 0 0 240px;
+}
+
+.main-categories .category-banner img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* Botão de ofertas - moved closer to navigation */
+.sale-button {
+    margin: 0 15px 0 0; /* Adjusted margin to remove right margin and add left margin */
+}
+
+.sale-button a {
+    display: block;
+    padding: 6px 10px;
+    background: #ff6900;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    font-size: 12px;
+    height: 30px;
+    line-height: 18px;
+}
+
+.sale-button a:hover {
+    background: #e55e00;
+}
+
+/* Área de busca, conta e carrinho */
+.easy-access {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto; /* Keep this as auto to push the entire section to the right */
+    justify-content: flex-end; /* Align items to the right */
+}
+
+.easy-access svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Estilo da barra de pesquisa - com ajuste de posição */
+.easy-access #search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-right: 100px; /* Push the search bar to the left by adding margin-right */
+}
+
+/* Estilo do campo de pesquisa */
+.easy-access #search .wd-search {
+    position: relative;
+    display: block;
+    opacity: 1;
+    transform: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+    min-width: auto;
+    background: transparent;
+    top: auto;
+    right: auto;
+}
+
+/* Estilo do formulário de pesquisa */
+.easy-access #search .wd-search #product-search-form {
+    position: relative;
+    width: 220px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.easy-access #search .input-wrapper {
+    position: relative;
+    margin-bottom: 0;
+    width: 100%;
+}
+
+/* Campo de busca compacto e com bordas arredondadas */
+.easy-access #search .input-wrapper input {
+    width: 100%;
+    padding: 6px 35px 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    outline: none;
+    font-size: 12px;
+    height: 30px;
+    transition: all 0.2s ease;
+    background-color: #f5f5f5;
+}
+
+.easy-access #search .input-wrapper input:focus {
+    border-color: #ff6700;
+    box-shadow: 0 0 0 1px rgba(255, 103, 0, 0.2);
+    background-color: #fff;
+}
+
+/* Remove completamente o ícone de lupa externo redundante */
+.easy-access #search > svg.search,
+.easy-access #search svg.search:not(button[type="submit"] svg.search) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Posicionamento adequado do botão de submit com ícone de lupa */
+.easy-access #search button[type="submit"] {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    z-index: 3;
+}
+
+/* Ícone de lupa no botão */
+.easy-access #search button[type="submit"] svg.search {
+    width: 16px;
+    height: 16px;
+    stroke: #999;
+    stroke-width: 1.5;
+    display: block;
+    transition: stroke 0.2s ease;
+}
+
+.easy-access #search button[type="submit"]:hover svg.search {
+    stroke: #ff6700;
+}
+
+/* Ajuste no botão de limpar */
+.easy-access #search .input-wrapper .search-erase {
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+
+.easy-access #search .input-wrapper input:not(:placeholder-shown) ~ .search-erase {
+    opacity: 1;
+}
+
+/* Container para os ícones de conta e carrinho */
+.easy-access .icons-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    /* Remove margin-left to keep icons at the right */
+}
+
+/* Estilo dos ícones de conta e carrinho */
+.easy-access .account,
+.easy-access .cart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+/* Adicionando link para o ícone de conta com comportamento correto e garantindo que seja clicável */
+.easy-access .account a.account-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+    z-index: 100; /* Higher z-index to ensure clickability */
+    position: relative;
+    cursor: pointer;
+    background-color: transparent; /* Ensure the link doesn't have a background that might interfere */
+    border: none; /* No border that could cause issues */
+}
+
+/* Ensure the link area covers the full icon area */
+.easy-access .account {
+    position: relative;
+}
+
+/* Make sure the icon inside the link is visible and properly sized */
+.easy-access .account a svg {
+    width: 20px;
+    height: 20px;
+    pointer-events: none; /* Prevents SVG from capturing clicks instead of link */
+}
+
+/* Add a debugging outline during development - remove when fixed */
+.easy-access .account a.account-link {
+    outline: 1px solid transparent; /* Change to a visible color like red for debugging */
+}
+
+/* Ensure link has proper hover state visual feedback */
+.easy-access .account a.account-link:hover {
+    opacity: 0.8;
+}
+
+.easy-access .account svg,
+.easy-access .cart svg {
+    width: 20px;
+    height: 20px;
+}
+
+.easy-access .account:hover,
+.easy-access .cart:hover {
+    transform: scale(1.1);
+}
+
+/* Ajuste para o contador do carrinho */
+.easy-access .cart .counter-item-cart {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff6700;
+    color: white;
+    font-size: 10px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Sugestões de busca com estilo aprimorado */
+.easy-access #search .suggestion-box-wrapper {
+    margin-top: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.easy-access #search .suggestion-terms {
+    padding: 10px 0;
+}
+
+.easy-access #search .suggestion-title {
+    display: block;
+    font-weight: 500;
+    color: #333;
+    font-size: 12px;
+    padding: 0 15px 5px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 5px;
+}
+
+.easy-access #search .suggestion-terms ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.easy-access #search .suggestion-item {
+    padding: 6px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.easy-access #search .suggestion-item:hover {
+    background-color: #f5f5f5;
+}
+
+.easy-access #search .suggestion-term a {
+    color: #666;
+    font-size: 12px;
+    text-decoration: none;
+    display: block;
+}
+
+.easy-access #search .suggestion-term a:hover {
+    color: #ff6700;
+}
+
+/* Produtos sugeridos na busca */
+.easy-access #search .suggestion-products {
+    border-top: 1px solid #eee;
+    padding: 10px 0;
+}
+
+.easy-access #search .suggestion-product {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.easy-access #search .suggestion-product:hover {
+    background-color: #f5f5f5;
+}
+
+.easy-access #search .suggestion-product-image {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    object-fit: contain;
+}
+
+.easy-access #search .suggestion-product-info {
+    flex: 1;
+}
+
+.easy-access #search .suggestion-product-name {
+    font-size: 12px;
+    color: #333;
+    margin-bottom: 3px;
+    display: block;
+}
+
+.easy-access #search .suggestion-product-price {
+    font-size: 12px;
+    color: #ff6700;
+    font-weight: 500;
+}
+
+/* Versão mobile da busca - adaptada para o novo layout */
+@media screen and (max-width: 767px) {
+    .top-search {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1003;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(3px);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 80px;
+        transform: translateY(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .top-search.active {
+        transform: translateY(0);
+    }
+    
+    .top-search .easy-access {
+        width: 100%;
+        padding: 0 15px;
+    }
+    
+    .top-search #search {
+        width: 100%;
+    }
+    
+    .top-search #search .wd-search {
+        position: relative;
+        width: 100%;
+    }
+    
+    .top-search #search .wd-search #product-search-form {
+        width: 100%;
+    }
+    
+    .top-search #search .input-wrapper input {
+        border-radius: 20px;
+        height: 40px;
+        font-size: 14px;
+        padding: 8px 40px 8px 15px;
+        background-color: #fff;
+    }
+    
+    .top-search #search button[type="submit"] {
+        right: 15px;
+        top: 50%;
+    }
+    
+    .top-search .close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: white;
+        font-size: 30px;
+        transform: rotate(45deg);
+        cursor: pointer;
+    }
+}
+
+/* Responsividade para dispositivos móveis */
+@media screen and (max-width: 767px) {
+    .benefits-top-bar {
+        padding: 22px !important;
+        position: relative;
+        height: 40px;
+    }
+    
+    .topo-mibrasil {
+        position: relative;
+    }
+    
+    .grid-icon-info {
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-content: center;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    
+    /* Configuração das animações para cada item */
+    .item-1-header-xiaomi {
+        animation-name: anim-1;
+    }
+    
+    .item-2-header-xiaomi {
+        animation-name: anim-2;
+    }
+    
+    .item-3-header-xiaomi {
+        animation-name: anim-3;
+    }
+    
+    .item-1-header-xiaomi, 
+    .item-2-header-xiaomi, 
+    .item-3-header-xiaomi {
+        position: absolute;
+        display: block;
+        animation-duration: 15s;
+        animation-timing-function: ease;
+        animation-iteration-count: infinite;
+        width: 90%;
+    }
+    
+    /* Keyframes para as animações de deslize horizontal */
+    @keyframes anim-1 {
+        0%, 8.3% { left: -100%; opacity: 0; }
+        8.3%, 25% { left: 5%; opacity: 1; }
+        33.33%, 100% { left: 110%; opacity: 0; }
+    }
+    
+    @keyframes anim-2 {
+        0%, 33.33% { left: -100%; opacity: 0; }
+        41.63%, 58.29% { left: 5%; opacity: 1; }
+        66.66%, 100% { left: 110%; opacity: 0; }
+    }
+    
+    @keyframes anim-3 {
+        0%, 66.66% { left: -100%; opacity: 0; }
+        74.96%, 91.62% { left: 5%; opacity: 1; }
+        100% { left: 110%; opacity: 0; }
+    }
+    
+    .top-bar {
+        height: 60px;
+    }
+    
+    .wrapper {
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    
+    #logo {
+        order: 1;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    .all-categories {
+        order: 2;
+        margin-right: 0;
+        flex: 1;
+    }
+    
+    .all-categories .title {
+        justify-content: center;
+    }
+    
+    .main-categories {
+        display: none;
+    }
+    
+    .sale-button {
+        order: 3;
+        margin: 0 5px 0 0; /* Adjusted for mobile */
+    }
+    
+    .easy-access {
+        order: 4;
+        gap: 10px; /* Reduced gap on mobile */
+        justify-content: space-between; /* Better spacing on mobile */
+        margin-left: 0;
+    }
+    
+    .easy-access #search .wd-search {
+        right: auto;
+        left: -100px;
+        width: 280px;
+    }
+    
+    .easy-access #search .wd-search #product-search-form {
+        width: 160px; /* Adjust search width on mobile */
+    }
+    
+    .easy-access .account,
+    .easy-access .cart {
+        width: 25px; /* Slightly smaller on mobile */
+        height: 25px;
+    }
+    
+    .easy-access .account svg,
+    .easy-access .cart svg {
+        width: 18px; /* Slightly smaller on mobile */
+        height: 18px;
+    }
+    
+    .wd-checkout-basket-summaryheader {
+        width: 100%;
+        right: -100%;
+    }
+}

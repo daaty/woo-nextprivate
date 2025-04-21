@@ -1,0 +1,461 @@
+// Estilos do cabeçalho inspirados no mibrasil.com.br
+
+.site-header {
+  width: 100%;
+  background-color: #fff;
+  position: relative;
+  z-index: 1000;
+}
+
+/* Barra de benefícios no topo */
+.benefits-top-bar {
+  background-color: #092046;
+  max-height: 40px;
+  padding: 8px 0;
+  color: white;
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+  
+  .topo-mibrasil {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    .grid-icon-info {
+      display: flex;
+      align-items: center;
+      margin: 0 20px;
+      font-size: 13px;
+      
+      .img-header-mi {
+        width: 15px;
+        height: 15px;
+        margin-right: 6px;
+      }
+    }
+  }
+}
+
+/* Barra principal com logo, menu e ações */
+.top-bar {
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+  
+  .wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  
+  /* Logo */
+  #logo {
+    flex: 0 0 auto;
+    margin-right: 20px;
+    
+    h1 {
+      margin: 0;
+      
+      a {
+        display: block;
+        
+        img {
+          max-height: 40px;
+          width: auto;
+        }
+      }
+    }
+  }
+  
+  /* Menu de todas categorias */
+  .all-categories {
+    position: relative;
+    margin-right: 20px;
+    
+    .title {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #333;
+      
+      i {
+        margin-right: 8px;
+      }
+      
+      &:hover {
+        color: #ff6700;
+      }
+    }
+    
+    .category-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      width: 240px;
+      z-index: 100;
+      
+      nav {
+        .section.level-1 {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          
+          > li {
+            position: relative;
+            border-bottom: 1px solid #f0f0f0;
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            h3 {
+              margin: 0;
+              font-size: 14px;
+              font-weight: normal;
+              
+              a {
+                padding: 12px 15px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                color: #333;
+                text-decoration: none;
+                
+                &:hover {
+                  background: #f5f5f5;
+                  color: #ff6700;
+                }
+                
+                .icon {
+                  font-size: 12px;
+                }
+              }
+            }
+            
+            .ver-tudo {
+              display: none;
+            }
+            
+            .sub-section.level-2 {
+              display: none;
+              position: absolute;
+              top: 0;
+              left: 100%;
+              width: 240px;
+              background: white;
+              box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+              list-style: none;
+              margin: 0;
+              padding: 10px 0;
+              
+              li {
+                h4 {
+                  margin: 0;
+                  font-size: 13px;
+                  font-weight: normal;
+                  
+                  a {
+                    padding: 8px 15px;
+                    display: block;
+                    color: #333;
+                    text-decoration: none;
+                    
+                    &:hover {
+                      background: #f5f5f5;
+                      color: #ff6700;
+                    }
+                  }
+                }
+              }
+            }
+            
+            &:hover .sub-section.level-2 {
+              display: block;
+            }
+          }
+        }
+      }
+    }
+    
+    &:hover .category-menu {
+      display: block;
+    }
+  }
+  
+  /* Menu principal */
+  .main-categories {
+    flex: 1;
+    
+    .category-menu {
+      nav {
+        .section.level-1 {
+          display: flex;
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          
+          > li {
+            position: relative;
+            
+            h3 {
+              margin: 0;
+              font-size: 14px;
+              font-weight: 500;
+              
+              a {
+                padding: 12px 15px;
+                display: flex;
+                align-items: center;
+                color: #333;
+                text-decoration: none;
+                white-space: nowrap;
+                
+                &:hover {
+                  color: #ff6700;
+                }
+                
+                .icon {
+                  display: none;
+                }
+              }
+            }
+            
+            .sub-section.level-2 {
+              display: none;
+              position: absolute;
+              top: 100%;
+              left: 0;
+              background: white;
+              box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+              z-index: 100;
+              min-width: 600px;
+              padding: 20px;
+              border-radius: 0 0 4px 4px;
+              
+              display: flex;
+              
+              .sub-section-content {
+                flex: 1;
+                padding-right: 20px;
+                
+                .ver-tudo {
+                  display: block;
+                  margin-bottom: 15px;
+                  font-weight: 500;
+                  color: #ff6700;
+                  text-decoration: none;
+                  
+                  &:hover {
+                    text-decoration: underline;
+                  }
+                }
+                
+                li {
+                  list-style: none;
+                  
+                  h4 {
+                    margin: 0 0 8px 0;
+                    font-size: 13px;
+                    font-weight: normal;
+                    
+                    a {
+                      color: #333;
+                      text-decoration: none;
+                      
+                      &:hover {
+                        color: #ff6700;
+                      }
+                    }
+                  }
+                }
+              }
+              
+              .category-banner {
+                flex: 0 0 240px;
+                
+                img {
+                  width: 100%;
+                  height: auto;
+                  border-radius: 4px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /* Botão de ofertas */
+  .sale-button {
+    margin: 0 20px;
+    
+    a {
+      display: block;
+      padding: 8px 15px;
+      background: #ff6700;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: 500;
+      
+      &:hover {
+        background: darken(#ff6700, 10%);
+      }
+    }
+  }
+  
+  /* Busca e ações */
+  .easy-access {
+    display: flex;
+    align-items: center;
+    
+    #search {
+      position: relative;
+      
+      form {
+        display: flex;
+        
+        .input-wrapper {
+          position: relative;
+          
+          i.fa-search {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+          }
+          
+          input {
+            width: 200px;
+            padding: 8px 10px 8px 30px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            outline: none;
+            
+            &:focus {
+              border-color: #ff6700;
+            }
+          }
+          
+          .search-erase {
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            cursor: pointer;
+          }
+        }
+        
+        button {
+          padding: 8px 15px;
+          background: #ff6700;
+          color: white;
+          border: none;
+          border-radius: 0 4px 4px 0;
+          cursor: pointer;
+          
+          &:hover {
+            background: darken(#ff6700, 10%);
+          }
+        }
+      }
+    }
+    
+    .account, .cart {
+      margin-left: 20px;
+      position: relative;
+      cursor: pointer;
+      
+      i {
+        font-size: 20px;
+        color: #333;
+        
+        &:hover {
+          color: #ff6700;
+        }
+      }
+    }
+    
+    .cart {
+      .counter-item-cart {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ff6700;
+        color: white;
+        font-size: 11px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+/* Responsividade */
+@media (max-width: 1200px) {
+  .top-bar .main-categories .category-menu nav .section.level-1 > li h3 a {
+    padding: 12px 10px;
+  }
+  
+  .top-bar .easy-access #search form .input-wrapper input {
+    width: 150px;
+  }
+}
+
+@media (max-width: 991px) {
+  .top-bar .main-categories {
+    display: none;
+  }
+  
+  .top-bar .all-categories {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .benefits-top-bar .topo-mibrasil {
+    flex-direction: column;
+    
+    .grid-icon-info {
+      margin: 3px 0;
+    }
+  }
+  
+  .top-bar .wrapper {
+    flex-wrap: wrap;
+  }
+  
+  .top-bar #logo {
+    width: 100%;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .top-bar .sale-button {
+    margin: 0 10px;
+  }
+  
+  .top-bar .easy-access #search {
+    display: none;
+  }
+}

@@ -1,31 +1,20 @@
-import Head from "next/head";
-import { AppProvider } from "./context/AppContext";
-import Header from "./Header";
-import Footer from "./Footer";
-import client from "./ApolloClient";
-import Router from "next/router";
-import NProgress from "nprogress";
-import { ApolloProvider } from "@apollo/client";
-
-Router.events.on("routeChangeStart", () => NProgress.start());
-Router.events.on("routeChangeComplete", () => NProgress.done());
-Router.events.on("routeChangeError", () => NProgress.done());
+import React from 'react';
+import Header from './Header/Header';
+import Footer from './Footer';
+import styles from './Layout.module.css';
+import DebugConsole from './DevTools/DebugConsole';
 
 const Layout = (props) => {
   return (
-    <AppProvider>
-      <ApolloProvider client={client}>
-        <div>
-          <Head>
-            <title>Woocommerce React Theme</title>
-          </Head>
-          <Header />
-          {props.children}
-          <Footer />
-        </div>
-      </ApolloProvider>
-    </AppProvider>
-  );
+    <div className="layout">
+      <Header/>
+      <div className="main-content">
+        {/* Não renderize CountdownOffers aqui se já estiver sendo renderizado na página */}
+        {props.children}
+      </div>
+      <Footer/>
+    </div>
+  )
 };
 
 export default Layout;

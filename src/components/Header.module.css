@@ -1,0 +1,71 @@
+.header {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.benefitsBar {
+  background-color: #092046;
+  color: white;
+  width: 100%;
+  padding: 10px 0;
+  max-height: 40px;
+  font-size: 12px;
+}
+
+.topBar {
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  height: 70px;
+  width: 100%;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+}
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.accountLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.accountIcon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 767px) {
+  .topBar {
+    height: 60px;
+  }
+  
+  .wrapper {
+    padding: 0 10px;
+  }
+}

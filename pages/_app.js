@@ -1,17 +1,21 @@
-import "../src/styles/style.scss";
-import "../src/styles/main.scss";
+import React from 'react';
+import App from 'next/app';
+import { ApolloProvider } from '@apollo/client';
+import { client } from '../src/apollo/client';
+import '../styles/globals.css';
+import '../src/styles/topbar.css'; // Importando os estilos globais da topbar
 
-import Router from 'next/router';
-import NProgress from 'nprogress';
+class MyApp extends App {
+  render() {
+    const { Component, pageProps } = this.props;
 
-NProgress.configure({ showSpinner: false });
-Router.events.on('routeChangeStart', () => NProgress.start());
-Router.events.on('routeChangeComplete', () => NProgress.done());
-Router.events.on('routeChangeError', () => NProgress.done());
-
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+    return (
+      <ApolloProvider client={client}>
+        <Component {...pageProps} />
+      </ApolloProvider>
+    );
+  }
 }
 
-export default MyApp
+export default MyApp;
 

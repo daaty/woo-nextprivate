@@ -2,6 +2,7 @@ const path = require("path");
 const allowedImageWordPressDomain = new URL(process.env.NEXT_PUBLIC_WORDPRESS_URL).hostname
 
 module.exports = {
+    reactStrictMode: true,
     trailingSlash: true,
     webpackDevMiddleware: (config) => {
         config.watchOptions = {
@@ -20,6 +21,17 @@ module.exports = {
      * @see https://nextjs.org/docs/basic-features/image-optimization#domains
      */
     images: {
-        domains: [ allowedImageWordPressDomain, 'via.placeholder.com' ],
+        domains: ['rota.rotadoscelulares.com'], // Adicione aqui seu domínio WordPress
+        deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+        imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    },
+    // Configuração de reescritas para redirecionar chamadas de placeholder.com para uma imagem local
+    async rewrites() {
+        return [
+            {
+                source: '/:path*',
+                destination: '/:path*',
+            },
+        ];
     },
 };

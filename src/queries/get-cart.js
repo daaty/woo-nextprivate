@@ -1,88 +1,86 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client';
 
-const GET_CART = gql`
-query GET_CART {
-  cart {
-    contents {
-      nodes {
-        key
-        product {
-          node {
-            id
-            productId: databaseId
-            name
-            description
-            type
-            onSale
-            slug
-            averageRating
-            reviewCount
-            image {
+export const GET_CART = gql`
+  query GET_CART {
+    cart {
+      contents {
+        nodes {
+          key
+          product {
+            node {
               id
-              sourceUrl
-              srcSet
-              altText
-              title
-            }
-            galleryImages {
-              nodes {
+              databaseId
+              name
+              description
+              type
+              onSale
+              slug
+              averageRating
+              image {
                 id
                 sourceUrl
                 srcSet
                 altText
                 title
               }
+              galleryImages {
+                nodes {
+                  id
+                  sourceUrl
+                  srcSet
+                  altText
+                  title
+                }
+              }
             }
           }
-        }
-        variation {
-          node {
-            id
-            variationId: databaseId
-            name
-            description
-            type
-            onSale
-            price
-            regularPrice
-            salePrice
-            image {
+          variation {
+            node {
               id
-              sourceUrl
-              srcSet
-              altText
-              title
+              databaseId
+              name
+              description
+              type
+              onSale
+              price
+              regularPrice
+              salePrice
+              image {
+                id
+                sourceUrl
+                srcSet
+                altText
+                title
+              }
+              attributes {
+                nodes {
+                  name
+                  value
+                }
+              }
             }
           }
-          attributes {
-            id
-            name
-            value
-          }
+          quantity
+          total
+          subtotal
+          subtotalTax
         }
-        quantity
-        total
-        subtotal
-        subtotalTax
       }
-    }
-    appliedCoupons {
-      code
-      discountAmount
+      appliedCoupons {
+        code
+        discountAmount
+        discountTax
+      }
+      subtotal
+      subtotalTax
+      shippingTax
+      shippingTotal
+      total
+      totalTax
+      feeTax
+      feeTotal
       discountTax
+      discountTotal
     }
-    subtotal
-    subtotalTax
-    shippingTax
-    shippingTotal
-    total
-    totalTax
-    feeTax
-    feeTotal
-    discountTax
-    discountTotal
   }
-}
 `;
-
-export default GET_CART;
