@@ -12,6 +12,23 @@ const Navigation = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Links atualizados para apontar para as páginas em /marca/
+  const menuItems = [
+    {
+      label: 'Smartphones',
+      submenu: [
+        { label: 'Apple', url: '/marca/apple' }, // Atualizado
+        { label: 'Xiaomi', url: '/marca/xiaomi' }, // Atualizado
+        { label: 'Samsung', url: '/marca/samsung' }, // Atualizado
+        { label: 'Motorola', url: '/marca/motorola' }, // Atualizado
+        // TODO: Verificar para onde "Ver todos" deve apontar, já que /categoria/smartphones não existe mais.
+        // Mantendo temporariamente ou remover/alterar conforme necessário.
+        { label: 'Ver todos', url: '/smartphones' } // Exemplo: Alterado para /smartphones
+      ]
+    },
+    // ... outros itens de menu existentes ...
+  ];
+
   return (
     <>
       <button 
@@ -36,11 +53,10 @@ const Navigation = () => {
           </li>
           
           <MegaMenu />
-          
-          <li className={styles.menuItem}>
-            <Link href="/promocoes">
+            <li className={styles.menuItem}>
+            <Link href="/produto/promocoes">
               <a 
-                className={`${styles.menuLink} ${router.pathname === '/promocoes' ? styles.menuLinkActive : ''}`}
+                className={`${styles.menuLink} ${router.pathname === '/produto/promocoes' ? styles.menuLinkActive : ''}`}
               >
                 Promoções
               </a>

@@ -8,10 +8,12 @@
 .main {
   flex: 1;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px; /* Aumentado de 1200px para 1400px */
   margin: 0 auto;
   padding: 0 15px;
-  padding-top: 110px; /* Space for fixed header */
+  padding-top: 80px; /* Reduzido para corresponder à altura do novo cabeçalho */
+  position: relative;
+  z-index: 1;
 }
 
 .mainContent {
@@ -22,13 +24,13 @@
 /* Media queries for responsive layout */
 @media (max-width: 767px) {
   .main {
-    padding-top: 100px;
+    padding-top: 70px; /* Ajustado para novo cabeçalho compacto */
   }
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
   .main {
-    padding-top: 105px;
+    padding-top: 80px;
   }
 }
 
@@ -46,14 +48,7 @@
   width: 100%;
   z-index: 1000;
   background-color: #fff;
-}
-
-/* Nova barra de benefícios */
-.benefitsBar {
-  background-color: #092046;
-  color: white;
-  padding: 8px 0;
-  font-size: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .benefitsContainer {
@@ -78,11 +73,13 @@
 
 /* TopBar principal com sombra gradiente */
 .topBar {
-  height: 70px;
-  border-bottom: none; /* Removendo a borda original */
-  position: relative; /* Necessário para o posicionamento dos pseudo-elementos */
+  height: 80px;
+  border-bottom: none;
+  position: relative;
   z-index: 1;
   background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0;
 }
 
 /* Pseudo-elemento para criar a sombra gradiente inferior */
@@ -92,11 +89,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 3px; /* Altura da sombra inferior */
+  height: 3px;
   background: linear-gradient(90deg, 
     rgba(255, 105, 0, 0.3) 0%, 
     rgba(255, 105, 0, 0.7) 25%, 
-    rgba(0, 168, 225, 0.7) 75%, 
+    rgba(0, 168, 225, 0.7) 75%,
     rgba(0, 168, 225, 0.3) 100%);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: -1;
@@ -124,7 +121,7 @@
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  max-width: 1200px;
+  max-width: 1400px; /* Aumentado de 1200px para 1400px */
   margin: 0 auto;
   padding: 0 15px;
 }
@@ -133,8 +130,13 @@
   flex: 0 0 auto;
   transition: transform 0.2s ease;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Mudado de center para flex-start para posicionar mais para cima */
   height: 100%;
+  margin-right: -30px; /* Aumentado espaço após o logo */
+  margin-left: -40px; /* Aumentado margem negativa para mover mais para esquerda */
+  margin-top: -85px; /* Aumentado margem negativa para mover mais para cima */
+  max-width: 360px; /* Dobrado o tamanho: 180px -> 360px */
+  padding-top: 10px; /* Ajustado padding para posicionamento fino */
 }
 
 .logoContainer:hover {
@@ -143,14 +145,16 @@
 
 .logoContainer a {
   display: block;
-  height: 45px; /* Ajuste a altura conforme necessário */
+  height: 112px; /* Dobrado: 60px -> 120px */
+  width: 100%;
 }
 
 .logoContainer img {
   height: 100%;
   width: auto;
-  max-width: 160px; /* Ajuste para limitar a largura máxima */
+  max-width: 100%; /* Limitando largura máxima */
   object-fit: contain; /* Mantém a proporção da imagem */
+  padding: 5px 0; /* Adicionando pequeno padding vertical */
 }
 
 /* Menu principal - Reposicionando para ficar mais à esquerda */
@@ -158,8 +162,8 @@
   flex: 1;
   display: flex;
   height: 100%;
-  justify-content: flex-start; /* Alterado: alinhamento à esquerda em vez de centralizado */
-  margin-left: 10px; /* Adicionado: espaço entre a logo e o menu */
+  justify-content: flex-start; /* Mantendo o alinhamento à esquerda conforme original */
+  margin-left: 10px; /* Mantendo o espaço entre a logo e o menu */
 }
 
 .navList {
@@ -177,11 +181,11 @@
   align-items: center;
 }
 
-/* Estilo comum para links de navegação - ajustando para combinar com o megaBtn */
-.navLink {
+/* Estilos base comuns para todos os itens de navegação (links e botões) */
+.navCommonStyles {
   display: flex;
   align-items: center;
-  height: 36px; /* Altura fixa igual ao megaBtn */
+  height: 36px;
   padding: 0 15px;
   color: #333;
   font-weight: 500;
@@ -191,11 +195,11 @@
   overflow: hidden;
   z-index: 1;
   border-radius: 4px;
-  margin: auto 0; /* Centraliza verticalmente na topbar */
+  margin: auto 5px;
+  font-size: 15px;
 }
 
-/* Corrigindo o gradiente para ficar igual ao do botão Todos os Produtos */
-.navLink::before {
+.navCommonStyles::before {
   content: '';
   position: absolute;
   top: 0;
@@ -206,84 +210,129 @@
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: -1;
-  border-radius: 4px; /* Adicionado para manter consistência com megaBtn */
+  border-radius: 4px;
 }
 
-.navLink:hover {
+.navCommonStyles:hover {
   color: white;
 }
 
-.navLink:hover::before {
+.navCommonStyles:hover::before {
   opacity: 1;
 }
 
-/* Megamenu específico - ajustado para ficar mais próximo à logo */
+/* Estilos específicos para botão e link com as mesmas características visuais */
+.navLink {
+  composes: navCommonStyles;
+}
+
 .megaBtn {
+  composes: navCommonStyles;
   background: transparent;
-  color: #333;
   border: none;
-  padding: 8px 15px;
-  border-radius: 4px;
-  font-weight: 500;
   cursor: pointer;
+  margin-left: 0; /* Removendo a margem esquerda do primeiro item */
+  margin-top: 22px; /* Adicionado para posicionar o botão mais para baixo */
+  font-weight: 700; /* Alterado para negrito (bold) */
   display: flex;
   align-items: center;
-  margin: 0 5px 0 0; /* Alterado: removido margem à esquerda, reduzida à direita */
-  height: 36px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
+  justify-content: center;
+  height: 36px; /* Mesma altura dos outros links */
+  padding: 0 15px; /* Mesmo padding dos outros links */
+  position: relative; /* Para posicionamento dos elementos */
 }
 
-/* Gradiente de fundo usando as cores da logo no hover */
-.megaBtn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #ff6900 0%, #00a8e1 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: -1;
+/* Estilo para o botão quando o menu estiver aberto ou hover */
+.navItem:hover .megaBtn,
+.megaBtn[aria-expanded="true"] {
+  color: #ff6900; /* Cor laranja ao passar o mouse ou quando o menu estiver aberto */
+  background-color: rgba(255, 105, 0, 0.05); /* Fundo sutil */
 }
 
-.megaBtn:hover {
-  color: white; /* Texto branco no hover */
+.btnContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.megaBtn:hover::before {
-  opacity: 1;
+.btnText {
+  margin: 0 8px;
+}
+
+.centeredBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .megaBtn svg.menuIcon {
   width: 18px;
   height: 18px;
-  margin-right: 8px; /* Espaço entre o ícone e o texto */
+  margin-right: 0; /* Removido o espaço entre o ícone e o texto - agora gerenciado pelo btnText */
+  flex-shrink: 0;
 }
 
 .megaBtn svg.arrowIcon {
   width: 14px;
   height: 14px;
-  margin-left: 8px; /* Espaço entre o texto e a seta */
+  margin-left: 0; /* Removido o espaço entre o texto e a seta - agora gerenciado pelo btnText */
+  flex-shrink: 0;
 }
 
 /* Simplificação crítica do megamenu para garantir funcionamento */
 .megaMenu {
-  position: fixed; /* Alterado para fixed para garantir posicionamento correto */
-  top: 118px; /* Posicionado logo abaixo da topbar (70px) + benefitsBar (~40px) + margem(8px) */
+  position: fixed; /* Posicionamento fixo para garantir alinhamento correto */
+  top: 80px; /* Altura exata do topbar para ficar colado logo abaixo */
   left: 0;
-  width: 100%;
+  right: 0; /* Garantir que o menu ocupa toda a largura disponível */
+  width: 100%; /* Usar toda a largura disponível */
   background: white;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
+  border-top: 3px solid #ff6900; /* Linha colorida na parte superior */
   opacity: 0;
   visibility: hidden;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease-out;
   z-index: 1001;
-  padding: 20px 0;
+  padding: 25px 0;
   transform: translateY(-10px);
+}
+
+/* Adicionar comportamento de hover para mostrar o megaMenu ao passar o mouse */
+.navItem:hover .megaMenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0.1s; /* Pequeno atraso para evitar que o menu desapareça imediatamente */
+}
+
+/* Destaque para o botão que ativa o megamenu quando hover */
+.navItem:hover .megaBtn {
+  background-color: rgba(255, 105, 0, 0.08);
+  color: #ff6900;
+}
+
+/* Adicionar um espaço de tolerância para a interação do usuário */
+.megaMenu::before {
+  content: '';
+  position: absolute;
+  top: -20px; /* Área invisível acima do menu para melhorar a interação */
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+/* Anexar o megaMenu ao container do cabeçalho para garantir alinhamento correto */
+.megaMenu::after {
+  content: '';
+  position: absolute;
+  top: -3px; /* Compensar a borda superior */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #ff6900; /* Seta apontando para cima na cor da borda */
 }
 
 .megaMenu.open {
@@ -296,22 +345,74 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 30px;
-  max-width: 1200px;
+  max-width: 1400px; /* Increased from 1200px to match the headerContainer */
   margin: 0 auto;
-  padding: 0 15px;
+  padding: 0 30px; /* Increased padding for better visibility of edge items */
+  width: 100%; /* Ensure full width within constraints */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* Responsive styles for the mega menu */
+@media (max-width: 1200px) {
+  .megaWrapper {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 992px) {
+  .megaMenu {
+    top: 100px; /* Adjust for smaller header */
+  }
+  
+  .megaWrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 0 15px;
+  }
+  
+  .megaColumn {
+    padding: 0 5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .megaWrapper {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 0 10px;
+  }
+  
+  .megaMenu {
+    padding: 15px 0;
+  }
 }
 
 .megaColumn {
-  padding: 0;
+  padding: 0 10px;
+  min-width: 0; /* Prevents overflow issues */
+  overflow: hidden; /* Ensures content fits in column */
 }
 
 .megaTitle {
   font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 15px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
-  color: #333;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f5f5f5;
+  color: #222;
+  position: relative;
+}
+
+/* Adiciona um pequeno detalhe colorido no título */
+.megaTitle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 30px;
+  height: 2px;
+  background-color: #ff6900;
 }
 
 .megaList {
@@ -322,30 +423,55 @@
 
 /* Ajustes para o submenu de produtos */
 .megaItem {
-  margin-bottom: 10px;
-  line-height: 1.3;
+  margin-bottom: 12px;
+  line-height: 1.4;
 }
 
 .megaLink {
-  color: #555;
+  color: #444;
   text-decoration: none;
-  display: block;
-  padding: 5px 0;
-  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  transition: all 0.2s ease;
   white-space: normal; /* Permite quebra de linha em nomes longos */
+  font-weight: 400;
+  font-size: 14px;
+  width: 100%; /* Ensures link takes full width of column */
+  overflow: hidden; /* Prevents text overflow */
+  text-overflow: ellipsis; /* Adds ellipsis for very long text */
 }
 
+/* Adicionar um pequeno efeito de transformação ao hover */
 .megaLink:hover {
-  color: #4a90e2;
+  color: #ff6900;
+  transform: translateX(3px);
 }
 
 .viewAll {
-  font-weight: 500;
+  font-weight: 600;
   color: #ff6900;
+  margin-top: 5px;
+  padding-top: 8px !important;
+  border-top: 1px dashed #eee;
+  display: flex;
+  align-items: center;
+}
+
+/* Adiciona uma seta indicando "ver mais" */
+.viewAll::after {
+  content: '→';
+  display: inline-block;
+  margin-left: 5px;
+  transition: transform 0.2s ease;
 }
 
 .viewAll:hover {
   color: #e55e00;
+}
+
+.viewAll:hover::after {
+  transform: translateX(3px);
 }
 
 /* Botões de ações à direita */
@@ -360,7 +486,8 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: 220px; /* Largura fixa */
+  width: 220px; /* Largura fixa para desktop */
+  flex-shrink: 1; /* Permitir que o container de pesquisa encolha se necessário */
 }
 
 .searchBtn {
@@ -486,43 +613,79 @@
 
 /* Media queries */
 @media (max-width: 991px) {
-  .menuToggle {
+  /* Reset de todos os estilos de ordem para o layout mobile */
+  .topBar {
+    height: 80px; /* Ajustado para ser mais alto */
+  }  .headerContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between; /* Mantém espaço entre os elementos */
+    align-items: center;
+    padding: 0 10px;
+    height: 80px; /* Ajustado para ser mais alto */
+    position: relative;
+  }  .menuToggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    order: 1;
+    margin-left: auto; /* Empurra para o canto direito */
+    order: 5; /* Último à direita */
+    flex: 0 0 auto;
+    position: relative; /* Para garantir posicionamento correto */
+    z-index: 1002; /* Garantir que fique acima do menu */
+    transition: transform 0.3s ease; /* Adicionar transição para animação */
+  }
+  
+  .menuToggle[aria-expanded="true"] {
+    color: #ff6900; /* Mudar cor quando o menu estiver aberto */
+  }  .logoContainer {
+    margin: 0;
+    padding-left: 0; /* Colado no canto esquerdo */
+    flex: 0 0 auto;
+    max-width: 280px; /* Dobrado: 140px -> 280px */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    order: 1; /* Primeiro à esquerda */
+  }
+  .logoContainer a {
+    height: 110px; /* Dobrado: 55px -> 110px */
+    width: 100%;
   }
 
-  .logoContainer {
-    order: 2;
-    margin: 0 auto;
+  .logoContainer img {
+    max-width: 100%;
+    height: auto;
+    padding: 3px 0; /* Reduzido padding vertical */
   }
-
+  /* Botões de ação vem depois do logo e antes do menu */
   .actions {
-    order: 3;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    order: 4;
+    margin-left: auto; /* Empurra para direita */
+    margin-right: 10px; /* Espaço entre os ícones de ação e o botão de menu */
   }
-
-  .headerContainer {
-    flex-wrap: wrap;
-  }
-
   .nav {
     position: fixed;
-    top: 118px;
-    left: 0;
-    right: 0;
+    top: 70px; /* Ajustado para menor altura do cabeçalho */
+    right: -280px; /* Inicialmente fora da tela, à direita */
     background: white;
-    height: 0;
+    height: calc(100vh - 70px); /* Altura fixa do menu */
     overflow: hidden;
-    transition: height 0.3s ease;
-    width: 100%;
+    transition: right 0.3s ease; /* Mudança na transição para deslizar da direita */
+    width: 280px; /* Largura fixa para o menu lateral */
     order: 4;
-    margin: 0; /* Resetado a margin em mobile */
-    justify-content: flex-start; /* Mantido alinhamento à esquerda */
+    margin: 0;
+    justify-content: flex-start;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1); /* Sombra no lado esquerdo do menu */
+    z-index: 1001;
   }
 
   .nav.open {
-    height: calc(100vh - 118px); /* Ajustado para considerar ambas as barras */
+    right: 0; /* Quando aberto, aparece na tela */
     overflow-y: auto;
   }
 
@@ -536,48 +699,37 @@
     width: 100%;
   }
 
-  .navLink {
+  .navCommonStyles,
+  .navLink,
+  .megaBtn {
     height: auto;
     padding: 15px 0;
     border-bottom: 1px solid #eee;
     border-radius: 0;
-    margin: 0; /* Remove margem no mobile */
+    margin: 0;
   }
 
-  .navLink:hover {
+  .navCommonStyles:hover,
+  .navLink:hover,
+  .megaBtn:hover {
     color: #ff6900; /* Em modo mobile, apenas muda a cor do texto */
   }
 
-  .navLink:hover::before {
+  .navCommonStyles:hover::before,
+  .navLink:hover::before,
+  .megaBtn:hover::before {
     opacity: 0; /* Desativa o gradiente no mobile */
   }
 
   .megaBtn {
     width: 100%;
     justify-content: space-between;
-    border-radius: 0;
-    background: none;
-    color: #333;
-    padding: 15px 0;
-    border-bottom: 1px solid #eee;
-    margin: 0;
-    height: auto;
-  }
-
-  .megaBtn:hover {
-    background: none; /* Não muda a cor de fundo no mobile */
-    color: #ff6900; /* Apenas muda a cor do texto para laranja */
-  }
-
-  .megaBtn:hover::before {
-    opacity: 0; /* Desativa o gradiente no mobile */
   }
 
   .megaBtn svg.menuIcon {
     margin-right: 10px; /* Mais espaço no mobile */
   }
-
-  /* Ajustes específicos para o megamenu em mobile */
+  /* Ajustes específicos para o megamenu em mobile com design aprimorado */
   .megaMenu {
     position: static;
     box-shadow: none;
@@ -585,25 +737,121 @@
     max-height: 0;
     transform: none;
     width: 100%;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    background-color: #f9f9f9;
+    border-radius: 0;
   }
 
   .megaMenu.open {
     max-height: 2000px;
-    padding: 10px 0;
+    padding: 0;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.05);
   }
 
   .megaWrapper {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: 0;
+    padding: 0;
   }
 
   .megaColumn {
+    margin-bottom: 0;
+    padding: 0;
     border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
+    overflow: hidden;
   }
-
   .megaColumn:last-child {
     border-bottom: none;
+  }
+  
+  /* Estilo para títulos de categoria no mobile - expansível */
+  .megaTitle {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    padding: 15px;
+    background-color: #fff;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+  }
+  
+  .megaTitle:after {
+    content: '+';
+    font-size: 18px;
+    font-weight: 400;
+    color: #999;
+  }
+  
+  .megaTitle.open {
+    background-color: #f5f5f5;
+    color: #ff6900;
+  }
+  
+  .megaTitle.open:after {
+    content: '−';
+  }
+  
+  .megaTitle:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* Itens do menu mobile com efeitos de toque */
+  .megaList {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease-in-out;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .megaColumn.open .megaList {
+    height: auto;
+    padding: 8px 0;
+    background-color: #f9f9f9;
+  }
+  
+  .megaItem {
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .megaItem:last-child {
+    border-bottom: none;
+  }
+  
+  .megaLink {
+    padding: 12px 15px;
+    display: block;
+    font-size: 13px;
+    color: #555;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  
+  .megaLink:active {
+    background-color: rgba(255, 105, 0, 0.05);
+  }
+  
+  .megaLink:hover {
+    background-color: rgba(0, 168, 225, 0.05);
+    color: #00a8e1;
+    padding-left: 20px;
+  }
+  
+  .viewAll {
+    font-weight: 500;
+    color: #ff6900;
+    background-color: #fff;
   }
 
   .searchContainer {
@@ -616,17 +864,287 @@
   }
 }
 
-@media (max-width: 767px) {
-  .benefitsContainer {
-    flex-direction: column;
+/* Separação entre menu mobile e desktop */
+/* Menu desktop sempre visível em telas grandes */
+@media (min-width: 1025px) {
+  .mobileMenuWrapper {
+    display: none !important;
+  }
+  
+  .desktopOnly {
+    display: block !important;
+  }
+}
+
+/* Menu mobile retrátil */
+@media (max-width: 1024px) {
+  /* Esconde componentes desktop e mostra mobile */
+  .desktopOnly {
+    display: none !important;
+  }
+  
+  .mobileMenuWrapper {
+    display: none;
+    width: 100%;
+    padding: 10px 0;
+  }
+
+  .nav.open .mobileMenuWrapper {
+    display: block;
+  }
+
+  /* Estilização dos elementos do menu mobile */
+  .megaColumn {
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 5px;
+  }
+
+  .megaTitle {
+    cursor: pointer;
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-radius: 6px;
+    margin: 2px 0;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
   }
 
-  .benefitItem {
-    margin: 5px 0;
+  .megaTitle:after {
+    content: '+';
+    font-size: 18px;
+    font-weight: 400;
+    color: #999;
   }
 
+  .megaTitle.open {
+    background-color: #f0f0f0;
+    color: #ff6900;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  
+  .megaTitle.open:after {
+    content: '−';
+  }
+
+  .megaList {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+  }
+
+  .megaColumn.open .megaList {
+    background-color: white;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+    border-top: none;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+  }
+
+  .megaLink {
+    padding: 12px 15px;
+    display: block;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+  }
+
+  .megaLink:hover {
+    background-color: #f9f9f9;
+    padding-left: 18px;
+    color: #00a8e1;
+  }
+
+  .megaLink.viewAll {
+    background-color: #f9f9f9;
+    color: #ff6900;
+    font-weight: 500;
+    text-align: center;
+    border-bottom: none;
+  }
+  
+  /* Botão de hambúrguer com animação */
+  .menuToggle {
+    transition: transform 0.3s ease;
+  }
+  
+  .menuToggle[aria-expanded="true"] {
+    transform: rotate(180deg);
+  }
+}
+
+/* Telas extremamente pequenas */
+@media (max-width: 767px) {
+  /* Estrutura do cabeçalho para telas muito pequenas */
+  .topBar {
+    height: 80px;  /* Altura ainda maior */
+  }
+  
+  .headerContainer {
+    display: flex;
+    flex-wrap: nowrap;
+    padding: 5px 10px;
+    gap: 8px;
+    align-items: center;
+    height: 80px;  /* Altura ainda maior */
+    justify-content: space-between;  /* Espaço entre os elementos */
+  }
+    /* Logo à esquerda, menu à direita */
+  .menuToggle {
+    width: 32px;
+    height: 32px;
+    margin-left: auto; /* Empurra para o canto direito */
+    margin-right: 0;
+    flex-shrink: 0;
+    order: 5; /* Último elemento à direita */
+  }    .logoContainer {
+    max-width: 240px; /* Dobrado: 120px -> 240px */
+    order: 1; /* Primeiro elemento à esquerda */
+    margin: 0;
+    padding-left: 0; /* Colado no canto esquerdo */
+    flex-shrink: 0;
+  }
+  
+  .logoContainer img {
+    max-width: 100%;
+    height: auto;
+    padding: 2px 0; /* Padding vertical otimizado */
+  }
+  /* Barra de pesquisa no meio */  .searchContainer {
+    flex-grow: 1; /* Cresce no espaço disponível */
+    width: auto;
+    max-width: none;
+    margin: 0 5px;
+    height: 36px;
+    order: 3; /* Terceiro elemento */
+  }
+  
+  .searchInput {
+    font-size: 13px;
+    height: 36px;
+    padding: 0 30px 0 8px; /* Reduzido padding esquerdo para economizar espaço */
+    width: 100%;
+  }
+  
+  .searchSubmitBtn {
+    height: 36px;
+    width: 36px;
+  }
+  
+  /* Área de ações (conta e carrinho) à direita */
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto; /* Empurra para a direita */
+    order: 4; /* Quarto elemento */
+  }
+  
+  .accountBtn, 
+  .cartBtn {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+    /* Reajuste do Nav para a nova altura de cabeçalho */
+  .nav {
+    top: 80px;  /* Ajustado para a nova altura */
+  }
+  
+  .nav.open {
+    height: calc(100vh - 80px);  /* Ajustado para a nova altura */
+  }
+}
+
+/* Telas extremamente pequenas */
+@media (max-width: 480px) {  .headerContainer {
+    padding: 5px 5px 5px 0; /* Remove padding esquerdo para colar a logo no canto */
+    gap: 3px;
+    height: 70px; /* Altura ligeiramente menor */  }.logoContainer {
+    max-width: 160px; /* Dobrado: 80px -> 160px */
+    margin-right: -45px; /* Pequeno espaço à direita */
+    margin-left: -45px; /* Margem negativa para mover para a esquerda */
+    margin-top: -10px; /* Margem negativa para mover um pouco para cima */
+    padding-left: 0; /* Remove qualquer padding interno */
+    order: 1; /* Garante que seja o primeiro elemento */  }
+  
   .searchContainer {
-    width: 150px; /* Largura ainda menor em celulares */
+    margin: 6px -4px 0 -2px; /* Margem superior para mover para baixo */
+  }
+    .searchInput {
+    font-size: 8px;
+    padding: 0 30px 0 6px;
+  }
+  
+  .searchSubmitBtn {
+    margin-top: -3px; /* Move o botão lupa um pouco para cima */
+  }
+    .menuToggle {
+    margin-left: auto; /* Empurra para o canto direito */
+    margin-right: 0;
+    order: 5; /* Explicitamente último */
+  }
+  
+  .logoContainer {
+    order: 1; /* Explicitamente primeiro */
+  }
+  
+  .searchContainer {
+    order: 3; /* Explicitamente terceiro */
+    display: block; /* Mantém a barra de busca visível */
+    width: auto; /* Permite que ocupe o espaço disponível */
+    flex: 1; /* Faz crescer para preencher o espaço */
+  }
+    .actions {
+    order: 4; /* Explicitamente quarto */
+    margin-right: 10px; /* Espaço entre ações e menu */
+  }
+  
+  .menuToggle,
+  .accountBtn,
+  .cartBtn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  /* O botão de menu deve estar bem no canto direito */
+  .menuToggle {
+    margin-left: auto; /* Empurra para o canto direito */
+    margin-right: 0;
+    padding-right: 0;
+  }
+}
+
+/* Telas em orientação landscape - APENAS para dispositivos móveis/tablets */
+@media screen and (orientation: landscape) and (max-height: 600px) and (max-width: 1024px) {
+  .logoContainer {
+    position: absolute;
+    top: -45px; /* Posiciona bem no topo */
+    left: -40px; /* Posiciona bem na esquerda */
+    margin: 0; /* Remove todas as margens */
+    padding: 0; /* Remove todos os paddings */
+    max-width: 180px; /* Tamanho adequado para landscape */
+    z-index: 1002; /* Garante que fique acima de outros elementos */
+  }
+  
+  .logoContainer a {
+    height: 40px; /* Altura menor para landscape */
+  }
+  
+  /* Ajusta o container principal para dar espaço à logo */
+  .headerContainer {
+    padding-left: 130px; /* Espaço para a logo posicionada absolutamente */
+  }
+}
+
+/* Ajustes adicionais para navegação */
+@media (max-width: 1024px) {
+  /* Em mobile e tablets, ajusta comportamento do menu */
+  .navItem {
+    display: block;
   }
 }

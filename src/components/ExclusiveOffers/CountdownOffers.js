@@ -78,7 +78,7 @@ const ProductCard = ({ product, discount }) => {
   const isLimitedStock = product.stock_quantity && product.stock_quantity < 5;
   
   // Criar URL segura para o produto
-  const productLink = product.slug ? `/produto/${product.slug}` : '#';
+  const productLink = product.slug ? `/product/${product.slug}` : '#';
   
   // Obter URL da imagem com fallback
   const getImageUrl = () => {
@@ -254,10 +254,7 @@ const CountdownOffers = () => {
         const fetchStartTime = performance.now();
         console.log(`Iniciando busca: ${new Date().toLocaleString()}`);
         
-        // Tentar buscar produtos em oferta primeiro
-        let productData = [];
-        let saleEndDateFromAPI = null;
-        
+        // Tentar buscar produtos em oferta
         try {
           console.log("Buscando produtos em oferta via GraphQL...");
           const response = await fetch('/api/products?on_sale=true&per_page=4');
@@ -267,92 +264,55 @@ const CountdownOffers = () => {
             throw new Error(`API retornou status ${response.status}: ${response.statusText}`);
           }
           
+          // Nova estrutura de resposta: { products: [...], saleEndDate: "..." }
           const responseData = await response.json();
           
-          // O formato mudou, agora temos {products: [...], saleEndDate: "..."}
-          if (responseData.products && Array.isArray(responseData.products)) {
-            productData = responseData.products;
-            saleEndDateFromAPI = responseData.saleEndDate;
+          if (responseData && responseData.products) {
+            console.log(`✅ Recebidos ${responseData.products.length} produtos em oferta`);
             
-            console.log(`✅ Recebidos ${productData.length} produtos em oferta`);
-            console.log(`✅ Data de expiração da oferta: ${saleEndDateFromAPI}`);
+            // Processar produtos
+            setProducts(responseData.products);
             
-            if (saleEndDateFromAPI) {
-              // Usar a data de expiração da API
+            // Processar data de expiração
+            if (responseData.saleEndDate) {
               try {
-                const apiEndDate = new Date(saleEndDateFromAPI);
-                setEndTime(apiEndDate);
-                console.log(`Data de expiração definida para: ${apiEndDate.toLocaleString()}`);
+                const saleEndDate = new Date(responseData.saleEndDate);
+                console.log(`✅ Data de expiração da oferta recebida: ${saleEndDate.toLocaleString()}`);
+                setEndTime(saleEndDate);
               } catch (dateError) {
-                console.error(`Erro ao processar data de expiração: ${dateError}`);
+                console.error("Erro ao processar data de expiração:", dateError);
                 // Fallback para data padrão
-                const fallbackDate = new Date();
-                fallbackDate.setDate(fallbackDate.getDate() + 30);
-                setEndTime(fallbackDate);
+                const defaultDate = new Date();
+                defaultDate.setDate(defaultDate.getDate() + 30);
+                setEndTime(defaultDate);
               }
             } else {
-              // Se não recebeu data da API, usar padrão
+              console.warn("Nenhuma data de expiração recebida, usando padrão");
               const defaultDate = new Date();
               defaultDate.setDate(defaultDate.getDate() + 30);
               setEndTime(defaultDate);
-              console.log(`Usando data de expiração padrão: ${defaultDate.toLocaleString()}`);
+            }
+            
+            // Log detalhado do primeiro produto
+            if (responseData.products.length > 0) {
+              const firstProduct = responseData.products[0];
+              console.log("Primeiro produto recebido:", {
+                nome: firstProduct.name,
+                preco: firstProduct.price,
+                precoRegular: firstProduct.regular_price,
+                emOferta: firstProduct.on_sale || firstProduct.is_on_sale,
+                dataFim: firstProduct.sale_end_date
+              });
             }
           } else {
-            // Formato antigo ou inesperado
-            console.warn("Formato de resposta inesperado:", responseData);
-            productData = Array.isArray(responseData) ? responseData : [];
-            
-            // Data padrão
-            const defaultDate = new Date();
-            defaultDate.setDate(defaultDate.getDate() + 30);
-            setEndTime(defaultDate);
-          }
-          
-          // Validação dos dados recebidos e debug
-          if (productData && productData.length > 0) {
-            console.log("Primeiro produto recebido:", {
-              nome: productData[0].name,
-              preco: productData[0].price,
-              precoRegular: productData[0].regular_price,
-              emOferta: productData[0].on_sale || productData[0].is_on_sale,
-              dataFim: productData[0].sale_end_date
-            });
-          } else {
-            console.warn("Nenhum produto em oferta encontrado");
-            throw new Error("Nenhum produto em oferta encontrado");
+            // Formato de resposta inesperado ou sem produtos
+            console.warn("Resposta da API em formato inesperado:", responseData);
+            throw new Error("Formato de resposta inválido ou nenhum produto encontrado");
           }
         } catch (error) {
-          console.warn("❌ Falha ao buscar produtos em oferta:", error);
-          
-          // Vamos tentar buscar produtos regulares como fallback
-          try {
-            console.log("Buscando produtos regulares via GraphQL...");
-            const fallbackResponse = await fetch('/api/products?per_page=4');
-            
-            if (!fallbackResponse.ok) {
-              throw new Error(`Fallback API retornou status ${fallbackResponse.status}`);
-            }
-            
-            productData = await fallbackResponse.json();
-            console.log(`✅ Recebidos ${productData.length} produtos regulares`);
-            
-            if (!productData || productData.length === 0) {
-              throw new Error("Nenhum produto regular encontrado");
-            }
-          } catch (fallbackError) {
-            console.error("❌ Falha no fallback para produtos regulares:", fallbackError);
-            throw fallbackError;
-          }
+          console.error("❌ Erro ao buscar produtos:", error);
+          throw error; // Propagar para tratamento externo
         }
-        
-        // Verificar explicitamente que temos um array de produtos
-        if (!Array.isArray(productData)) {
-          console.error("Dados de produto inválidos:", productData);
-          throw new Error("Formato de dados inválido");
-        }
-        
-        // Definir produtos encontrados
-        setProducts(productData);
         
         // Log de conclusão
         const fetchEndTime = performance.now();
@@ -360,8 +320,14 @@ const CountdownOffers = () => {
         console.groupEnd();
         
       } catch (error) {
-        console.error("❌ Erro ao buscar produtos:", error);
+        console.error("❌ Erro geral:", error);
         setError(`Falha ao carregar ofertas: ${error.message}`);
+        setProducts([]);
+        
+        // Definir data padrão em caso de erro
+        const defaultDate = new Date();
+        defaultDate.setDate(defaultDate.getDate() + 30);
+        setEndTime(defaultDate);
       } finally {
         setLoading(false);
       }
@@ -384,14 +350,18 @@ const CountdownOffers = () => {
         return;
       }
       
-      // Calcular horas, minutos e segundos restantes
+      // Calcular dias, horas, minutos e segundos restantes
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
       
+      // Se faltam mais de 24 horas, mostrar o total de horas
+      const totalHours = days * 24 + hours;
+      
       // Formatar os números para sempre terem dois dígitos
       setTimeLeft({
-        hours: hours.toString().padStart(2, '0'),
+        hours: totalHours.toString().padStart(2, '0'),
         minutes: minutes.toString().padStart(2, '0'),
         seconds: seconds.toString().padStart(2, '0')
       });

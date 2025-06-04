@@ -1,0 +1,301 @@
+/**
+ * Estilos específicos para a versão mobile da página de carrinho
+ * Versão aprimorada para melhor compatibilidade com dispositivos móveis
+ */
+
+/* Responsividade para dispositivos móveis (max-width: 768px) */
+@media (max-width: 768px) {
+  body {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .cart-container {
+    padding: 0 12px;
+    margin-top: 10px;
+    margin-bottom: 80px; /* Espaço para o footer mobile */
+  }
+
+  .cart-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .cart-title {
+    font-size: 1.4rem !important;
+    text-align: center !important;
+    padding: 10px 0 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .cart-box {
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  }
+
+  .cart-item {
+    padding: 16px 10px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .cart-item-image {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 6px !important;
+  }
+
+  .cart-item-title {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+    -webkit-line-clamp: 2; /* Limita a 2 linhas */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .cart-item-price {
+    font-size: 15px !important;
+    margin-top: 4px !important;
+  }
+
+  .quantity-selector {
+    min-width: 100px !important;
+    margin: 0 !important;
+    height: 36px !important;
+    border-radius: 6px !important;
+  }
+
+  .quantity-btn {
+    width: 30px !important;
+    height: 36px !important;
+    font-size: 18px !important;
+    padding: 0 !important;
+    background-color: #f4f4f4 !important;
+  }
+
+  .quantity-input {
+    width: 40px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+
+  .remove-btn {
+    font-size: 12px !important;
+    padding: 6px !important;
+  }
+
+  .delivery-section, 
+  .coupon-section {
+    padding: 16px !important;
+    border-radius: 10px !important;
+  }
+
+  .shipping-options {
+    gap: 8px !important;
+  }
+
+  .shipping-option {
+    padding: 12px !important;
+    border-radius: 8px !important;
+  }
+
+  .shipping-option.selected {
+    border-width: 2px !important;
+  }
+
+  .summary-row {
+    font-size: 14px !important;
+    padding: 8px 0 !important;
+  }
+
+  .summary-row.total {
+    font-size: 18px !important;
+    margin-top: 12px !important;
+  }
+
+  .bt-checkout {
+    font-size: 16px !important;
+    padding: 14px !important;
+    border-radius: 10px !important;
+    height: auto !important;
+    min-height: 54px !important;
+  }
+  
+  .delivery-form {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .delivery-form button {
+    align-self: stretch !important;
+  }
+  
+  /* Formulário de cupom mais acessível em mobile */
+  .coupon-form {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .coupon-form button {
+    align-self: stretch !important;
+  }
+}
+
+/* Ultra-compacto para smartphones pequenos (max-width: 480px) */
+@media (max-width: 480px) {
+  .cart-container {
+    padding: 0 8px !important;
+  }
+
+  .cart-item {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 12px 8px !important;
+    position: relative !important;
+  }
+
+  .cart-item-image {
+    margin-right: 0 !important;
+    margin-bottom: 10px !important;
+    width: 70px !important;
+    height: 70px !important;
+  }
+
+  .cart-item-details {
+    width: 100% !important;
+    margin-bottom: 12px !important;
+    align-items: center !important;
+  }
+
+  .cart-item-actions {
+    width: 100% !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .quantity-selector {
+    transform: scale(0.95) !important;
+    margin-bottom: 6px !important;
+  }
+  
+  .remove-btn {
+    margin-top: 2px !important;
+  }
+
+  /* Modal de login em tela pequena */
+  .login-modal-content {
+    padding: 20px !important;
+    width: 95% !important;
+    max-width: 320px !important;
+  }
+
+  .login-option {
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 8px !important;
+  }
+
+  .login-icon {
+    width: 36px !important;
+    height: 36px !important;
+    margin-right: 0 !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Badges de vantagens */
+  .grid.grid-cols-2 {
+    gap: 6px !important;
+  }
+  
+  .grid.grid-cols-2 > div {
+    padding: 8px !important;
+  }
+  
+  .grid.grid-cols-2 > div > div:first-child {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Animações otimizadas para mobile - reduzindo para melhor desempenho */
+@media (max-width: 768px) {
+  .bt-checkout:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(255, 105, 0, 0.3) !important;
+  }
+
+  .shipping-option:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  .shipping-option:active {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+  
+  .animate-pulse {
+    animation-duration: 1.8s !important; /* Mais lento para economizar bateria */
+  }
+}
+
+/* Melhorias na usabilidade para toque */
+@media (max-width: 768px) {
+  .quantity-btn {
+    min-width: 30px !important;
+    min-height: 30px !important;
+  }
+  
+  button, a {
+    min-height: 44px !important; /* Tamanho mínimo recomendado para alvos de toque */
+  }
+  
+  input, select, textarea {
+    font-size: 16px !important; /* Previne zoom automático no iOS */
+    padding: 10px !important;
+  }
+  
+  /* Evitar que elementos muito próximos sejam tocados acidentalmente */
+  .cart-item button {
+    margin: 2px !important;
+    padding: 8px !important;
+  }
+  
+  /* Evitar que o botão de finalizar compra fique muito próximo ao final da página */
+  .bt-checkout {
+    margin-bottom: 10px !important;
+  }
+  
+  /* Melhor feedback visual para interações de toque */
+  .cart-item:active {
+    background-color: #f9f9f9 !important;
+  }
+  
+  .shipping-option:active {
+    opacity: 0.8 !important;
+  }
+}
+
+/* Estilos específicos para dispositivos iOS */
+@supports (-webkit-touch-callout: none) {
+  input {
+    border-radius: 0 !important; /* Remover arredondamento automático em inputs no iOS */
+  }
+  
+  .bt-checkout {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+  }
+}

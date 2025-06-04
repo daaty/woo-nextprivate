@@ -1,0 +1,879 @@
+.brandPageContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.brandHero {
+  background-color: #f8f8f8;
+  padding: 40px 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.brandContent h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.brandContent p {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 800px;
+  margin: 0 auto 20px;
+}
+
+.brandNavigation {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.brandNavigation a {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.brandNavigation a:hover {
+  background-color: #e0e0e0;
+}
+
+.brandNavigation .activeLink {
+  background-color: #007aff;
+  color: white;
+}
+
+.brandInfo {
+  margin-bottom: 30px;
+}
+
+.brandInfo h2 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.brandInfo p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Layout principal dividido em colunas */
+.mainContent {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 30px;
+  margin-top: 40px;
+}
+
+/* Filtros laterais */
+.sidebarFilters {
+  flex: 0 0 280px;
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  padding: 20px;
+  height: fit-content;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.sidebarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sidebarHeader h2 {
+  font-size: 1.4rem;
+  margin: 0;
+  color: #333;
+}
+
+.clearAllFilters {
+  background: none;
+  border: none;
+  color: #ff3e3e;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.clearAllFilters:hover {
+  color: #d32f2f;
+  text-decoration: underline;
+}
+
+/* Área de produtos */
+.productsArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.productsToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f8f8;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.productCount {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.sortingOptions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sortingOptions span {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.sortSelect {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 30px 8px 10px;
+  font-size: 0.9rem;
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 12l-6-6h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  appearance: none;
+  cursor: pointer;
+}
+
+.viewOptions {
+  display: flex;
+  gap: 5px;
+}
+
+.viewButton {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.viewButton.active {
+  background-color: #007aff;
+  border-color: #007aff;
+  color: white;
+}
+
+/* Spinner de carregamento */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.spinner {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(0, 122, 255, 0.1);
+  border-radius: 50%;
+  border-top-color: #007aff;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  color: #ff3e3e;
+  text-align: center;
+  padding: 40px;
+}
+
+.retryButton {
+  background-color: #007aff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.noProducts {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.clearFilters {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Grid de produtos (visualização em grade) */
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+/* Lista de produtos (visualização em lista) */
+.productsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Cartão de produto (visualização em grade) */
+.productCard {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.productCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Cartão de produto (visualização em lista) */
+.productCardList {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+  display: flex;
+  padding: 15px;
+}
+
+.productCardList:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.productCardList .productImage {
+  flex: 0 0 150px;
+  height: 150px;
+}
+
+.productCardList .productInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+}
+
+.productCardList .productActions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 20px;
+  gap: 10px;
+}
+
+.productLink {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.productCardList .productLink {
+  flex-direction: row;
+}
+
+.productImage {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.productImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.productCard:hover .productImage img {
+  transform: scale(1.05);
+}
+
+.saleTag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff3e3e;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.productInfo {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.productName {
+  font-size: 1.1rem;
+  margin: 0 0 10px;
+  color: #333;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  height: 2.8em;
+}
+
+.productCardList .productName {
+  font-size: 1.3rem;
+  -webkit-line-clamp: 1;
+  height: auto;
+}
+
+.productDescription {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.productPricing {
+  margin-top: auto;
+}
+
+.regularPrice {
+  display: block;
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.price {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #007aff;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.installments {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.productActions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  padding: 0 15px 15px;
+}
+
+.addToCartButton {
+  flex: 1;
+  padding: 12px;
+  background: #007aff;
+  color: white;
+  border: none;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.addToCartButton:hover {
+  background: #0055cc;
+}
+
+.quickviewButton {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  font-size: 0;
+  width: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-2.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.quickviewButton:hover {
+  border-color: #007aff;
+  background-color: #f0f8ff;
+}
+
+/* Filtragem - checkboxes estilizados */
+.filterCheckbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filterCheckbox input {
+  margin-right: 8px;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #007aff;
+}
+
+.filterCheckbox span {
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.filterCheckbox .count {
+  color: #777;
+  margin-left: 5px;
+  font-size: 0.85rem;
+}
+
+/* Filtros - inputs de preço */
+.priceInputs {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+/* Paginação */
+.pagination {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.paginationInfo {
+  margin-bottom: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.loadMoreButton {
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(90deg, #ff6900, #00a8e1);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.loadMoreButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.2), transparent);
+  transition: left 0.7s;
+}
+
+.loadMoreButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.loadMoreButton:hover::before {
+  left: 100%;
+}
+
+.loadMoreButton:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos para o rodapé especial da página Apple */
+.appleBrandFooter {
+  background: linear-gradient(to right, #f9f9f9, #f2f2f2);
+  padding: 60px 20px;
+  margin-top: 60px;
+  border-top: 1px solid #eee;
+}
+
+.footerGridContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-bottom: 40px;
+}
+
+.footerColumn h3 {
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  position: relative;
+  padding-bottom: 10px;
+  border-bottom: 2px solid transparent;
+  background-image: linear-gradient(90deg, #ff6900, #00a8e1);
+  background-size: 100% 2px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+}
+
+.footerColumn ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footerColumn li {
+  margin-bottom: 12px;
+}
+
+.footerColumn a {
+  color: #555;
+  text-decoration: none;
+  font-size: 15px;
+  transition: color 0.3s, padding-left 0.3s;
+  display: inline-block;
+  position: relative;
+}
+
+.footerColumn a:hover {
+  color: #ff6900;
+  padding-left: 5px;
+}
+
+.footerColumn a:hover::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #ff6900, #00a8e1);
+}
+
+.footerInfo {
+  color: #666;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.footerAppleLogo {
+  margin: 20px 0;
+  opacity: 0.7;
+}
+
+.footerLink {
+  display: inline-block;
+  color: #333;
+  font-weight: 500;
+  position: relative;
+  text-decoration: none;
+  padding-bottom: 2px;
+  background-image: linear-gradient(90deg, #ff6900, #00a8e1);
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  transition: background-size 0.3s;
+}
+
+.footerLink:hover {
+  background-size: 0 1px;
+}
+
+.footerCTA {
+  background: linear-gradient(to right, rgba(255,105,0,0.05), rgba(0,168,225,0.05));
+  padding: 30px;
+  border-radius: 12px;
+  margin: 40px auto;
+  max-width: 900px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  position: relative;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  overflow: hidden;
+}
+
+.footerCTA::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(90deg, #ff6900, #00a8e1);
+  z-index: -1;
+  border-radius: 12px;
+  margin: -1px;
+}
+
+.ctaContent {
+  text-align: center;
+}
+
+.ctaContent h3 {
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.ctaContent p {
+  color: #666;
+  margin-bottom: 25px;
+  font-size: 16px;
+}
+
+.newsletterForm {
+  display: flex;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.newsletterForm input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 30px 0 0 30px;
+  padding: 12px 20px;
+  font-size: 16px;
+  outline: none;
+}
+
+.newsletterForm button {
+  border-radius: 0 30px 30px 0;
+  padding: 12px 25px;
+  font-size: 16px;
+  border: none;
+}
+
+.footerDisclaimer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 30px;
+  border-top: 1px solid #eee;
+  color: #999;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.footerDisclaimer p {
+  margin-bottom: 6px;
+}
+
+/* Debug info - estilo para visualização durante desenvolvimento */
+.debugInfo {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  display: none; /* Comentar esta linha para mostrar em desenvolvimento */
+}
+
+.logs {
+  max-height: 200px;
+  overflow-y: auto;
+  background: #222;
+  color: #00ff00;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.dataStructure {
+  margin: 40px 0;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: none; /* Comentar esta linha para mostrar em desenvolvimento */
+}
+
+.dataStructure pre {
+  background: #f1f1f1;
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+/* Melhorias para os filtros */
+.priceRangeControls {
+  margin-bottom: 15px;
+}
+
+.priceSlider {
+  width: 100%;
+  margin-bottom: 10px;
+  -webkit-appearance: none;
+  height: 5px;
+  background: #ddd;
+  border-radius: 5px;
+  outline: none;
+}
+
+.priceSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #007aff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.priceSlider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #007aff;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.filterButtonActive {
+  background-color: #007aff !important;
+  color: white !important;
+  border-color: #007aff !important;
+}
+
+.clearFiltersButton {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: fit-content;
+}
+
+.clearFiltersButton:hover {
+  background-color: #d32f2f;
+}
+
+/* Media queries para responsividade */
+@media (max-width: 980px) {
+  .footerGridContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebarFilters {
+    margin-bottom: 20px;
+  }
+  
+  .newsletterForm {
+    flex-direction: column;
+  }
+  
+  .newsletterForm input,
+  .newsletterForm button {
+    width: 100%;
+    border-radius: 30px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footerGridContainer {
+    grid-template-columns: 1fr;
+  }
+  
+  .pagination {
+    margin-top: 20px;
+  }
+  
+  .productsGrid,
+  .productsList {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Melhoria na navegação de marcas para mobile */
+  .brandNavigation {
+    display: flex;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 0;
+    margin: 10px -15px;
+    width: calc(100% + 30px);
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .brandNavigation::-webkit-scrollbar {
+    display: none; /* Chrome, Safari e Opera */
+  }
+  
+  .brandNavigation > * {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+  }
+}

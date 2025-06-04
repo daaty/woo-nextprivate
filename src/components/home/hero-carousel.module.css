@@ -1,0 +1,226 @@
+.carouselContainer {
+  width: 100%;
+  max-width: 1400px; /* Aumentado de 1200px para 1400px */
+  margin: 0 auto 40px;
+  padding: 0 20px;
+}
+
+.carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.carouselInner {
+  position: relative;
+  display: flex;
+  width: 100%;
+  /* Altura adaptativa para desktop */
+  height: auto;
+  aspect-ratio: 16/7; /* Proporção mais panorâmica para desktop */
+  min-height: 400px;
+  max-height: 500px;
+}
+
+.carouselItem {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s ease-in-out;
+  left: 0;
+  top: 0;
+}
+
+.carouselItem.active {
+  z-index: 1;
+}
+
+.carouselImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Alterado para 'cover' para melhor preenchimento */
+  display: block;
+  background-color: #f0f0f0; /* Cor de fundo para áreas não preenchidas pela imagem */
+}
+
+.placeholderImage {
+  width: 100%;
+  height: 300px;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Controles de navegação */
+.carouselControlPrev,
+.carouselControlNext {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  font-size: 28px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.carouselControlPrev:hover,
+.carouselControlNext:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Cor gradiente nos botões ao passar o mouse */
+.carouselControlPrev:hover span,
+.carouselControlNext:hover span {
+  background: linear-gradient(135deg, #ff6900 0%, #00a8e1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.carouselControlPrev {
+  left: 20px;
+}
+
+.carouselControlNext {
+  right: 20px;
+}
+
+/* Indicadores/bolinhas de navegação no estilo do site */
+.carouselIndicators {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.indicator {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+}
+
+.indicatorContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background-color: #cccccc;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+/* Efeito gradiente laranja-azul para indicador ativo */
+.activeIndicator .indicatorContent {
+  background: linear-gradient(135deg, #ff6900 0%, #00a8e1 100%);
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 0 6px rgba(0, 168, 225, 0.5);
+}
+
+/* Efeito de hover para os indicadores */
+.indicator:hover .indicatorContent {
+  background-color: #aaaaaa;
+}
+
+.activeIndicator:hover .indicatorContent {
+  background: linear-gradient(135deg, #ff6900 0%, #00a8e1 100%);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .carouselContainer {
+    padding: 0 10px;
+    margin-bottom: 30px;
+  }
+  
+  .carouselInner {
+    height: auto; /* Alterado para auto para respeitar a proporção natural da imagem */
+    aspect-ratio: 16/9; /* Mantém uma proporção widescreen padrão */
+    min-height: 280px; /* Altura mínima para garantir boa visualização em tablets */
+    max-height: 350px; /* Limita a altura máxima em tablets */
+  }
+    .carouselImage {
+    object-fit: cover; /* Consistente com a versão mobile e desktop */
+    object-position: center; /* Garante que a imagem fique centralizada */
+  }
+  
+  .carouselControlPrev,
+  .carouselControlNext {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+  
+  .indicator {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .indicatorContent {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carouselContainer {
+    padding: 0;
+    margin-bottom: 20px;
+  }  .carouselInner {
+    height: 240px; /* Altura fixa para evitar espaços em branco */
+    aspect-ratio: auto; /* Removido para permitir altura fixa */
+    min-height: 0; /* Removido min-height */
+    max-height: none; /* Removido max-height para usar apenas height fixa */
+  }
+    .carousel {
+    border-radius: 0; /* Remove o arredondamento para ocupar toda a largura */
+    background-color: #f0f0f0; /* Cor de fundo que combina com a imagem */
+  }
+  .carouselImage {
+    object-fit: fill; /* Alterado para 'fill' para preencher o container sem respeitar a proporção */
+    object-position: center; /* Garante que a imagem fique centralizada */
+    height: 100%; /* Garante que a imagem ocupe toda a altura disponível */
+    width: 100%;
+  }
+  
+  .carouselControlPrev,
+  .carouselControlNext {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+  
+  .carouselIndicators {
+    bottom: 10px;
+    padding: 6px 12px;
+  }
+}

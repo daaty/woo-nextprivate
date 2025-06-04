@@ -1,0 +1,230 @@
+.carouselContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%; /* Alterado para ocupar 100% do container pai */
+  overflow: hidden;
+  border-radius: 0; /* Removido o border radius */
+  box-shadow: none; /* Removida a sombra que pode causar efeitos indesejados */
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: #000; /* Fundo preto para evitar transparências */
+}
+
+.carouselWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+}
+
+.slide {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: all 0.5s ease;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #000; /* Fundo preto para evitar transparências */
+}
+
+.slide.active {
+  z-index: 2;
+}
+
+.slideLink {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: white;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+.videoWrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: visible; /* Alterado para visible para evitar cortes */
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  background-color: #000; /* Fundo preto para evitar transparências */
+  display: block; /* Alterado para block */
+  border-radius: 0;
+}
+
+.videoBackground {
+  width: 120%;
+  height: 120%;
+  object-fit: cover; /* Mantém a proporção e cobre todo o container */
+  object-position: center bottom; /* Foco na parte inferior para eliminar a faixa preta */
+  min-height: 120%; /* Maior que o container para evitar bordas */
+  min-width: 120%; /* Maior que o container para evitar bordas */
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  margin: 0;
+  padding: 0;
+  transform: scale(1.2); /* Escala maior para garantir cobertura completa */
+  border-radius: 0;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.4) 100%);
+  z-index: 1;
+}
+
+.content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  padding: 20px;
+  pointer-events: none; /* Permite clicar através do conteúdo para o carrossel */
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  height: 80px;
+}
+
+/* Controles de navegação */
+.carouselControl {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 20px;
+  color: white;
+}
+
+.carouselControl:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.prevControl {
+  left: 20px;
+}
+
+.nextControl {
+  right: 20px;
+}
+
+.controlIcon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Indicadores - agora também com suporte para posição superior */
+.indicators {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Posicionamento original (parte inferior) */
+.indicators {
+  bottom: 20px;
+  left: 0;
+  right: 0;
+}
+
+/* Novos estilos para indicadores na parte superior */
+.topIndicators {
+  top: 20px;
+  bottom: auto;
+  left: 0;
+  right: 0;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.activeIndicator {
+  background-color: white;
+  transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+  .carouselContainer {
+    height: 380px; /* Ajustado para manter a proporção em telas menores */
+  }
+
+  .carouselControl {
+    width: 35px;
+    height: 35px;
+  }
+
+  .logoContainer {
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carouselContainer {
+    height: 100%; /* Ocupa 100% da altura disponível */
+    border-radius: 0;
+  }
+  
+  .videoBackground {
+    width: 140%; /* Ainda maior em telas pequenas */
+    height: 140%;
+    min-height: 140%;
+    min-width: 140%;
+    top: -20%;
+    left: -20%;
+    transform: scale(1.4);
+  }
+}

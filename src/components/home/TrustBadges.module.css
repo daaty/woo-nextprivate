@@ -1,0 +1,46 @@
+.trustBadges {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 40px;
+}
+
+.badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.badge:hover {
+  transform: translateY(-5px);
+}
+
+.badge svg {
+  margin-bottom: 8px;
+}
+
+.badge span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .trustBadges {
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trustBadges {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .badge {
+    margin-bottom: 16px;
+  }
+}

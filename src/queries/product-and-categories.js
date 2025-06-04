@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 /**
  * GraphQL categories and products query.
  */
-const PRODUCTS_AND_CATEGORIES_QUERY = gql`query {
+export const PRODUCTS_AND_CATEGORIES_QUERY = gql`query {
   heroCarousel: productCategories(where: {slug: "offers"}) {
     nodes {
       id
@@ -58,27 +58,6 @@ const PRODUCTS_AND_CATEGORIES_QUERY = gql`query {
         id
         regularPrice
       }
-      ... on ExternalProduct {
-        price
-        id
-        externalUrl
-        regularPrice
-      }
-      ... on GroupProduct {
-        id
-        products {
-          nodes {
-            ... on SimpleProduct {
-              id
-              price
-              regularPrice
-            }
-          }
-        }
-      }
     }
   }
-}
-`;
-
-export default PRODUCTS_AND_CATEGORIES_QUERY;
+}`;

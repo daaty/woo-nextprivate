@@ -66,11 +66,12 @@ export const handleCreateAccount = ( input, setInput, target ) => {
  * @param setShowStripeForm
  * @param clearCartMutation
  * @param setIsStripeOrderProcessing
+ * @param customerId - ID do customer no WooCommerce (opcional)
  *
  */
-export const handleStripeCheckout = async (input, products, setRequestError, clearCartMutation, setIsStripeOrderProcessing, setCreatedOrderData) => {
+export const handleStripeCheckout = async (input, products, setRequestError, clearCartMutation, setIsStripeOrderProcessing, setCreatedOrderData, customerId = null) => {
     setIsStripeOrderProcessing(true);
-    const orderData = getCreateOrderData( input, products );
+    const orderData = getCreateOrderData( input, products, customerId );
     const createCustomerOrder = await createTheOrder( orderData, setRequestError,  '' );
     const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
     setIsStripeOrderProcessing(false);

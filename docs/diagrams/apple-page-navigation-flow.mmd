@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant Usuário
+    participant HomePage
+    participant NextRouter
+    participant ApplePage
+
+    Usuário->>HomePage: Clica em "Apple" no menu
+    HomePage->>NextRouter: Navega para /marca/apple
+    NextRouter->>ApplePage: Renderiza ApplePage
+    ApplePage->>ApplePage: useEffect dispara fetch de produtos
+    ApplePage->>API: GET /api/brand?brand=apple&per_page=20
+    API-->>ApplePage: Retorna lista de produtos
+    ApplePage->>Usuário: Exibe produtos Apple

@@ -1,0 +1,309 @@
+.brandBanner {
+  display: flex;
+  width: 100%;
+  height: 480px; /* Reduzido de 500px para 450px para eliminar a faixa preta */
+  position: relative;
+  overflow: hidden;
+  margin: 40px 0;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  background-color: #000; /* Garantindo que todo o fundo seja preto */
+}
+
+.apple {
+  background-color: #000;
+  color: #fff;
+}
+
+.brandBannerContainer {
+  display: flex;
+  align-items: center;
+  max-width: 1400px; /* Aumentado de 1200px para 1400px */
+  margin: 0 auto;
+  padding: 0 24px;
+  min-height: 400px;
+}
+
+.brandBannerContent {
+  flex: 1;
+  padding: 48px 0;
+}
+
+.brandLogo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 24px;
+}
+
+.brandTitle {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  line-height: 1.2;
+}
+
+.brandDescription {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  opacity: 0.9;
+  max-width: 500px;
+}
+
+.brandCta {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(90deg, #ff6900, #00a8e1);
+  color: white;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+}
+
+.brandCta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.brandImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mediaContainer {
+  flex: 1; /* Voltando para flex 1 para usar todo o espaço disponível */
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+}
+
+.infoContainer {
+  width: 40%; /* Mantendo 40% para a área de texto */
+  min-width: 380px; /* Garantindo largura mínima para o texto */
+  background-color: #000;
+  color: #fff;
+  position: relative;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.infoContent {
+  padding: 40px;
+  max-width: 100%;
+}
+
+.videoWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+}
+
+.brandVideo {
+  width: 100%; /* Usando 100% da largura disponível */
+  height: 100%; /* Usando 100% da altura disponível */
+  object-fit: cover; /* Cover para preencher todo o espaço */
+  object-position: center 40%; /* Ajuste fino da posição vertical */
+}
+
+.videoControls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  gap: 15px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.videoWrapper:hover .videoControls {
+  opacity: 1;
+}
+
+.playButton,
+.muteButton {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.playButton:hover,
+.muteButton:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+}
+
+.logoContainer {
+  margin-bottom: 20px;
+}
+
+.shopButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 25px;
+  background: linear-gradient(135deg, #ff6900 0%, #e55e00 100%);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.shopButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(255, 105, 0, 0.2);
+}
+
+@media (max-width: 991px) {
+  .brandBanner {
+    height: auto;
+    flex-direction: column;
+  }
+  
+  .mediaContainer {
+    height: 350px;
+  }
+  
+  .infoContainer {
+    width: 100%;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 767px) {
+  .mediaContainer {
+    height: 250px;
+  }
+  
+  .infoContent {
+    padding: 30px 20px;
+  }
+  
+  .brandTitle {
+    font-size: 24px;
+  }
+  
+  .brandDescription {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+}
+
+/* Estilos específicos para o vídeo da Apple */
+.apple .videoContainer {
+  position: relative;
+  width: 100%; /* Ensure full width */
+  height: 100%; /* Ensure full height */
+}
+
+.apple .brandVideo {
+  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.1);
+  width: 100%; /* Ensure full width */
+  height: 100%; /* Ensure full height */
+  object-fit: cover; /* Cover the entire container */
+}
+
+/* Estilos específicos para Apple */
+.apple .brandCta {
+  background: white;
+  color: black;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .brandBannerContainer {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .brandBannerContent {
+    padding: 32px 0 0;
+  }
+  
+  .brandDescription {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .brandImage {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .videoContainer {
+    margin-top: 24px;
+    width: 100%;
+  }
+  
+  .brandVideo {
+    width: 100%;
+    max-height: 300px; /* Control height on mobile */
+  }
+}
+
+/* Melhorias específicas para vídeo em mobile */
+@media (max-width: 768px) {
+  .brandBanner {
+    margin: 20px 0;
+    height: auto;
+    min-height: 400px;
+  }
+  
+  .brandVideo {
+    object-position: center center; /* Centraliza o vídeo em mobile */
+  }
+  
+  /* Ajustes específicos para Apple */
+  .apple .videoContainer {
+    height: 100%;
+  }
+  
+  .apple .brandLogo {
+    margin-bottom: 15px;
+  }
+}
+
+/* Ajustes extras para dispositivos muito pequenos */
+@media (max-width: 480px) {
+  .brandBanner {
+    min-height: 300px;
+    border-radius: 0;
+  }
+  
+  .brandNavigation {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 10px 0;
+    scroll-padding: 5px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .brandNavigation::-webkit-scrollbar {
+    display: none; /* Chrome, Safari e Opera */
+  }
+}

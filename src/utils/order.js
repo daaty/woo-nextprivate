@@ -57,14 +57,15 @@ export const getCreateOrderLineItems = (products) => {
  *
  * @param order
  * @param products
- * @return {{shipping: {country: *, city: *, phone: *, address_1: (string|*), address_2: (string|*), postcode: (string|*), last_name: (string|*), company: *, state: *, first_name: (string|*), email: *}, payment_method_title: string, line_items: (*[]|*), payment_method: string, billing: {country: *, city: *, phone: *, address_1: (string|*), address_2: (string|*), postcode: (string|*), last_name: (string|*), company: *, state: *, first_name: (string|*), email: *}}}
+ * @param customerId - ID do customer no WooCommerce (opcional)
+ * @return {{shipping: {country: *, city: *, phone: *, address_1: (string|*), address_2: (string|*), postcode: (string|*), last_name: (string|*), company: *, state: *, first_name: (string|*), email: *}, payment_method_title: string, line_items: (*[]|*), payment_method: string, billing: {country: *, city: *, phone: *, address_1: (string|*), address_2: (string|*), postcode: (string|*), last_name: (string|*), company: *, state: *, first_name: (string|*), email: *}, customer_id?: number}}
  */
-export const getCreateOrderData = (order, products) => {
+export const getCreateOrderData = (order, products, customerId = null) => {
     // Set the billing Data to shipping, if applicable.
     const billingData = order.billingDifferentThanShipping ? order.billing : order.shipping;
 
-    // Checkout data.
-    return {
+    // Checkout data base
+    const orderData = {
         shipping: {
             first_name: order?.shipping?.firstName,
             last_name: order?.shipping?.lastName,
@@ -95,6 +96,14 @@ export const getCreateOrderData = (order, products) => {
         payment_method_title: 'Stripe',
         line_items: getCreateOrderLineItems( products ),
     };
+
+    // Se temos um customer_id, incluir no pedido para vincular ao usuário
+    if (customerId) {
+        orderData.customer_id = parseInt(customerId);
+        console.log('[Order] Vinculando pedido ao customer ID:', customerId);
+    }
+
+    return orderData;
 }
 
 /**

@@ -94,14 +94,12 @@ const MegaMenu = () => {
         
         <div className={styles.megaMenuSection}>
           <h3 className={styles.megaMenuTitle}>Destaques</h3>
-          <ul className={styles.megaMenuList}>
-            <li className={styles.megaMenuItem}>
-              <Link href="/promocoes">
+          <ul className={styles.megaMenuList}>            <li className={styles.megaMenuItem}>
+              <Link href="/produto/promocoes">
                 <a className={styles.megaMenuLink}>Promoções</a>
               </Link>
-            </li>
-            <li className={styles.megaMenuItem}>
-              <Link href="/lancamentos">
+            </li>            <li className={styles.megaMenuItem}>
+              <Link href="/produto/lancamentos">
                 <a className={styles.megaMenuLink}>Lançamentos</a>
               </Link>
             </li>
@@ -113,6 +111,11 @@ const MegaMenu = () => {
             <li className={styles.megaMenuItem}>
               <Link href="/products">
                 <a className={styles.megaMenuLink}>Ver Todos os Produtos</a>
+              </Link>
+            </li>
+            <li className={styles.megaMenuItem}>
+              <Link href="/marca/apple">
+                <a className={styles.megaMenuLink}>Apple</a>
               </Link>
             </li>
           </ul>
