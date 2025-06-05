@@ -11,12 +11,12 @@ import { useQuery } from "@apollo/client";
 import { GET_CUSTOMER } from "../src/queries/customer";
 import { useNotification } from '../src/components/ui/Notification';
 import SEO from '../src/components/seo/SEO';
-import { useCart } from '../src/hooks/useCart';
+import { useCartWithFallback as useCart } from '../src/hooks/useCartWithFallback';
 import { 
-  getBestSubtotalValue,
   formatPrice,
   calculateCartSubtotal
 } from '../src/utils/cart-utils';
+import { priceToNumber } from '../src/utils/format-price';
 import { handleCartError } from '../src/middleware/cart-error-handler';
 import LoadingSpinner from '../src/components/LoadingSpinner';
 // Importar logger para debugging (versão frontend)
@@ -118,26 +118,15 @@ const Checkout = ({countriesData}) => {
 			}
 		});
 	}, [cartTotal, subtotal, formattedTotal, formattedSubtotal, contextReady, manualSubtotal]);
-
-	// ADICIONADO: Função utilitária para obter o melhor valor de subtotal disponível
-	const getBestSubtotalValue = () => {
-		// Usar a função centralizada de utils
-		return getBestSubtotalValue({
-			subtotal,
-			manualSubtotal,
-			cartTotal
-		});
-	};
-
-	// ADICIONADO: Função para obter o melhor formato de preço para exibição
+	// Função para obter o melhor formato de preço para exibição (usar manualSubtotal)
 	const getBestSubtotalFormatted = () => {
-		const value = getBestSubtotalValue();
+		const value = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
 		return formatPrice(value);
 	};
 	
 	// ADICIONADO: Efeito para calcular o total (subtotal + frete) com base nos melhores valores disponíveis
-	useEffect(() => {
-		const bestSubtotal = getBestSubtotalValue();
+	useEffect(() => {		// Usar manualSubtotal como fonte primária confiável
+		const bestSubtotal = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
 		const shipping = typeof shippingCost === 'number' ? shippingCost : 0;
 		const total = bestSubtotal + shipping;
 		
@@ -271,14 +260,14 @@ const Checkout = ({countriesData}) => {
 
 	// Verificar se o valor da compra qualifica para frete grátis
 	useEffect(() => {
-		// MODIFICADO: Usar a função getBestSubtotalValue para obter o valor mais confiável
-		const valorBase = getBestSubtotalValue();
+		// MODIFICADO: Usar manualSubtotal diretamente como fonte primária
+		const baseValue = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
 		
-		if (valorBase >= FREE_SHIPPING_THRESHOLD) {
-			console.log(`[Checkout] ✅ Compra qualifica para frete grátis: ${valorBase} >= ${FREE_SHIPPING_THRESHOLD}`);
+		if (baseValue >= FREE_SHIPPING_THRESHOLD) {
+			console.log(`[Checkout] ✅ Compra qualifica para frete grátis: ${baseValue} >= ${FREE_SHIPPING_THRESHOLD}`);
 			setHasFreightFree(true);
 		} else {
-			console.log(`[Checkout] ❌ Compra não qualifica para frete grátis: ${valorBase} < ${FREE_SHIPPING_THRESHOLD}`);
+			console.log(`[Checkout] ❌ Compra não qualifica para frete grátis: ${baseValue} < ${FREE_SHIPPING_THRESHOLD}`);
 			setHasFreightFree(false);
 		}
 	}, [cartTotal, subtotal, manualSubtotal]);
@@ -524,19 +513,18 @@ const Checkout = ({countriesData}) => {
 		console.log('🚀 [DEBUG] shippingCost:', shippingCost);
 		console.log('🚨 [DEBUG] notification object:', notification);
 		console.log('🚨 [DEBUG] notification.error function:', typeof notification?.error);
-		
-		// ADICIONADO: Log detalhado dos valores do carrinho para depuração
+				// ADICIONADO: Log detalhado dos valores do carrinho para depuração
 		console.log('🛒 [DEBUG] Valores do carrinho:', {
 			subtotal,
 			cartTotal,
 			formattedTotal,
 			formattedSubtotal,
 			manualSubtotal,
-			bestSubtotal: getBestSubtotalValue(),
+			bestSubtotal: typeof manualSubtotal === 'number' ? manualSubtotal : 0,
 			bestFormatted: getBestSubtotalFormatted(),
 			cartValueNumeric: typeof subtotal === 'number' ? subtotal : priceToNumber(cartTotal || 0),
 			shippingCost,
-			totalCalculado: getBestSubtotalValue() + shippingCost,
+			totalCalculado: (typeof manualSubtotal === 'number' ? manualSubtotal : 0) + shippingCost,
 		});
 		
 		// Verificar se já está processando para evitar múltiplos cliques
@@ -556,7 +544,7 @@ const Checkout = ({countriesData}) => {
 			if (!selectedPaymentMethod) {
 				checkoutLogger.log('❌ ERRO: Método de pagamento não selecionado');
 				notification.warning('Por favor, selecione um método de pagamento');
-				setIsFinalizandoOrder(false);
+				setIsFinalizingOrder(false);
 				return;
 			}
 			
@@ -568,7 +556,7 @@ const Checkout = ({countriesData}) => {
 					shippingOptionsCount: shippingOptions?.length || 0
 				});
 				notification.warning('Por favor, selecione uma opção de entrega para calcular o frete');
-				setIsFinalizandoOrder(false);
+				setIsFinalizingOrder(false);
 				return;
 			}
 
@@ -580,30 +568,27 @@ const Checkout = ({countriesData}) => {
 					shippingOptions: shippingOptions
 				});
 				notification.warning('Erro no cálculo do frete. Por favor, recalcule o frete');
-				setIsFinalizandoOrder(false);
+				setIsFinalizingOrder(false);
 				return;
 			}			// 4. Validar total do pedido
-			// MODIFICADO: Usar getBestSubtotalValue como fonte primária para o cálculo
-			const valorBase = getBestSubtotalValue();
-			const totalCalculated = valorBase + shippingCost;
+			// MODIFICADO: Usar manualSubtotal diretamente como fonte primária para o cálculo
+			const totalCalculated = (typeof manualSubtotal === 'number' ? manualSubtotal : 0) + (typeof shippingCost === 'number' ? shippingCost : 0);
 			
 			console.log('[Checkout] 💰 Cálculo do total:', {
-				valorBase,
+				manualSubtotal,
 				shippingCost,
 				totalCalculated
 			});
-			
-			if (totalCalculated <= 0) {
+					if (totalCalculated <= 0) {
 				checkoutLogger.log('❌ ERRO: Total do pedido inválido', {
 					subtotal,
 					cartTotal,
 					manualSubtotal,
-					valorBase,
 					shippingCost,
 					totalCalculated
 				});
 				notification.error('Erro no total do pedido. Por favor, recarregue a página');
-				setIsFinalizandoOrder(false);
+				setIsFinalizingOrder(false);
 				return;
 			}
 
@@ -644,7 +629,7 @@ const Checkout = ({countriesData}) => {
 					console.error('🚨 [DEBUG] Erro ao chamar notification.error:', error);
 				}
 				
-				setIsFinalizandoOrder(false);
+				setIsFinalizingOrder(false);
 				return;
 			}
 
@@ -739,10 +724,9 @@ const Checkout = ({countriesData}) => {
 				};
 				console.log('[Checkout Debug] Item mapeado:', mappedItem);
 				console.log('[Checkout Debug] Price usado:', itemPrice, 'de totalPrice:', item.totalPrice);
-				return mappedItem;				}),
-			// MODIFICADO: Usar getBestSubtotalValue como fonte primária para o cálculo do total
-			total: getBestSubtotalValue() + shippingCost,
-			subtotal: getBestSubtotalValue(),
+				return mappedItem;				}),			// MODIFICADO: Usar manualSubtotal diretamente para cálculo do total
+			total: (typeof manualSubtotal === 'number' ? manualSubtotal : 0) + shippingCost,
+			subtotal: typeof manualSubtotal === 'number' ? manualSubtotal : 0,
 			customer: combinedUserData ? {
 				databaseId: user?.databaseId || 0, // Adicionar databaseId para associar ao cliente
 				email: combinedUserData.email,
@@ -1731,7 +1715,7 @@ const processOtherPayment = async (orderData) => {
 					display: grid;
 					grid-template-columns: 1fr 380px;
 					gap: 32px;
-					align-items: start;
+									align-items: start;
 				}
 				
 				@media (max-width: 1024px) {
@@ -1799,6 +1783,7 @@ const processOtherPayment = async (orderData) => {
 				.status-badge.completed {
 					background: #d4edda;
 					color: #155724;
+			
 				}
 				
 				.status-badge.active {
@@ -1959,7 +1944,8 @@ const processOtherPayment = async (orderData) => {
 					order: 0 !important;
 					margin-bottom: 1.5rem !important;
 				}
-						.checkout .woocommerce-checkout-payment {
+				
+				.checkout .woocommerce-checkout-payment {
 					order: 1 !important;
 				}
 				
@@ -2498,9 +2484,8 @@ const processOtherPayment = async (orderData) => {
 										<span>Total:</span>
 										<span className="text-orange-500">
 											{selectedShipping 
-												? (() => {
-														// MODIFICADO: Usar getBestSubtotalValue para cálculo mais preciso
-														const baseValue = getBestSubtotalValue();
+												? (() => {														// MODIFICADO: Usar manualSubtotal diretamente para cálculo mais preciso
+														const baseValue = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
 														
 														// Garantir que o frete seja um número válido
 														const freightValue = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
@@ -2518,11 +2503,10 @@ const processOtherPayment = async (orderData) => {
 									
 									{/* Opções de pagamento - MODIFICADAS para usar valor mais confiável */}
 									<div className="mt-3 p-3 bg-gray-50 rounded-lg">
-										<div className="text-xs text-gray-600">
-											<p>💳 À vista: <span className="font-medium text-green-600">
+										<div className="text-xs text-gray-600">											<p>💳 À vista: <span className="font-medium text-green-600">
 												{(() => {
 													// Garantir que o valor seja calculado corretamente
-													const baseValue = getBestSubtotalValue();
+													const baseValue = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
 													
 													// Garantir que o frete seja um número válido
 													const freightValue = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
@@ -2531,11 +2515,10 @@ const processOtherPayment = async (orderData) => {
 													const total = baseValue + freightValue;
 													return formatPrice(total * 0.92);
 												})()}
-											</span> (8% desc.)</p>
-											<p>📅 ou 12x de <span className="font-medium">
+											</span> (8% desc.)</p><p>📅 ou 12x de <span className="font-medium">
 												{(() => {
 													// Garantir que o valor seja calculado corretamente
-													const baseValue = getBestSubtotalValue();
+													const baseValue = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
 													
 													// Garantir que o frete seja um número válido
 													const freightValue = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
