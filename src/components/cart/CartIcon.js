@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { useCartContext } from '../../contexts/CartContext';
+import { useCart } from '../../v2/cart/hooks/useCart';
 import Link from 'next/link';
 import styles from '../../styles/CartIcon.module.css'; // Make sure to create this CSS module
 
 const CartIcon = ({ className, onClick }) => {
-    const { cartCount, cartItems, loading } = useCartContext();
+    const { cartCount, cartItems, loading } = useCart();
     
     // Memoize cart count calculation for better performance
     const displayCount = useMemo(() => {
@@ -58,9 +58,8 @@ const CartIcon = ({ className, onClick }) => {
             </button>
         );
     }
-    
-    return (
-        <Link href="/carrinho">
+      return (
+        <Link href="/cart">
             <a className={`${styles.cartIconContainer || "cart-icon-container"} ${className || ''}`}>
                 <svg 
                     xmlns="http://www.w3.org/2000/svg" 

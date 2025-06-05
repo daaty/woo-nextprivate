@@ -80,31 +80,29 @@ export const calculateCartSubtotal = (items) => {
  * @param {Object} options - Opções disponíveis (subtotal, manualSubtotal, cartTotal)
  * @returns {number} O melhor valor disponível
  */
-export const getBestSubtotalValue = ({ subtotal, manualSubtotal, cartTotal }) => {
+export const getBestSubtotalValue = (input = {}) => {
+  // Defensive: fallback para objeto vazio se input for undefined/null
+  if (!input || typeof input !== 'object') input = {};
+  const { subtotal, manualSubtotal, cartTotal } = input;
   // Ordem de prioridade:
   // 1. manualSubtotal (calculado diretamente dos itens)
   // 2. subtotal do contexto
   // 3. cartTotal
-
   if (manualSubtotal && !isNaN(manualSubtotal) && manualSubtotal > 0) {
     return manualSubtotal;
   }
-  
   if (subtotal && typeof subtotal === 'number' && !isNaN(subtotal) && subtotal > 0) {
     return subtotal;
   }
-  
   if (typeof cartTotal === 'number' && !isNaN(cartTotal) && cartTotal > 0) {
     return cartTotal;
   }
-  
   if (typeof cartTotal === 'string') {
     const parsed = priceToNumber(cartTotal);
     if (!isNaN(parsed) && parsed > 0) {
       return parsed;
     }
   }
-  
   return 0;
 };
 

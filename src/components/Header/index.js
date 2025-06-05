@@ -52,9 +52,8 @@ const Header = ({ header, cartCount = 0, contextReady = false }) => { // NOVO: R
         </ul>
       </nav>
 
-      {/* Contador do carrinho */}
-      <div className="cart-counter-container">
-        <Link href="/carrinho">
+      {/* Contador do carrinho */}        <div className="cart-counter-container">
+        <Link href="/cart">
           <a className="cart-link">
             <svg /* ícone do carrinho */ />
             {contextReady && cartCount > 0 && (

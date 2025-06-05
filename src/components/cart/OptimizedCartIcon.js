@@ -76,7 +76,7 @@ const OptimizedCartIcon = ({ className, onClick }) => {
     }
     
     return (
-        <Link href="/carrinho">
+        <Link href="/cart">
             <a className={`${styles.cartIconContainer || "cart-icon-container"} ${className || ''}`} data-count={cartCount || 0}>
                 <svg 
                     xmlns="http://www.w3.org/2000/svg" 

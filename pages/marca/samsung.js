@@ -205,6 +205,256 @@ export default function SamsungPage() {
     setSelectedAvailability('all');
   };
 
+  // Função para adicionar produto ao carrinho - ENHANCED VERSION WITH DOM MANIPULATION
+  const handleAddToCart = async (product, event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const button = event.currentTarget;
+    
+    // Check if already processing
+    if (button.classList.contains('loading') || button.disabled) {
+      console.log('🚫 [Samsung Page] Already processing, ignoring click');
+      return;
+    }
+
+    console.log('🛒 [Samsung Page] Starting enhanced add to cart:', product.name);
+    
+    // Debug product data being sent
+    console.log('🔍 [Samsung Page] Product data for API:', {
+      id: product.databaseId || product.id,
+      name: product.name,
+      price: product.price,
+      regularPrice: product.regularPrice,
+      hasImage: !!(product.image?.sourceUrl || product.featuredImage?.node?.sourceUrl)
+    });
+    
+    // Store original button content
+    const originalContent = button.innerHTML;
+    
+    try {
+      // Phase 1: Loading state with DOM manipulation
+      button.disabled = true;
+      button.classList.add('loading');
+      button.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+      button.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center;">
+          <div style="
+            width: 20px; 
+            height: 20px; 
+            border: 2px solid #ffffff; 
+            border-top-color: transparent; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite;
+          "></div>
+        </div>
+      `;
+      
+      // Add spinner animation if not already present
+      if (!document.querySelector('#spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'spinner-style';
+        style.textContent = `
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      
+      const productId = product.databaseId || product.id;
+      
+      // Prepare sanitized product data
+      let safeProductName = '';
+      if (typeof product?.name === 'string') {
+        safeProductName = product.name
+          .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+          .replace(/\\/g, '\\\\')
+          .replace(/"/g, '\\"');
+      } else {
+        safeProductName = `Produto ${productId}`;
+      }
+        // VERSÃO APRIMORADA V2: Extração super-robusta da imagem com suporte REST API
+      const DEFAULT_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRjY5MDAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCI+UHJvZHV0bzwvdGV4dD48L3N2Zz4=';
+      
+      // Função auxiliar para extrair a URL da imagem de qualquer estrutura
+      function extractImageUrl(product) {
+        // Registra a tentativa de extração de URL
+        console.log('🔍 [Samsung Page] Tentando extrair URL da imagem do produto:', product?.name || 'sem nome');
+        
+        // CASO 1: Se o produto não existir ou não tiver propriedade de imagem
+        if (!product) {
+          console.log('❌ [Samsung Page] Produto não existe');
+          return null;
+        }
+
+        // CASO NOVO 1: Formato REST API - array de imagens com src (formato Motorola)
+        if (Array.isArray(product.images) && product.images.length > 0) {
+          const firstImage = product.images[0].src || product.images[0].sourceUrl || product.images[0].url;
+          if (firstImage) {
+            console.log('✅ [Samsung Page] Imagem encontrada em array images[0].src:', firstImage);
+            return firstImage;
+          }
+        }
+
+        // CASO NOVO 2: Campo image_url ou imageUrl direto (outro formato REST)
+        if (product.image_url) {
+          console.log('✅ [Samsung Page] Imagem encontrada em image_url:', product.image_url);
+          return product.image_url;
+        }
+        
+        if (product.imageUrl) {
+          console.log('✅ [Samsung Page] Imagem encontrada em imageUrl:', product.imageUrl);
+          return product.imageUrl;
+        }
+        
+        // CASO 2: Se a imagem for diretamente uma string (URL)
+        if (typeof product.image === 'string') {
+          console.log('✅ [Samsung Page] Imagem encontrada como URL direta:', product.image);
+          return product.image;
+        }
+        
+        // CASO 3: Se a imagem for um objeto com sourceUrl (padrão WooGraphQL)
+        if (product.image?.sourceUrl) {
+          console.log('✅ [Samsung Page] Imagem encontrada em image.sourceUrl:', product.image.sourceUrl);
+          return product.image.sourceUrl;
+        }
+        
+        // CASO 4: Estrutura diferente - objeto.node.sourceUrl (alguns casos GraphQL)
+        if (product.image?.node?.sourceUrl) {
+          console.log('✅ [Samsung Page] Imagem encontrada em image.node.sourceUrl:', product.image.node.sourceUrl);
+          return product.image.node.sourceUrl;
+        }
+        
+        // CASO 5: featuredImage como usado em algumas queries
+        if (product.featuredImage?.node?.sourceUrl) {
+          console.log('✅ [Samsung Page] Imagem encontrada em featuredImage.node.sourceUrl:', product.featuredImage.node.sourceUrl);
+          return product.featuredImage.node.sourceUrl;
+        }
+        
+        // CASO 6: URLs padrão em outras propriedades
+        if (product.thumbnail) {
+          console.log('✅ [Samsung Page] Imagem encontrada em thumbnail:', product.thumbnail);
+          return product.thumbnail;
+        }
+        
+        if (product.src) {
+          console.log('✅ [Samsung Page] Imagem encontrada em src:', product.src);
+          return product.src;
+        }
+        
+        if (product.url) {
+          console.log('✅ [Samsung Page] Imagem encontrada em url:', product.url);
+          return product.url;
+        }
+        
+        // CASO 7: Se o próprio produto for uma URL de imagem (raro, mas possível)
+        if (typeof product === 'string' && (product.startsWith('http') || product.startsWith('data:'))) {
+          console.log('✅ [Samsung Page] O próprio produto é uma URL de imagem:', product);
+          return product;
+        }
+        
+        // CASO ESPECIAL: Gerar um mock URL para esse produto para evitar placeholder
+        const mockImageUrl = `https://via.placeholder.com/400x400?text=${encodeURIComponent(product.name || 'Produto')}`;
+        console.log('⚠️ [Samsung Page] Usando imagem mockada:', mockImageUrl);
+        return mockImageUrl;
+      }
+      
+      // Tenta extrair a URL da imagem
+      let safeProductImage = extractImageUrl(product) || DEFAULT_PLACEHOLDER;// Use Cart v2 API with EXACT same structure as homepage AddToCartButton
+      const response = await fetch('/api/v2/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product: {
+            id: productId,
+            name: safeProductName,
+            price: product?.price || product?.regularPrice || 220.00,
+            image: typeof safeProductImage === 'string' && safeProductImage ? safeProductImage : null,
+            slug: product?.slug || null
+          },
+          quantity: 1
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ [Samsung Page] Product added successfully!');
+        
+        // Phase 2: Success state
+        button.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        button.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            <span>Adicionado!</span>
+          </div>
+        `;
+        
+        // Update global cart counter
+        const cartCountElements = document.querySelectorAll('.cart-count, [data-cart-count]');
+        cartCountElements.forEach(element => {
+          const currentCount = parseInt(element.textContent) || 0;
+          element.textContent = currentCount + 1;
+          element.style.display = 'inline-block';
+        });
+        
+        // Dispatch custom event for cart updates
+        window.dispatchEvent(new CustomEvent('cartUpdated', { 
+          detail: { 
+            action: 'add', 
+            product: result.product || product,
+            source: 'samsung-page-enhanced'
+          } 
+        }));
+        
+        // Mobile vibration feedback
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50);
+        }
+        
+        // Show notification if system exists
+        if (window.showNotification) {
+          window.showNotification(`${product.name} foi adicionado ao carrinho!`, 'success');
+        }
+        
+      } else {
+        throw new Error(result.message || 'Falha ao adicionar produto ao carrinho');
+      }
+      
+    } catch (error) {
+      console.error('❌ [Samsung Page] Add to cart error:', error);
+      
+      // Phase 2: Error state
+      button.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+      button.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+          <span>Erro!</span>
+        </div>
+      `;
+      
+      // Show error notification if system exists
+      if (window.showNotification) {
+        window.showNotification('Erro ao adicionar produto ao carrinho. Tente novamente.', 'error');
+      }
+    }
+    
+    // Phase 3: Reset button after 2 seconds
+    setTimeout(() => {
+      button.disabled = false;
+      button.classList.remove('loading');
+      button.style.background = '';
+      button.innerHTML = originalContent;
+    }, 2000);
+  };
+  
   // Buscar produtos da categoria/marca Samsung
   useEffect(() => {
     setLoading(true);
@@ -931,17 +1181,34 @@ export default function SamsungPage() {
                         </div>
                       </a>
                     </Link>
-                    
                     <div className={styles.productActions}>
-                      <button className={styles.quickviewButton} title="Visualização rápida">
-                        <span>Visualização rápida</span>
+                      <button 
+                        className={`${styles.addToCartButton} ${homeBrandStyles.brandCta}`}
+                        onClick={(e) => handleAddToCart(product, e)}
+                        data-product-id={product.id}
+                        data-product-name={product.name}
+                        data-product-price={product.price}
+                        data-product-image={product.image?.sourceUrl || product.images?.[0]?.src}
+                        style={{
+                          position: 'relative',
+                          minHeight: '48px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: 'linear-gradient(135deg, #ff6900 0%, #00a8e1 100%)',
+                          transition: 'all 0.3s ease',
+                          border: 'none',
+                          borderRadius: '8px',
+                          color: 'white',
+                          fontWeight: '600',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          width: '100%',
+                          textAlign: 'center'
+                        }}
+                      >
+                        Adicionar ao carrinho
                       </button>
-                      
-                      <Link href={`/produto/${product.slug}`}>
-                        <a className={`${styles.addToCartButton} ${homeBrandStyles.brandCta}`}>
-                          {viewMode === 'grid' ? 'Adicionar' : 'Adicionar ao carrinho'}
-                        </a>
-                      </Link>
                     </div>
                   </div>
                 ))}
@@ -1065,3 +1332,6 @@ export default function SamsungPage() {
     </Layout>
   );
 }
+
+// Defina o placeholder SVG inline no topo do arquivo (fora do componente)
+const DEFAULT_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRjY5MDAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCI+UHJvZHV0bzwvdGV4dD48L3N2Zz4=';

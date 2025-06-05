@@ -258,11 +258,10 @@ const ProductGrid = ({ products }) => {
   const handleContinueShopping = () => {
     setShowProductAddedModal(false);
   };
-
   // Manipulador para ir ao carrinho
   const handleGoToCart = () => {
     setShowProductAddedModal(false);
-    window.location.href = '/carrinho';
+    window.location.href = '/cart';
   };
 
   return (

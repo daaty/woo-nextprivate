@@ -37,7 +37,7 @@ const ProductCard = ({ product, discount }) => {
 
   const handleGoToCart = () => {
     setShowProductAddedModal(false);
-    window.location.href = '/carrinho';
+    window.location.href = '/cart';
   };
 
   const handleContinueShopping = () => {

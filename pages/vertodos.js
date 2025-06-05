@@ -17,6 +17,48 @@ import FilterToggleButton from '../src/components/FilterToggleButton';
 // Carregar o carrossel dinamicamente para otimizar o carregamento
 const Carousel = dynamic(() => import('../src/components/Carousel'), { ssr: false });
 
+// VERSÃO APRIMORADA V2: Extração super-robusta da imagem com suporte para diferentes formatos
+function extractImageUrl(product) {
+  // Se o produto não existir
+  if (!product) {
+    return null;
+  }
+
+  // Formato REST API - array de imagens com src (formato Motorola)
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    const firstImage = product.images[0].src || product.images[0].sourceUrl || product.images[0].url;
+    if (firstImage) {
+      return firstImage;
+    }
+  }
+
+  // Campo image_url ou imageUrl direto (outro formato REST)
+  if (product.image_url) return product.image_url;
+  if (product.imageUrl) return product.imageUrl;
+  
+  // Se a imagem for diretamente uma string (URL)
+  if (typeof product.image === 'string') return product.image;
+  
+  // Se a imagem for um objeto com sourceUrl (padrão WooGraphQL)
+  if (product.image?.sourceUrl) return product.image.sourceUrl;
+  
+  // Estrutura diferente - objeto.node.sourceUrl (alguns casos GraphQL)
+  if (product.image?.node?.sourceUrl) return product.image.node.sourceUrl;
+  
+  // featuredImage como usado em algumas queries
+  if (product.featuredImage?.node?.sourceUrl) return product.featuredImage.node.sourceUrl;
+  
+  // URLs padrão em outras propriedades
+  if (product.thumbnail) return product.thumbnail;
+  if (product.src) return product.src;
+  if (product.url) return product.url;
+  
+  // Mock URL como último recurso
+  return product.name ? `https://via.placeholder.com/400x400?text=${encodeURIComponent(product.name)}` : null;
+}
+
+const DEFAULT_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRjY5MDAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCI+UHJvZHV0bzwvdGV4dD48L3N2Zz4=';
+
 const VerTodos = () => {
   // Estados para gerenciar produtos e filtros
   const [products, setProducts] = useState([]);
@@ -318,6 +360,175 @@ const VerTodos = () => {
     setSelectedColors([]);
     setSelectedBrand("all");
     setSelectedAvailability('all');
+  };
+
+  // Função para adicionar produto ao carrinho - ENHANCED VERSION WITH DOM MANIPULATION
+  const handleAddToCart = async (product, event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const button = event.currentTarget;
+    
+    // Check if already processing
+    if (button.classList.contains('loading') || button.disabled) {
+      console.log('🚫 [VerTodos Page] Already processing, ignoring click');
+      return;
+    }
+
+    console.log('🛒 [VerTodos Page] Starting enhanced add to cart:', product.name);
+    
+    // Debug product data being sent
+    console.log('🔍 [VerTodos Page] Product data for API:', {
+      id: product.databaseId || product.id,
+      name: product.name,
+      price: product.price,
+      regularPrice: product.regularPrice,
+      hasImage: !!(product.image?.sourceUrl || product.featuredImage?.node?.sourceUrl)
+    });
+    
+    // Store original button content
+    const originalContent = button.innerHTML;
+    
+    try {
+      // Phase 1: Loading state with DOM manipulation
+      button.disabled = true;
+      button.classList.add('loading');
+      button.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+      button.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center;">
+          <div style="
+            width: 20px; 
+            height: 20px; 
+            border: 2px solid #ffffff; 
+            border-top-color: transparent; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite;
+          "></div>
+        </div>
+      `;
+      
+      // Add spinner animation if not already present
+      if (!document.querySelector('#spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'spinner-style';
+        style.textContent = `
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      
+      const productId = product.databaseId || product.id;
+      
+      // Prepare sanitized product data
+      let safeProductName = '';
+      if (typeof product?.name === 'string') {
+        safeProductName = product.name
+          .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+          .replace(/\\/g, '\\\\')
+          .replace(/"/g, '\\"');
+      } else {
+        safeProductName = `Produto ${productId}`;
+      }      // Extrai a URL da imagem usando a função global
+      console.log('🔍 [VerTodos Page] Tentando extrair URL da imagem do produto:', product?.name || 'sem nome');
+      
+      // Tenta extrair a URL da imagem
+      let safeProductImage = extractImageUrl(product) || DEFAULT_PLACEHOLDER;
+      
+      // Log da URL encontrada
+      console.log('✅ [VerTodos Page] URL da imagem extraída:', safeProductImage);// Use Cart v2 API with EXACT same structure as homepage AddToCartButton
+      const response = await fetch('/api/v2/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product: {
+            id: productId,
+            name: safeProductName,
+            price: product?.price || product?.regularPrice || 220.00,
+            image: typeof safeProductImage === 'string' && safeProductImage ? safeProductImage : null,
+            slug: product?.slug || null
+          },
+          quantity: 1
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ [VerTodos Page] Product added successfully!');
+        
+        // Phase 2: Success state
+        button.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        button.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            <span>Adicionado!</span>
+          </div>
+        `;
+        
+        // Update global cart counter
+        const cartCountElements = document.querySelectorAll('.cart-count, [data-cart-count]');
+        cartCountElements.forEach(element => {
+          const currentCount = parseInt(element.textContent) || 0;
+          element.textContent = currentCount + 1;
+          element.style.display = 'inline-block';
+        });
+        
+        // Dispatch custom event for cart updates
+        window.dispatchEvent(new CustomEvent('cartUpdated', { 
+          detail: { 
+            action: 'add', 
+            product: result.product || product,
+            source: 'vertodos-page-enhanced'
+          } 
+        }));
+        
+        // Mobile vibration feedback
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50);
+        }
+        
+        // Show notification if system exists
+        if (window.showNotification) {
+          window.showNotification(`${product.name} foi adicionado ao carrinho!`, 'success');
+        }
+        
+      } else {
+        throw new Error(result.message || 'Falha ao adicionar produto ao carrinho');
+      }
+      
+    } catch (error) {
+      console.error('❌ [VerTodos Page] Add to cart error:', error);
+      
+      // Phase 2: Error state
+      button.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+      button.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+          <span>Erro!</span>
+        </div>
+      `;
+      
+      // Show error notification if system exists
+      if (window.showNotification) {
+        window.showNotification('Erro ao adicionar produto ao carrinho. Tente novamente.', 'error');
+      }
+    }
+    
+    // Phase 3: Reset button after 2 seconds
+    setTimeout(() => {
+      button.disabled = false;
+      button.classList.remove('loading');
+      button.style.background = '';
+      button.innerHTML = originalContent;
+    }, 2000);
   };
 
   // Buscar produtos de todas as marcas
@@ -985,21 +1196,24 @@ const VerTodos = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           padding: '10px'
-                        }}>
-                          {(product.image?.sourceUrl || product.images?.[0]?.src) ? (
-                            <Image
-                              src={product.image?.sourceUrl || product.images?.[0]?.src}
-                              alt={product.name || "Produto"}
-                              width={240}
-                              height={240}
-                              style={{ objectFit: "contain" }}
-                              loading="lazy"
-                              quality={80}
-                              className={styles.productImageElement}
-                            />
-                          ) : (
-                            <div className={styles.noImage}>Sem Imagem</div>
-                          )}
+                        }}>                          {(() => {
+                            // Usar a mesma função extractImageUrl para renderização
+                            const imageUrl = extractImageUrl(product);
+                            return imageUrl ? (
+                              <Image
+                                src={imageUrl}
+                                alt={product.name || "Produto"}
+                                width={240}
+                                height={240}
+                                style={{ objectFit: "contain" }}
+                                loading="lazy"
+                                quality={80}
+                                className={styles.productImageElement}
+                              />
+                            ) : (
+                              <div className={styles.noImage}>Sem Imagem</div>
+                            );
+                          })()}
                           {product.on_sale && <span className={styles.saleTag}>OFERTA</span>}
                         </div>
                         
@@ -1040,17 +1254,32 @@ const VerTodos = () => {
                         </div>
                       </a>
                     </Link>
-                    
-                    <div className={styles.productActions}>
-                      <button className={styles.quickviewButton} title="Visualização rápida">
-                        <span>Visualização rápida</span>
+                      <div className={styles.productActions}>
+                      <button 
+                        className={`${styles.addToCartButton} ${homeBrandStyles.brandCta}`}
+                        onClick={(e) => handleAddToCart(product, e)}                        data-product-id={product.id}
+                        data-product-name={product.name}
+                        data-product-price={product.price}
+                        data-product-image={extractImageUrl(product)}
+                        style={{
+                          position: 'relative',
+                          minHeight: '48px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: 'linear-gradient(135deg, #ff6900 0%, #00a8e1 100%)',
+                          transition: 'all 0.3s ease',
+                          border: 'none',
+                          borderRadius: '8px',
+                          color: 'white',
+                          fontWeight: '600',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          width: '100%',
+                          textAlign: 'center'
+                        }}                      >
+                        Adicionar ao carrinho
                       </button>
-                      
-                      <Link href={`/produto/${product.slug}`}>
-                        <a className={`${styles.addToCartButton} ${homeBrandStyles.brandCta}`}>
-                          {viewMode === 'grid' ? 'Adicionar' : 'Adicionar ao carrinho'}
-                        </a>
-                      </Link>
                     </div>
                   </div>
                 ))}

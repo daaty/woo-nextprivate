@@ -161,6 +161,301 @@ const ProductCard = ({ product, discount }) => {
   
   // Obter preços reais diretamente dos dados do WooCommerce
   const priceData = getProductPrices();
+
+  // Função para adicionar ao carrinho usando a mesma lógica do AddToCartButton
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    
+    const button = e.currentTarget;
+    
+    // Não permitir múltiplos cliques
+    if (button.classList.contains('loading') || button.disabled) {
+      return;
+    }
+    
+    // Salvar estado original do botão
+    const originalContent = button.innerHTML;
+    const originalStyles = {
+      background: button.style.background,
+      color: button.style.color,
+      border: button.style.border,
+      padding: button.style.padding,
+      borderRadius: button.style.borderRadius,
+      fontSize: button.style.fontSize,
+      fontWeight: button.style.fontWeight,
+      textTransform: button.style.textTransform,
+      boxShadow: button.style.boxShadow,
+    };
+    
+    // Adicionar classe de loading e desabilitar o botão
+    button.classList.add('loading');
+    button.disabled = true;
+    
+    // FASE 1: MOSTRAR SPINNER DE LOADING
+    button.innerHTML = '';
+    button.style.position = 'relative';
+    button.style.minHeight = '48px';
+    
+    const spinnerContainer = document.createElement('div');
+    spinnerContainer.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+    
+    spinnerContainer.innerHTML = `
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes spin-reverse {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(-360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        @keyframes successPulse {
+          0% { transform: scale(0.7); opacity: 0.5; }
+          50% { transform: scale(1.05); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      </style>
+      <div style="
+          position: relative;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      ">
+          <div style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              border: 2px solid rgba(0, 168, 225, 0.3);
+              border-radius: 50%;
+              animation: pulse 2s infinite;
+          "></div>
+          <div style="
+              position: absolute;
+              width: 24px;
+              height: 24px;
+              border: 2px solid transparent;
+              border-left: 2px solid #00a8e1;
+              border-bottom: 2px solid #ff6900;
+              border-radius: 50%;
+              animation: spin-reverse 1.5s linear infinite;
+          "></div>
+      </div>
+    `;
+    
+    button.appendChild(spinnerContainer);
+    
+    // Processar a adição ao carrinho de forma assíncrona
+    (async () => {
+      try {
+        // Extrair dados do produto
+        const productData = {
+          id: product.id,
+          name: product.name || 'Produto sem nome',
+          price: priceData.salePrice || product.price,
+          image: getImageUrl()
+        };
+        
+        console.log('🔍 [CountdownOffers Button] Dados do produto:', productData);
+        
+        // Chamar a API REST v2
+        const response = await fetch('/api/v2/cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            product: {
+              id: productData.id,
+              name: productData.name,
+              price: productData.price,
+              image: productData.image
+            },
+            quantity: 1
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('✅ [CountdownOffers Button] Produto adicionado com sucesso!');
+          
+          // FASE 2: MOSTRAR FEEDBACK DE SUCESSO
+          button.innerHTML = '';
+          button.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          button.style.border = 'none';
+          button.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+          button.style.color = 'white';
+          
+          // Container do ícone de sucesso
+          const successContainer = document.createElement('div');
+          successContainer.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+          `;
+          
+          successContainer.innerHTML = `
+            <div style="
+              width: 40px;
+              height: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: white;
+              border-radius: 50%;
+              animation: successPulse 0.6s ease-out;
+            ">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          `;
+          
+          button.appendChild(successContainer);
+          
+          // Vibração de sucesso no mobile
+          if (navigator.vibrate) {
+            navigator.vibrate(100);
+          }
+          
+          // Mostrar notificação de sucesso se disponível
+          if (window.showNotification) {
+            window.showNotification('Produto adicionado ao carrinho!', 'success');
+          }
+          
+          // Atualizar contador do carrinho se disponível
+          if (window.updateCartCount) {
+            window.updateCartCount();
+          }
+          
+          // Disparar evento personalizado para atualizar outras partes da aplicação
+          window.dispatchEvent(new CustomEvent('cartUpdated', { 
+            detail: { product: productData, quantity: 1 } 
+          }));
+          
+          // Disparar evento específico para o contador do Layout
+          window.dispatchEvent(new CustomEvent('productAddedToCart', {
+            detail: {
+              productId: productData.id,
+              productName: productData.name,
+              quantity: 1,
+              timestamp: Date.now()
+            }
+          }));
+          
+          // FASE 3: AGUARDAR 2 SEGUNDOS E RESTAURAR O BOTÃO ORIGINAL
+          setTimeout(() => {
+            button.classList.remove('loading');
+            button.disabled = false;
+            button.innerHTML = originalContent;
+            button.style.background = originalStyles.background;
+            button.style.color = originalStyles.color;
+            button.style.border = originalStyles.border;
+            button.style.padding = originalStyles.padding;
+            button.style.borderRadius = originalStyles.borderRadius;
+            button.style.fontSize = originalStyles.fontSize;
+            button.style.fontWeight = originalStyles.fontWeight;
+            button.style.textTransform = originalStyles.textTransform;
+            button.style.boxShadow = originalStyles.boxShadow;
+            button.style.minHeight = '';
+            button.style.position = '';
+          }, 2000);
+          
+        } else {
+          throw new Error(result.error || 'Erro ao adicionar produto');
+        }
+        
+      } catch (error) {
+        console.error('❌ [CountdownOffers Button] Erro:', error);
+        
+        // FASE 2 (ERRO): MOSTRAR FEEDBACK DE ERRO
+        button.innerHTML = '';
+        button.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        button.style.border = 'none';
+        button.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)';
+        button.style.color = 'white';
+        
+        const errorContainer = document.createElement('div');
+        errorContainer.style.cssText = `
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        `;
+        
+        errorContainer.innerHTML = `
+          <div style="
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+          ">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3">
+              <line x1="18" y1="6" x2="6" y2="18" stroke-linecap="round" />
+              <line x1="6" y1="6" x2="18" y2="18" stroke-linecap="round" />
+            </svg>
+          </div>
+        `;
+        
+        button.appendChild(errorContainer);
+        
+        // Mostrar notificação de erro se disponível
+        if (window.showNotification) {
+          window.showNotification('Erro ao adicionar produto ao carrinho', 'error');
+        }
+        
+        // FASE 3: AGUARDAR 2 SEGUNDOS E RESTAURAR O BOTÃO ORIGINAL
+        setTimeout(() => {
+          button.classList.remove('loading');
+          button.disabled = false;
+          button.innerHTML = originalContent;
+          button.style.background = originalStyles.background;
+          button.style.color = originalStyles.color;
+          button.style.border = originalStyles.border;
+          button.style.padding = originalStyles.padding;
+          button.style.borderRadius = originalStyles.borderRadius;
+          button.style.fontSize = originalStyles.fontSize;
+          button.style.fontWeight = originalStyles.fontWeight;
+          button.style.textTransform = originalStyles.textTransform;
+          button.style.boxShadow = originalStyles.boxShadow;
+          button.style.minHeight = '';
+          button.style.position = '';
+        }, 2000);
+      }
+    })();
+  };
   
   return (
     <div className={styles.productCard}>
@@ -220,7 +515,14 @@ const ProductCard = ({ product, discount }) => {
         </a>
       </Link>
       
-      <button className={styles.addToCart}>
+      <button 
+        className={styles.addToCart}
+        onClick={handleAddToCart}
+        data-product-id={product.id}
+        data-product-name={product.name}
+        data-product-price={priceData.salePrice}
+        data-product-image={getImageUrl()}
+      >
         Adicionar ao Carrinho
       </button>
     </div>

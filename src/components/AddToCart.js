@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../v2/cart/hooks/useCart';
 
 /**
  * Componente AddToCart
@@ -43,25 +43,17 @@ const AddToCart = ({
     try {
       setIsLoading(true);
       setMessage(null);
+        // Adicionar ao carrinho via Cart v2
+      await addToCart(productToAdd, quantity);
       
-      // Adicionar ao carrinho via contexto
-      const result = await addToCart(productToAdd, quantity);
+      setMessage({
+        type: 'success',
+        text: `${product.name} adicionado ao carrinho!`
+      });
       
-      if (result.success) {
-        setMessage({
-          type: 'success',
-          text: `${product.name} adicionado ao carrinho!`
-        });
-        
-        // Chamar callback se fornecido
-        if (onAddedToCart && typeof onAddedToCart === 'function') {
-          onAddedToCart(result.cart);
-        }
-      } else {
-        setMessage({
-          type: 'error',
-          text: 'Erro ao adicionar produto ao carrinho.'
-        });
+      // Chamar callback se fornecido
+      if (onAddedToCart && typeof onAddedToCart === 'function') {
+        onAddedToCart(productToAdd);
       }
     } catch (error) {
       console.error('Erro ao adicionar ao carrinho:', error);

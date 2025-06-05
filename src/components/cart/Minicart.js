@@ -285,7 +285,7 @@ const Minicart = ({ className = '' }) => {
                   {cartData.hasMoreItems && cartData.totalItemTypes > cartData.items.length && (
                     <div className="minicart-more">
                       +{cartData.totalItemTypes - cartData.items.length} {cartData.totalItemTypes - cartData.items.length === 1 ? 'item a mais' : 'itens a mais'}
-                      <Link href="/carrinho">
+                      <Link href="/cart">
                         <a className="minicart-view-all">Ver todos os itens</a>
                       </Link>
                     </div>
@@ -298,11 +298,9 @@ const Minicart = ({ className = '' }) => {
                     <span>Total:</span>
                     <span className="minicart-total-value">{cartData.total}</span>
                   </div>
-                </div>
-
-                {/* Ações */}
+                </div>                {/* Ações */}
                 <div className="minicart-actions">
-                  <Link href="/carrinho">
+                  <Link href="/cart">
                     <a className="minicart-view-cart" onClick={() => setIsOpen(false)}>
                       Ver Carrinho
                     </a>

@@ -4,8 +4,7 @@ import cx from 'classnames'
 
 import YourOrder from "./YourOrder";
 import PaymentModes from "./PaymentModes";
-import {AppContext} from "../context/AppContext";
-import { CartContext } from "../../contexts/CartContext";
+import { useCart } from "../../v2/cart/hooks/useCart";
 import validateAndSanitizeCheckoutForm from '../../validator/checkout';
 import {getFormattedCart, createCheckoutData,} from "../../functions";
 import OrderSuccess from "./OrderSuccess";
@@ -89,8 +88,7 @@ const CheckoutForm = ({countriesData, isUserLoggedIn = false, userData = null}) 
         selectedShippingAddress: null, // Endereço de entrega selecionado
         selectedBillingAddress: null, // Endereço de cobrança selecionado
     };
-    
-    const cartContext = useContext(CartContext);
+      const { cartItems, cartTotal, clearCart } = useCart();
     const [input, setInput] = useState(initialState);
     const [orderData, setOrderData] = useState(null);
     const [requestError, setRequestError] = useState(null);
@@ -524,12 +522,11 @@ const CheckoutForm = ({countriesData, isUserLoggedIn = false, userData = null}) 
                     paymentMethod: input.paymentMethod,
                     shipping: input.shipping, // Passar endereço diretamente
                     shippingOption: props.selectedShipping,
-                    shippingCost: props.shippingCost || 0,
-                    items: cartContext.cartItems.map(item => ({
+                    shippingCost: props.shippingCost || 0,                    items: cartItems.map(item => ({
                         ...item,
                         price: parseFloat(item.price || item.subtotal || 0)
                     })),
-                    total: parseFloat(cartContext.cartTotal || 0) + (props.shippingCost || 0),
+                    total: parseFloat(cartTotal || 0) + (props.shippingCost || 0),
                     customer: {
                         email: input.shipping.email || input.billing?.email,
                         name: `${input.shipping.firstName || ''} ${input.shipping.lastName || ''}`.trim(),
@@ -582,7 +579,7 @@ const CheckoutForm = ({countriesData, isUserLoggedIn = false, userData = null}) 
                 return;
             }
         }if ('stripe-mode' === input.paymentMethod) {
-            const createdOrderData = await handleStripeCheckout(input, cartContext.cartItems, setRequestError, clearCartMutation, setIsStripeOrderProcessing, setCreatedOrderData);
+            const createdOrderData = await handleStripeCheckout(input, cartItems, setRequestError, clearCartMutation, setIsStripeOrderProcessing, setCreatedOrderData);
         	return null;
         }
 
@@ -654,7 +651,7 @@ const CheckoutForm = ({countriesData, isUserLoggedIn = false, userData = null}) 
 
     return (
         <>
-            {cartContext.cartItems && cartContext.cartItems.length > 0 ? (
+            {cartItems && cartItems.length > 0 ? (
                 <form onSubmit={handleFormSubmit} className="woo-next-checkout-form">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Coluna da Esquerda - Formulários de endereço */}

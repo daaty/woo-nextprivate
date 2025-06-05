@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { useAuth } from '../../hooks/useAuth';
-import { useCart } from '../../hooks/useCart';
+import { useCart } from '../../v2/cart/hooks/useCart'; // Using Cart v2
 import { GET_ORDERS } from '../../queries/get-orders'; // Usar a mesma query do OrdersTab
 import { formatPrice } from '../../utils/format-price';
 import LoadingSpinner from '../LoadingSpinner';

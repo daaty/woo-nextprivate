@@ -17,9 +17,8 @@ export const useCartRest = () => {
   const [operationInProgress, setOperationInProgress] = useState(false);
   const [lastAddedProduct, setLastAddedProduct] = useState(null);
   const isMountedRef = useRef(true);
-
-  // API REST base URL - usando APIs simples que funcionam
-  const API_BASE = '/api/cart';
+  // API REST base URL - usando API Cart v2
+  const API_BASE = '/api/v2/cart';
   // Buscar carrinho via REST - VERSÃO SIMPLIFICADA
   const fetchCart = useCallback(async () => {
     if (!isMountedRef.current) return;
@@ -28,9 +27,9 @@ export const useCartRest = () => {
     setError(null);
     
     try {
-      console.log('[useCartRest] 🔄 Buscando carrinho via API REST simples...');
+      console.log('[useCartRest] 🔄 Buscando carrinho via API REST v2...');
       
-      const response = await fetch(`${API_BASE}/simple-get`, {
+      const response = await fetch(API_BASE, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -134,25 +133,33 @@ export const useCartRest = () => {
       if (variationId) {
         payload.variation_id = parseInt(variationId);
       }
+        // Usar a API Cart v2
+      // Adaptar os nomes dos campos para o formato da API v2
+      const v2Payload = {
+        productId: payload.product_id,
+        quantity: payload.quantity,
+        name: payload.product_name,
+        price: payload.product_price,
+        image: payload.product_image,
+        variationId: payload.variation_id
+      };
       
-      // Usar APENAS a API simples que funciona (agora com dados reais)
-      const response = await fetch(`${API_BASE}/simple-add`, {
+      const response = await fetch(API_BASE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Requested-With': 'XMLHttpRequest'
         },
         credentials: 'include',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(v2Payload)
       });
       
       const data = await response.json();
       
-      console.log('[useCartRest] ✅ Resposta da API simple-add:', {
+      console.log('[useCartRest] ✅ Resposta da API Cart v2:', {
         success: data.success,
-        message: data.message,
-        response_time: data.responseTime,
-        product_data_received: !!data.data
+        items: data.data?.length || 0,
+        total: data.meta?.total || 0
       });
 
       if (data.data) {

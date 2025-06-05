@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useCart } from '../../hooks/useCart'; // Hook unificado
+import { useCart } from '../../v2/cart/hooks/useCart'; // Using Cart v2
 import { useCartContext } from '../../contexts/CartContext';
 import Image from 'next/image';
 

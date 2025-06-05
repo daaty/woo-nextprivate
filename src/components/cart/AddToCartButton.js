@@ -5,6 +5,15 @@ import { useCartContext } from '../../contexts/CartContext';
 import LoadingSpinner from '../LoadingSpinner';
 import { cartLockHelpers } from '../../utils/cart-lock';
 
+// Import Cart v2 components dynamically
+import dynamic from 'next/dynamic';
+
+// Dynamic import of Cart v2 AddToCartButton (only loads when Cart v2 is enabled)
+const AddToCartButtonV2 = dynamic(
+    () => import('../../v2/cart/components/AddToCartButton.js'),
+    { ssr: false }
+);
+
 /**
  * Modal de confirmação de produto adicionado ao carrinho
  */
@@ -215,6 +224,108 @@ const ProductAddedModal = ({ isOpen, onClose, onGoToCart, onContinueShopping, pr
  * Versão atualizada com spinner centralizado e modal de confirmação
  */
 const AddToCartButton = ({ product, buttonClassName, showQuantity = false }) => {
+    // Check Cart v2 feature flags
+    const cartV2Enabled = process.env.NEXT_PUBLIC_CART_V2_ENABLED === 'true';
+    const cartV2API = process.env.NEXT_PUBLIC_CART_V2_API === 'true';
+    const cartV2Percentage = parseInt(process.env.NEXT_PUBLIC_CART_V2_PERCENTAGE || '0');
+    const shouldUseCartV2 = cartV2Enabled && cartV2API && cartV2Percentage >= 100;
+
+    // Enhanced debug logging
+    console.log('[AddToCartButton] Feature Flag Check:', {
+        CART_V2_ENABLED: process.env.NEXT_PUBLIC_CART_V2_ENABLED,
+        CART_V2_API: process.env.NEXT_PUBLIC_CART_V2_API,
+        CART_V2_PERCENTAGE: process.env.NEXT_PUBLIC_CART_V2_PERCENTAGE,
+        cartV2Enabled,
+        cartV2API,
+        cartV2Percentage,
+        shouldUseCartV2
+    });
+
+    // Use Cart v2 component if feature flags are enabled
+    if (shouldUseCartV2) {
+        console.log('[AddToCartButton] Using Cart v2 component 🚀');
+        
+        // Estados locais só para o modal
+        const [showProductAddedModal, setShowProductAddedModal] = useState(false);
+        const [addedProductQuantity, setAddedProductQuantity] = useState(1);
+        
+        return (
+            <>
+                <AddToCartButtonV2 
+                    product={product} 
+                    className={buttonClassName}
+                    quantity={showQuantity ? undefined : 1}
+                    onSuccess={(product, quantity) => {
+                        console.log(`[AddToCartButton v2] ✅ Produto adicionado: ${product.name} x${quantity}`);
+                        
+                        // Mostrar modal de confirmação
+                        setAddedProductQuantity(quantity);
+                        setShowProductAddedModal(true);
+                        
+                        // Disparar eventos para atualizar o minicart e outros componentes
+                        window.dispatchEvent(new CustomEvent('cartUpdated'));
+                        window.dispatchEvent(new CustomEvent('minicartUpdate'));
+                        
+                        // Evento adicional para o contador do Layout
+                        window.dispatchEvent(new CustomEvent('productAddedToCart', {
+                            detail: {
+                                productId: product.id || product.productId,
+                                productName: product.name,
+                                quantity: quantity,
+                                timestamp: Date.now()
+                            }
+                        }));
+                        
+                        // Vibração de sucesso no mobile
+                        if (navigator.vibrate) {
+                            navigator.vibrate(100);
+                        }
+                        
+                        // Usar API de notificações se disponível
+                        if (window.showNotification) {
+                            window.showNotification('Produto adicionado ao carrinho!', 'success');
+                        }
+                    }}
+                    onError={(error, product) => {
+                        console.error(`[AddToCartButton v2] ❌ Erro ao adicionar ${product?.name || 'produto'}:`, error);
+                        
+                        // Vibração de erro no mobile
+                        if (navigator.vibrate) {
+                            navigator.vibrate([100, 100, 100]);
+                        }
+                        
+                        // Usar API de notificações se disponível
+                        if (window.showNotification) {
+                            window.showNotification(
+                                error?.message || 'Erro ao adicionar produto ao carrinho',
+                                'error'
+                            );
+                        }
+                    }}
+                />
+                
+                {/* Modal de produto adicionado */}
+                <ProductAddedModal 
+                    isOpen={showProductAddedModal}
+                    onClose={() => setShowProductAddedModal(false)}
+                    onContinueShopping={() => {
+                        setShowProductAddedModal(false);
+                        window.dispatchEvent(new CustomEvent('cartUpdated'));
+                    }}
+                    onGoToCart={() => {
+                        setShowProductAddedModal(false);
+                        window.location.href = '/cart';
+                    }}
+                    productName={product?.name}
+                    quantity={addedProductQuantity}
+                />
+            </>
+        );
+    }
+
+    console.log('[AddToCartButton] Using Cart v1 component (fallback)');
+    // Continue with Cart v1 implementation
+    
     // Estados locais para o componente
     const [quantity, setQuantity] = useState(1);
     const [showProductAddedModal, setShowProductAddedModal] = useState(false);
@@ -311,20 +422,19 @@ const AddToCartButton = ({ product, buttonClassName, showQuantity = false }) => 
                 setLocalError('Por favor, selecione as opções do produto antes de adicionar ao carrinho');
                 return;
             }
-            
-            // NOVO: Usar a API REST simples diretamente
-            const response = await fetch('/api/cart/simple-add', {
+              // ATUALIZADO: Usar a API REST v2 diretamente
+            const response = await fetch('/api/v2/cart', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    product_id: productId,
+                    productId: productId,
                     quantity: quantity,
                     // Dados extras do produto para melhor experiência
-                    product_name: product?.name || `Produto ${productId}`,
-                    product_price: product?.price || product?.regularPrice || 220.00,
-                    product_image: product?.image?.sourceUrl || product?.featuredImage?.node?.sourceUrl || null
+                    name: product?.name || `Produto ${productId}`,
+                    price: product?.price || product?.regularPrice || 220.00,
+                    image: product?.image?.sourceUrl || product?.featuredImage?.node?.sourceUrl || null
                 })
             });
 
@@ -411,7 +521,7 @@ const AddToCartButton = ({ product, buttonClassName, showQuantity = false }) => 
         window.dispatchEvent(new CustomEvent('minicartUpdate'));
         
         // Redirecionar para o carrinho
-        window.location.href = '/carrinho';
+        window.location.href = '/cart';
     };
 
     // Manipulador de alteração de quantidade
@@ -756,20 +866,20 @@ export const initializeHomepageButtons = () => {
                             image: productData.image,
                             buttonElement: button.className,
                             parentElement: button.parentElement?.className
-                        });
-                        
-                        // Chamar a API REST simples
-                        const response = await fetch('/api/cart/simple-add', {
+                        });                        // Chamar a API REST v2
+                        const response = await fetch('/api/v2/cart', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                product_id: productData.id || 137, // Fallback para produto teste
-                                quantity: 1,
-                                product_name: productData.name || 'Produto da Homepage',
-                                product_price: productData.price || 220.00,
-                                product_image: productData.image || null
+                                product: {
+                                    id: productData.id || 137, // Fallback para produto teste
+                                    name: productData.name || 'Produto da Homepage',
+                                    price: productData.price || 220.00,
+                                    image: productData.image || null
+                                },
+                                quantity: 1
                             })
                         });
 

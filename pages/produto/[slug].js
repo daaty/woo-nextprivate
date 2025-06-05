@@ -6,7 +6,6 @@ import Layout from '../../src/components/Layout';
 import { isEmpty } from 'lodash';
 import Head from 'next/head';
 import SEO from '../../src/components/seo/SEO';
-import { useCartContext } from '../../src/contexts/CartContext';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 
 // Importação de componentes
@@ -66,17 +65,9 @@ export default function ProdutoDetalhe() {
   const [filteredVariants, setFilteredVariants] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');  
-  const [relatedProducts, setRelatedProducts] = useState([]);
-  const [showImageModal, setShowImageModal] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [promoProducts, setPromoProducts] = useState([]);
+  const [relatedProducts, setRelatedProducts] = useState([]);  const [showImageModal, setShowImageModal] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);  const [promoProducts, setPromoProducts] = useState([]);
   const [newProducts, setNewProducts] = useState([]);
-    // Acessando o contexto do carrinho
-  const { addToCart, isAddingToCart, addToCartSuccess } = useCartContext();
-  
-  // Estado para controlar a adição ao carrinho
-  const [isAdding, setIsAdding] = useState(false);
-  const [addSuccess, setAddSuccess] = useState(false);
 
   // Função para calcular o preço total baseado na quantidade
   const calculateTotalPrice = () => {
@@ -127,44 +118,335 @@ export default function ProdutoDetalhe() {
     
     const installmentValue = numericPrice / 12;
     return formatPrice(installmentValue);
-  };
-
-  // Função para adicionar produto ao carrinho
-  const handleAddToCart = async () => {
-    try {
-      setIsAdding(true);
-      
-      // Garantir que temos o ID numérico do produto
-      const productId = product.databaseId || 
-                       (typeof product.id === 'string' && product.id.includes('post:') 
-                        ? parseInt(product.id.split(':')[1]) 
-                        : product.id);
-      
-      console.log(`📦 Adicionando produto ao carrinho - ID: ${productId}, Variante: ${selectedVariant?.databaseId || 'nenhuma'}`);
-      
-      // Verifica se existe uma variante selecionada para adicionar
-      if (selectedVariant) {
-        const variantId = selectedVariant.databaseId || 
-                         (typeof selectedVariant.id === 'string' && selectedVariant.id.includes('product_variation:') 
-                          ? parseInt(selectedVariant.id.split(':')[1]) 
-                          : selectedVariant.id);
-        
-        await addToCart(productId, quantity, variantId);
-      } else {
-        await addToCart(productId, quantity);
-      }
-      
-      setAddSuccess(true);
-      
-      // Reset do estado após 3 segundos
-      setTimeout(() => {
-        setAddSuccess(false);
-      }, 3000);
-    } catch (err) {
-      console.error('Erro ao adicionar ao carrinho:', err);
-    } finally {
-      setIsAdding(false);
+  };  // Função para adicionar produto ao carrinho com feedback visual melhorado
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    
+    const button = e.currentTarget;
+    
+    // Não permitir múltiplos cliques
+    if (button.classList.contains('loading') || button.disabled) {
+      return;
     }
+    
+    // Salvar estado original do botão
+    const originalContent = button.innerHTML;
+    const originalStyles = {
+      background: button.style.background,
+      color: button.style.color,
+      border: button.style.border,
+      padding: button.style.padding,
+      borderRadius: button.style.borderRadius,
+      fontSize: button.style.fontSize,
+      fontWeight: button.style.fontWeight,
+      textTransform: button.style.textTransform,
+      boxShadow: button.style.boxShadow,
+      width: button.style.width,
+      minHeight: button.style.minHeight,
+      display: button.style.display,
+      alignItems: button.style.alignItems,
+      justifyContent: button.style.justifyContent,
+      position: button.style.position,
+      overflow: button.style.overflow,
+      transition: button.style.transition,
+      opacity: button.style.opacity,
+      cursor: button.style.cursor
+    };
+    
+    // Adicionar classe de loading e desabilitar o botão
+    button.classList.add('loading');
+    button.disabled = true;
+    
+    // FASE 1: MOSTRAR SPINNER DE LOADING
+    button.innerHTML = '';
+    button.style.position = 'relative';
+    
+    const spinnerContainer = document.createElement('div');
+    spinnerContainer.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+    
+    spinnerContainer.innerHTML = `
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes spin-reverse {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(-360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        @keyframes successPulse {
+          0% { transform: scale(0.7); opacity: 0.5; }
+          50% { transform: scale(1.05); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      </style>
+      <div style="
+          position: relative;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      ">
+          <div style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              border: 2px solid rgba(0, 168, 225, 0.3);
+              border-radius: 50%;
+              animation: pulse 2s infinite;
+          "></div>
+          <div style="
+              position: absolute;
+              width: 24px;
+              height: 24px;
+              border: 2px solid transparent;
+              border-left: 2px solid #00a8e1;
+              border-bottom: 2px solid #ff6900;
+              border-radius: 50%;
+              animation: spin-reverse 1.5s linear infinite;
+          "></div>
+      </div>
+    `;
+    
+    button.appendChild(spinnerContainer);
+    
+    // Processar a adição ao carrinho de forma assíncrona
+    (async () => {
+      try {
+        // 🔍 DEBUG TEMPORÁRIO - Logs detalhados do produto
+        console.group('🐛 [DEBUG] Dados do produto no handleAddToCart [slug].js');
+        console.log('📦 Objeto produto completo:', product);
+        console.log('💰 Preço bruto product.price:', product.price, typeof product.price);
+        console.log('💰 Preço regular product.regularPrice:', product.regularPrice, typeof product.regularPrice);
+        console.log('💰 Preço de venda product.salePrice:', product.salePrice, typeof product.salePrice);
+        console.log('🏷️ Produto em oferta product.onSale:', product.onSale);
+        console.groupEnd();
+        
+        // Garantir que temos o ID numérico do produto
+        const productId = product.databaseId || 
+                         (typeof product.id === 'string' && product.id.includes('post:') 
+                          ? parseInt(product.id.split(':')[1]) 
+                          : product.id);
+        
+        console.log(`📦 [Produto ${slug}] Adicionando ao carrinho via Cart v2 - ID: ${productId}, Quantidade: ${quantity}`);
+        
+        // Preparar dados do produto para envio
+        const productData = {
+          id: productId,
+          name: product.name || `Produto ${productId}`,
+          price: product.price || product.regularPrice || '0',
+          image: product.image?.sourceUrl || product.featuredImage?.node?.sourceUrl || null
+        };
+        
+        // 🔍 DEBUG TEMPORÁRIO - Logs dos dados preparados para envio
+        console.group('🐛 [DEBUG] Dados preparados para Cart v2 API');
+        console.log('📦 productData completo:', productData);
+        console.log('💰 productData.price:', productData.price, typeof productData.price);
+        console.groupEnd();
+        
+        // Se existe uma variante selecionada, incluir no envio
+        if (selectedVariant) {
+          const variantId = selectedVariant.databaseId || 
+                           (typeof selectedVariant.id === 'string' && selectedVariant.id.includes('product_variation:') 
+                            ? parseInt(selectedVariant.id.split(':')[1]) 
+                            : selectedVariant.id);
+          
+          productData.variantId = variantId;
+          productData.price = selectedVariant.price || selectedVariant.regularPrice || productData.price;
+          console.log(`📦 [Produto ${slug}] Variante selecionada: ${variantId}`);
+        }
+        
+        // Chamar API Cart v2
+        const response = await fetch('/api/v2/cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-cart-source': 'product-page',
+            'x-request-time': Date.now().toString()
+          },
+          body: JSON.stringify({
+            product: productData,
+            quantity: quantity
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log(`✅ [Produto ${slug}] Produto adicionado com sucesso ao Cart v2!`);
+          
+          // FASE 2: MOSTRAR FEEDBACK DE SUCESSO
+          button.innerHTML = '';
+          button.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          button.style.border = 'none';
+          button.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+          button.style.color = 'white';
+          
+          // Container do ícone de sucesso
+          const successContainer = document.createElement('div');
+          successContainer.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+          `;
+          
+          successContainer.innerHTML = `
+            <div style="
+              width: 40px;
+              height: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: white;
+              border-radius: 50%;
+              animation: successPulse 0.6s ease-out;
+            ">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          `;
+          
+          button.appendChild(successContainer);
+          
+          // Vibração de sucesso no mobile
+          if (navigator.vibrate) {
+            navigator.vibrate([200, 100, 200]);
+          }
+          
+          // Mostrar notificação de sucesso se disponível
+          if (window.showNotification) {
+            window.showNotification('Produto adicionado ao carrinho!', 'success');
+          }
+          
+          // Atualizar contador do carrinho se disponível
+          if (window.updateCartCount) {
+            window.updateCartCount();
+          }
+          
+          // Disparar eventos para sincronizar contador global
+          window.dispatchEvent(new CustomEvent('cartUpdated', { 
+            detail: { 
+              product: {
+                id: productId,
+                name: product.name,
+                price: parseFloat(product.price || product.regularPrice || 0),
+                image: product.image?.sourceUrl || product.featuredImage?.node?.sourceUrl
+              },
+              quantity: quantity,
+              timestamp: Date.now()
+            } 
+          }));
+          
+          // Disparar evento específico para o contador do Layout
+          window.dispatchEvent(new CustomEvent('productAddedToCart', {
+            detail: {
+              productId: productId,
+              productName: product.name,
+              quantity: quantity,
+              timestamp: Date.now()
+            }
+          }));
+          
+          // FASE 3: AGUARDAR 2 SEGUNDOS E RESTAURAR O BOTÃO ORIGINAL
+          setTimeout(() => {
+            button.classList.remove('loading');
+            button.disabled = false;
+            button.innerHTML = originalContent;
+            Object.keys(originalStyles).forEach(key => {
+              if (originalStyles[key]) {
+                button.style[key] = originalStyles[key];
+              }
+            });
+          }, 2000);
+          
+        } else {
+          throw new Error(result.error || 'Erro ao adicionar produto');
+        }
+        
+      } catch (error) {
+        console.error(`❌ [Produto ${slug}] Erro ao adicionar ao carrinho:`, error);
+        
+        // FASE 2 (ERRO): MOSTRAR FEEDBACK DE ERRO
+        button.innerHTML = '';
+        button.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        button.style.border = 'none';
+        button.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)';
+        button.style.color = 'white';
+        
+        const errorContainer = document.createElement('div');
+        errorContainer.style.cssText = `
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        `;
+        
+        errorContainer.innerHTML = `
+          <div style="
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+          ">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3">
+              <line x1="18" y1="6" x2="6" y2="18" stroke-linecap="round" />
+              <line x1="6" y1="6" x2="18" y2="18" stroke-linecap="round" />
+            </svg>
+          </div>
+        `;
+        
+        button.appendChild(errorContainer);
+        
+        // Mostrar notificação de erro se disponível
+        if (window.showNotification) {
+          window.showNotification('Erro ao adicionar produto ao carrinho', 'error');
+        }
+        
+        // FASE 3: AGUARDAR 2 SEGUNDOS E RESTAURAR O BOTÃO ORIGINAL
+        setTimeout(() => {
+          button.classList.remove('loading');
+          button.disabled = false;
+          button.innerHTML = originalContent;
+          Object.keys(originalStyles).forEach(key => {
+            if (originalStyles[key]) {
+              button.style[key] = originalStyles[key];
+            }
+          });
+        }, 2000);
+      }
+    })();
   };
 
   // Cores comuns de smartphones com códigos de cores correspondentes
@@ -1817,7 +2099,7 @@ export default function ProdutoDetalhe() {
                       (product?.image) ? [product.image] : []
                   });
                   return null;
-                })()}
+                })}
                 <GalleryCarousel 
                   gallery={
                     // Prioriza imagens da galeria, se existirem
@@ -2016,15 +2298,27 @@ export default function ProdutoDetalhe() {
               </div>
             </div>            {/* Botão Adicionar ao Carrinho */}
             <button
-              className={`jsx-2605175872 add-to-cart-button ${isAdding ? 'loading' : ''}`}
+              className="jsx-2605175872 add-to-cart-button"
               onClick={handleAddToCart}
-              disabled={isAdding}
+              style={{
+                width: '100%',
+                minHeight: '50px',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, #ff6900 0%, #00a8e1 100%)',
+                transition: 'all 0.3s ease',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
             >
-              {isAdding ? (
-                <LoadingSpinner size="small" />
-              ) : (
-                'Adicionar ao Carrinho'
-              )}
+              Adicionar ao carrinho
             </button>
             
             {/* Benefícios */}
@@ -2452,7 +2746,7 @@ export default function ProdutoDetalhe() {
           border: none;
           border-radius: 8px;
           cursor: pointer;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           width: 100%;
           max-width: 240px;
           height: 200px !important;

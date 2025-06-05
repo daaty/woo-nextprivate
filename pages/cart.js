@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Layout from '../src/components/Layout';
 import SEO from '../src/components/seo/SEO';
 import { useAuth } from '../src/hooks/useAuth'; // Importando o hook de autenticação
-import { useCart } from '../src/hooks/useCart'; // Agora usa REST automaticamente
+import { useCartWithFallback as useCart } from '../src/hooks/useCartWithFallback'; // Agora usa Cart v2 com fallback
 import { useNotification } from '../src/components/ui/Notification'; // Importando o sistema de notificações
 import { formatPrice, priceToNumber } from '../src/utils/format-price';
 
@@ -100,6 +100,40 @@ const Cart = () => {
     contextReady, // Se o contexto está pronto
     refetchCart
   } = useCart(); // Agora é REST puro!
+
+  // ADICIONADO: Fix para o problema de sessão entre adição e exibição de produtos
+  useEffect(() => {
+    // Verificar se precisa aplicar a correção (via query param)
+    const shouldApplyFix = router?.query?.fix === 'true' || localStorage.getItem('apply_cart_fix') === 'true';
+    
+    // Limpar flag se existir
+    if (localStorage.getItem('apply_cart_fix')) {
+      localStorage.removeItem('apply_cart_fix');
+    }
+    
+    // Garantir sessão consistente
+    const ensureConsistentSession = async () => {
+      const sessionId = localStorage.getItem('cart_v2_session_id');
+      
+      if (!sessionId) {
+        console.log('[Cart Fix] Nenhum ID de sessão encontrado. Criando um novo...');
+        // Não precisa criar aqui, o CartProvider vai criar um
+      } else {
+        console.log('[Cart Fix] ID de sessão encontrado:', sessionId);
+      }
+      
+      // Forçar atualização do carrinho
+      if (refetchCart && typeof refetchCart === 'function') {
+        console.log('[Cart Fix] Forçando atualização do carrinho...');
+        refetchCart();
+      }
+    };
+    
+    if (shouldApplyFix) {
+      console.log('[Cart Fix] Aplicando correção de sessão do carrinho...');
+      ensureConsistentSession();
+    }
+  }, [router.query, refetchCart]);
 
   // Funções para controlar a visibilidade dos campos de frete e cupom
   const toggleDeliveryField = () => setShowDeliveryField(!showDeliveryField);
@@ -205,7 +239,6 @@ const Cart = () => {
     
     return () => clearTimeout(timer);
   }, []);
-
   // Efeito para sair do estado de carregamento quando os itens estiverem disponíveis
   useEffect(() => {
     console.log('CartContext data:', { 
@@ -215,7 +248,54 @@ const Cart = () => {
     if (Array.isArray(cartItems) || loading === false) {
       setIsInitialLoading(false);
     }
-  }, [loading, cartItems]);
+    
+    // Verificar se temos uma sessão de carrinho no localStorage mas sem itens no carrinho
+    // Isso pode indicar que o carrinho não foi carregado corretamente
+    if (typeof window !== 'undefined' && 
+        localStorage.getItem('cart_session_id') && 
+        Array.isArray(cartItems) && 
+        cartItems.length === 0 && 
+        !loading) {
+      
+      console.log('[Cart] Detectada possível desincronização do carrinho. Forçando refresh...');
+      // Tentar recarregar os dados do carrinho
+      if (refetchCart) {
+        refetchCart();
+      }
+    }
+  }, [loading, cartItems, refetchCart]);
+
+  // ADICIONADO: Efeito para monitorar mudanças no cartItems e suas imagens
+  useEffect(() => {
+    console.log(`🔄 [Cart Monitor] CartItems mudaram! Quantidade: ${Array.isArray(cartItems) ? cartItems.length : 'não é array'}`);
+    
+    if (Array.isArray(cartItems) && cartItems.length > 0) {
+      console.log(`📊 [Cart Monitor] Analisando ${cartItems.length} itens do carrinho:`);
+      
+      cartItems.forEach((item, index) => {
+        console.log(`\n📦 [Cart Monitor] Item ${index + 1}:`, {
+          name: item.name,
+          cartKey: item.cartKey,
+          key: item.key,
+          productId: item.productId,
+          hasImage: !!(item.image || item.product?.image),
+          imageUrl: item.image?.sourceUrl || item.product?.image?.sourceUrl || item.image || 'N/A',
+          completeImageStructure: {
+            'item.image': item.image,
+            'item.product?.image': item.product?.image,
+            'item.product_data?.image': item.product_data?.image,
+            'item.data?.image': item.data?.image
+          }
+        });
+      });
+    } else if (cartItems === null || cartItems === undefined) {
+      console.log(`⚠️ [Cart Monitor] CartItems é ${cartItems === null ? 'null' : 'undefined'}`);
+    } else if (!Array.isArray(cartItems)) {
+      console.log(`⚠️ [Cart Monitor] CartItems não é um array:`, typeof cartItems, cartItems);
+    } else {
+      console.log(`📭 [Cart Monitor] Carrinho vazio (array com 0 itens)`);
+    }
+  }, [cartItems]);
 
   // MODIFICADO: Efeito mais robusto para cálculo do subtotal
   useEffect(() => {
@@ -352,30 +432,18 @@ const Cart = () => {
       .replace(/-+/g, '-')          // Remove hífens duplicados
       .replace(/^-+|-+$/g, '')      // Remove hífens no início e fim
       .trim();                      // Remove espaços no início e fim
-  };// Função para navegar para a página do produto
+  };// Função para navegar para a página do produto (corrigida para usar o slug real, robusta para WooCommerce)
   const handleProductNavigation = (item) => {
-    if (!item || !item.name) {
-      notification.warning('Não foi possível encontrar o produto');
+    if (!item) {
+      notification.warning('Produto não encontrado');
       return;
     }
-
-    console.log('Navegando para o produto:', item);
-    
-    // Se o produto tiver um slug próprio, usamos ele
-    let productSlug = '';
-    
-    // Verificar se o item tem um slug personalizado (sem o ID)
-    if (item.slug && !item.slug.includes('id-')) {
-      productSlug = item.slug;
-    } 
-    // Para todos os casos, gerar slug apenas do nome do produto (sem ID)
-    else {
-      productSlug = generateProductSlug(item.name);
+    // WooCommerce: o campo correto é item.slug OU item.product.slug OU item.data.slug OU item.product_data?.slug
+    const productSlug = item.slug || item.product?.slug || item.data?.slug || item.product_data?.slug || (item.name ? generateProductSlug(item.name) : '');
+    if (!productSlug) {
+      notification.warning('Produto sem slug válido');
+      return;
     }
-    
-    console.log('Slug gerado:', productSlug);
-    
-    // Navegar para a página do produto
     router.push(`/produto/${productSlug}`);
   };
 
@@ -982,6 +1050,20 @@ const Cart = () => {
     });
   }, [cartTotal, shippingCost, discountAmount, selectedShipping]);
 
+  // Forçar atualização do carrinho ao entrar na página se estiver vazio, mas houver sessão/localStorage
+  useEffect(() => {
+    // Só tenta forçar se o contexto está pronto e o carrinho está vazio
+    if (contextReady && (!cartItems || cartItems.length === 0)) {
+      // Verifica se existe sessão/cart no localStorage
+      const sessionId = typeof window !== 'undefined' ? localStorage.getItem('cart_v2_session_id') : null;
+      const legacyCart = typeof window !== 'undefined' ? localStorage.getItem('woo-next-cart') : null;
+      if ((sessionId || legacyCart) && refetchCart && typeof refetchCart === 'function') {
+        // Força atualização do carrinho
+        refetchCart();
+      }
+    }
+  }, [contextReady, cartItems, refetchCart]);
+
   // Estados de loading e erro
   if (isInitialLoading && loading && !Array.isArray(cartItems)) {
     return (
@@ -1038,6 +1120,38 @@ const Cart = () => {
         </div>
       </Layout>
     );
+  }
+  // LOGS DETALHADOS: Estado do carrinho no momento da renderização
+  console.log("🎯 [Cart Render] === INÍCIO DA RENDERIZAÇÃO ===");
+  console.log("🎯 [Cart Render] Estado do cartItems:", {
+    type: typeof cartItems,
+    isArray: Array.isArray(cartItems),
+    length: cartItems?.length,
+    isEmpty: !cartItems || !Array.isArray(cartItems) || cartItems.length === 0,
+    loading: loading,
+    error: error,
+    contextReady: contextReady
+  });
+  
+  if (Array.isArray(cartItems) && cartItems.length > 0) {
+    console.log("🎯 [Cart Render] ITEMS DETALHADOS:");
+    cartItems.forEach((item, index) => {
+      console.log(`🎯 [Cart Render] Item ${index + 1}:`, {
+        name: item.name,
+        imageData: {
+          hasDirectImage: !!item.image,
+          hasProductImage: !!item.product?.image,
+          directImageUrl: item.image?.sourceUrl || item.image,
+          productImageUrl: item.product?.image?.sourceUrl,
+          willUseImage: item.product?.image?.sourceUrl || 
+                       item.image?.sourceUrl || 
+                       item.product_data?.image?.sourceUrl || 
+                       item.data?.image?.sourceUrl || 
+                       item.image || 
+                       'DEFAULT_PLACEHOLDER'
+        }
+      });
+    });
   }
 
   // Exibir dados brutos do carrinho para depuração
@@ -1101,7 +1215,8 @@ const Cart = () => {
             gap: 16px !important;
             border-radius: 16px !important;
           }
-            .cart-item-image {
+
+          .cart-item-image {
             width: 140px !important;
             height: 140px !important;
             margin-right: 0 !important;
@@ -1962,19 +2077,69 @@ const Cart = () => {
               </div>
                 {/* Lista de produtos no carrinho */}
               <div className="cart-items">
-                {Array.isArray(cartItems) && cartItems.map((item, index) => (                  <div key={item.cartKey || index} className="cart-item" id={`basket-item-${item.cartKey}`}>
-                    {/* Imagem do produto */}
-                    <img 
-                      src={item.image?.sourceUrl || DEFAULT_PLACEHOLDER} 
-                      alt={item.name} 
-                      className="cart-item-image"
-                      onClick={() => handleProductNavigation(item)}
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = DEFAULT_PLACEHOLDER;
-                      }}
-                      title="Clique para ver detalhes do produto"
-                    />
+                {Array.isArray(cartItems) && cartItems.map((item, index) => (                  <div key={item.cartKey || index} className="cart-item" id={`basket-item-${item.cartKey}`}>                    {/* Imagem do produto */}
+                    {(() => {
+                      // LOGS DETALHADOS: Investigando por que as imagens não carregam
+                      console.log(`🔍 [Cart Debug] Processando imagem para produto: "${item.name}"`);
+                      console.log(`🔍 [Cart Debug] Estrutura completa do item:`, JSON.stringify(item, null, 2));
+                      
+                      // Verificar todas as possíveis localizações de imagem
+                      const imageStructures = {
+                        'item.product?.image?.sourceUrl': item.product?.image?.sourceUrl,
+                        'item.image?.sourceUrl': item.image?.sourceUrl,
+                        'item.product_data?.image?.sourceUrl': item.product_data?.image?.sourceUrl,
+                        'item.data?.image?.sourceUrl': item.data?.image?.sourceUrl,
+                        'item.image': item.image,
+                        'item.product?.image': item.product?.image,
+                        'item.productImage': item.productImage,
+                        'item.thumbnail': item.thumbnail,
+                        'item.src': item.src,
+                        'item.url': item.url
+                      };
+                      
+                      console.log(`🔍 [Cart Debug] Estruturas de imagem encontradas:`, imageStructures);
+                      
+                      // Busca a imagem do produto em diferentes formatos possíveis
+                      const imgSrc =
+                        item.product?.image?.sourceUrl ||
+                        item.image?.sourceUrl ||
+                        item.product_data?.image?.sourceUrl ||
+                        item.data?.image?.sourceUrl ||
+                        item.image ||
+                        item.productImage ||
+                        item.thumbnail ||
+                        item.src ||
+                        item.url ||
+                        DEFAULT_PLACEHOLDER;
+                        
+                      const altText =
+                        item.product?.image?.altText ||
+                        item.image?.altText ||
+                        item.name || 'Produto';
+                      
+                      console.log(`🔍 [Cart Debug] Imagem selecionada: "${imgSrc}"`);
+                      console.log(`🔍 [Cart Debug] Alt text: "${altText}"`);
+                      console.log(`🔍 [Cart Debug] Usando placeholder? ${imgSrc === DEFAULT_PLACEHOLDER ? 'SIM' : 'NÃO'}`);
+                      
+                      return (
+                        <img
+                          src={imgSrc}
+                          alt={altText}
+                          className="cart-item-image"
+                          onClick={() => handleProductNavigation(item)}
+                          onLoad={(e) => {
+                            console.log(`✅ [Cart Debug] Imagem carregada com sucesso para "${item.name}": ${e.target.src}`);
+                          }}
+                          onError={e => {
+                            console.error(`❌ [Cart Debug] Erro ao carregar imagem para "${item.name}": ${e.target.src}`);
+                            console.error(`❌ [Cart Debug] Trocando para placeholder: ${DEFAULT_PLACEHOLDER}`);
+                            e.target.onerror = null;
+                            e.target.src = DEFAULT_PLACEHOLDER;
+                          }}
+                          title="Clique para ver detalhes do produto"
+                        />
+                      );
+                    })()}
                     
                     {/* Detalhes do produto */}
                     <div className="cart-item-details">
@@ -2190,12 +2355,16 @@ const Cart = () => {
               <div className="summary-row">
                 <span className="text-gray-600">Subtotal:</span>
                 <span className="font-medium">
-                  {/* Prioridade: formattedSubtotal > subtotal formatado > manualSubtotal > formattedTotal > fallback */}
-                  {formattedSubtotal || 
-                   (subtotal ? formatPrice(subtotal) : null) || 
-                   (manualSubtotal ? formatPrice(manualSubtotal) : null) || 
-                   formattedTotal || 
-                   'R$ 0,00'}
+                  {/* Se houver itens e manualSubtotal > 0, sempre priorize ele */}
+                  {(Array.isArray(cartItems) && cartItems.length > 0 && manualSubtotal > 0)
+                    ? formatPrice(manualSubtotal)
+                    : (formattedSubtotal && formattedSubtotal !== 'R$ 0,00')
+                      ? formattedSubtotal
+                      : (subtotal && subtotal > 0)
+                        ? formatPrice(subtotal)
+                        : (formattedTotal && formattedTotal !== 'R$ 0,00')
+                          ? formattedTotal
+                          : 'R$ 0,00'}
                 </span>
               </div>
               
@@ -2225,46 +2394,32 @@ const Cart = () => {
                 </div>
               )}
                 <div className="summary-row total">                
-                <span className="text-orange-600 font-semibold">Total:</span>                
-                <span className="text-orange-600">                  
-                  {selectedShipping ? (
-                    (() => {
-                      // MODIFICADO: Cálculo de total com valores do contexto
-                      // Valor base preferencial: subtotal > manualSubtotal > cartTotal
-                      let baseValue = 0;
-                      
-                      if (subtotal && typeof subtotal === 'number' && !isNaN(subtotal)) {
-                        baseValue = subtotal;
-                      } else if (manualSubtotal && !isNaN(manualSubtotal)) {
-                        baseValue = manualSubtotal;
-                      } else if (typeof cartTotal === 'string') {
-                        baseValue = priceToNumber(cartTotal);
-                      } else if (typeof cartTotal === 'number' && !isNaN(cartTotal)) {
-                        baseValue = cartTotal;
-                      }
-                      
-                      // Garantir que o frete seja um número
-                      const shipping = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
-                      const discount = typeof discountAmount === 'number' ? discountAmount : priceToNumber(discountAmount || 0);
-                      
-                      // Calcular o total sempre com valores numéricos
-                      const total = baseValue + shipping - discount;
-                      
-                      // Log detalhado para depuração
-                      console.log('[Cart] 🧮 Calculando total do pedido:', { 
-                        subtotalCtx: subtotal,
-                        baseValue,
-                        shipping, 
-                        discount, 
-                        total,
-                        formatted: formatPrice(total)
-                      });
-                      
-                      return formatPrice(total);
-                    })()
-                  ) : (
-                    formattedTotal || formattedSubtotal || formatPrice(manualSubtotal) || 'R$ 0,00'
-                  )}
+                <span className="text-orange-600 font-semibold">Total:</span>
+                <span className="text-orange-600">
+                  {(Array.isArray(cartItems) && cartItems.length > 0 && manualSubtotal > 0)
+                    ? formatPrice(manualSubtotal + (typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0)) - (typeof discountAmount === 'number' ? discountAmount : priceToNumber(discountAmount || 0)))
+                    : selectedShipping ? (
+                      (() => {
+                        let baseValue = 0;
+                        if (subtotal && typeof subtotal === 'number' && subtotal > 0) {
+                          baseValue = subtotal;
+                        } else if (manualSubtotal && manualSubtotal > 0) {
+                          baseValue = manualSubtotal;
+                        } else if (typeof cartTotal === 'string') {
+                          baseValue = priceToNumber(cartTotal);
+                        } else if (typeof cartTotal === 'number' && cartTotal > 0) {
+                          baseValue = cartTotal;
+                        }
+                        const shipping = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
+                        const discount = typeof discountAmount === 'number' ? discountAmount : priceToNumber(discountAmount || 0);
+                        const total = baseValue + shipping - discount;
+                        return formatPrice(total);
+                      })()
+                    ) : (
+                      (formattedTotal && formattedTotal !== 'R$ 0,00') ? formattedTotal :
+                      (formattedSubtotal && formattedSubtotal !== 'R$ 0,00') ? formattedSubtotal :
+                      'R$ 0,00'
+                    )}
                 </span>
               </div>
               

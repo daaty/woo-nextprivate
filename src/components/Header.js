@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Script from 'next/script';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useCart } from '../hooks/useCart'; // Usar hook unificado
+import { useCart } from '../v2/cart/hooks/useCart'; // Using Cart v2
 import styles from './Header.module.css';
 
 const Header = () => {
@@ -21,7 +21,7 @@ const Header = () => {
     }, [router.pathname]);
     
     // Verifica se estamos na página do carrinho
-    const isCartPage = router.pathname === '/cart' || router.pathname === '/carrinho';
+    const isCartPage = router.pathname === '/cart'; // Removida referência a /carrinho
 
     const [categories, setCategories] = useState([
         {

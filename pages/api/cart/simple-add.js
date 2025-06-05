@@ -490,14 +490,48 @@ export default async function handler(req, res) {
           
           // Converter mapa de volta para array
           const allItems = Object.values(productsMap);
-          
-          // Atualizar armazenamento global com todos os itens
+            // Atualizar armazenamento global com todos os itens
           global.serverCartStorage[sessionId] = {
             items: allItems,
             timestamp: Date.now(),
             total: totalPrice,
             items_count: totalItems
           };
+          
+          // Sincronizar com Cart v2 se estiver disponível (importante para compatibilidade)
+          if (global.cartStorageV2) {
+            console.log('[API Simple Cart Add] 🔄 Sincronizando com Cart v2');
+            
+            // Converter itens para formato compatível com Cart v2
+            const cartV2Items = allItems.map(item => ({
+              id: item.productId,
+              productId: item.productId,
+              name: item.name || `Produto ${item.productId}`,
+              price: typeof item.price === 'number' ? item.price : parseFloat(item.price || 0),
+              quantity: item.quantity || item.qty || 1,
+              total: (item.price * (item.quantity || item.qty || 1)),
+              image: item.image?.sourceUrl || null,
+              attributes: item.attributes || [],
+              variationId: item.variationId || null
+            }));
+            
+            // Inicializar armazenamento de Cart v2 se não existir para essa sessão
+            if (!global.cartStorageV2[sessionId]) {
+              global.cartStorageV2[sessionId] = {
+                items: [],
+                total: 0,
+                itemCount: 0,
+                created: new Date().toISOString()
+              };
+            }
+              // Atualizar armazenamento de Cart v2
+            global.cartStorageV2[sessionId].items = cartV2Items;
+            global.cartStorageV2[sessionId].total = totalPrice;
+            global.cartStorageV2[sessionId].itemCount = totalItems;
+            global.cartStorageV2[sessionId].lastUpdated = Date.now();
+            
+            console.log(`[API Simple Cart Add] ✅ Carrinho sincronizado com Cart v2 (${cartV2Items.length} itens)`);
+          }
           
           // Definir cookie com ID de sessão
           const sessionCookie = `cartSessionId=${sessionId}; Path=/; Max-Age=2592000; SameSite=Lax`;

@@ -1,6 +1,6 @@
 // CartContext.js - Enhanced version integrated with state manager
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useCart } from '../hooks/useCart'; // Agora usa REST automaticamente
+import { useCart } from '../v2/cart/hooks/useCart'; // Using Cart v2
 
 // Create context with enhanced default values
 const CartContext = createContext({

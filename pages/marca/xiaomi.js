@@ -272,204 +272,267 @@ export default function XiaomiPage({ initialProducts = [] }) {
     setSelectedAvailability('all');
   };
   
-  // Função para adicionar produto ao carrinho - ATUALIZADA PARA USAR ARMAZENAMENTO DO SERVIDOR
-  const handleAddToCart = async (product, event) => {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    
-    // Verificar se já está processando
-    if (addingProductId === product.id || addingToCart) {
-      console.log('🚫 [Xiaomi Page] Já processando, ignorando click');
-      return;
+  // Função para adicionar produto ao carrinho - ENHANCED VERSION WITH DOM MANIPULATION (padrão VerTodos)
+const handleAddToCart = async (product, event) => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const button = event.currentTarget;
+
+  // Check if already processing
+  if (button.classList.contains('loading') || button.disabled) {
+    console.log('🚫 [Xiaomi Page] Already processing, ignoring click');
+    return;
+  }
+
+  console.log('🛒 [Xiaomi Page] Starting enhanced add to cart:', product.name);
+  // Debug product data being sent - IMPROVED LOGGING
+  console.log('🔍 [Xiaomi Page] Product data for API:', {
+    id: product.databaseId || product.id,
+    name: product.name,
+    price: product.price,
+    regularPrice: product.regularPrice,
+    hasImage: !!(product.image?.sourceUrl || product.featuredImage?.node?.sourceUrl)
+  });
+  
+  // Debug completo da estrutura da imagem
+  console.log('🖼️ [Xiaomi Page] ESTRUTURA COMPLETA DA IMAGEM:', {
+    'product.image (raw)': product.image,
+    'image type': typeof product.image,
+    'image instanceof Object': product.image instanceof Object,
+    'image?.sourceUrl': product.image?.sourceUrl,
+    'featuredImage': product.featuredImage,
+    'featuredImage?.node': product.featuredImage?.node,
+    'featuredImage?.node?.sourceUrl': product.featuredImage?.node?.sourceUrl
+  });
+
+  // Store original button content
+  const originalContent = button.innerHTML;
+
+  try {
+    // Phase 1: Loading state with DOM manipulation
+    button.disabled = true;
+    button.classList.add('loading');
+    button.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+    button.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center;">
+        <div style="
+          width: 20px; 
+          height: 20px; 
+          border: 2px solid #ffffff; 
+          border-top-color: transparent; 
+          border-radius: 50%; 
+          animation: spin 1s linear infinite;
+        "></div>
+      </div>
+    `;
+
+    // Add spinner animation if not already present
+    if (!document.querySelector('#spinner-style')) {
+      const style = document.createElement('style');
+      style.id = 'spinner-style';
+      style.textContent = `
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
     }
 
-    console.log('🛒 [Xiaomi Page] Iniciando adição ao carrinho:', product.name);
+    const productId = product.databaseId || product.id;
+
+    // Prepare sanitized product data
+    let safeProductName = '';
+    if (typeof product?.name === 'string') {
+      safeProductName = product.name
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"');
+    } else {
+      safeProductName = `Produto ${productId}`;    }
+      // VERSÃO APRIMORADA V2: Extração super-robusta da imagem com suporte REST API
+    const DEFAULT_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRjY5MDAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCI+UHJvZHV0bzwvdGV4dD48L3N2Zz4=';
     
-    try {
-      setAddingProductId(product.id);
-      setAddingToCart(true);
-      // Limpar estados de sucesso/erro anteriores
-      setSuccessProductId(null);
-      setErrorProductId(null);
+    // Função auxiliar para extrair a URL da imagem de qualquer estrutura
+    function extractImageUrl(product) {
+      // Registra a tentativa de extração de URL
+      console.log('🔍 [Xiaomi Page] Tentando extrair URL da imagem do produto:', product?.name || 'sem nome');
       
-      // Usar o ID correto do produto
-      const productId = product.databaseId || product.id;
-      
-      try {
-        // Chamar a API REST simples diretamente - evita corrupção do cookie causada pelo useCartContext
-        console.log(`[Xiaomi Page] 🛒 Adicionando ao carrinho via API REST:`);
-        
-        // CORREÇÃO: sanitização mais robusta para evitar corrupção do cookie
-        let safeProductName = '';
-        if (typeof product?.name === 'string') {
-          safeProductName = product.name
-            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove caracteres de controle
-            .replace(/\\/g, '\\\\')  // Escapa barras invertidas
-            .replace(/"/g, '\\"')    // Escapa aspas duplas
-            .replace(/\n/g, ' ')     // Remove quebras de linha
-            .replace(/\r/g, ' ')     // Remove retornos de carro
-            .replace(/\t/g, ' ');    // Remove tabulações
-        } else {
-          safeProductName = `Produto ${productId}`;
-        }
-        
-        // Log para depuração
-        console.log(`[Xiaomi Page] 🔍 Nome sanitizado: "${safeProductName.substring(0, 30)}${safeProductName.length > 30 ? '...' : ''}"`);
-        
-        const safeProductPrice = parseFloat(product?.price || product?.regularPrice || 0);
-        
-        // CORREÇÃO: sanitização mais robusta para URLs de imagem
-        let safeProductImage = null;
-        if (typeof product?.image?.sourceUrl === 'string') {
-          safeProductImage = product.image.sourceUrl
-            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"');
-        } else if (typeof product?.featuredImage?.node?.sourceUrl === 'string') {
-          safeProductImage = product.featuredImage.node.sourceUrl
-            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"');
-        }
-            
-        const response = await fetch('/api/cart/simple-add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-cart-source': 'xiaomi-page', // Adiciona identificador de origem
-            'x-request-time': Date.now().toString() // Adicionar timestamp para evitar cache
-          },
-          body: JSON.stringify({
-            product_id: productId,
-            quantity: 1,
-            product_name: safeProductName,
-            product_price: safeProductPrice,
-            product_image: safeProductImage,
-            append_to_server_storage: true // NOVO: Flag para garantir que produtos sejam adicionados, não substituídos
-          })
-        });
-        
-        const result = await response.json();
-            
-        // Processar resultado
-        if (result.success) {
-          console.log('✅ [Xiaomi Page] Produto adicionado com sucesso via REST API!');
-          console.log(`[Xiaomi Page] ℹ️ Detalhes do carrinho: ${result.cart.items?.length || 0} tipos de produtos, ${result.cart.items_count || 0} unidades totais`);
-          
-          // Dados simplificados para eventos - evita objetos circulares e caracteres problemáticos
-          const safeProduct = {
-            id: productId,
-            name: typeof product?.name === 'string' 
-              ? product.name.replace(/[^\w\s\-.,]/g, '') // Manter apenas caracteres seguros
-              : `Produto ${productId}`,
-            price: parseFloat(product?.price || product?.regularPrice || 0) || 0,
-            image: typeof product?.image?.sourceUrl === 'string' 
-              ? product.image.sourceUrl.replace(/[^\w\s\-.:\/]/g, '') // URL segura
-              : null
-          };
-          
-          console.log('[Xiaomi Page] 🛒 Evento com dados sanitizados:', {
-            id: safeProduct.id,
-            name: safeProduct.name.substring(0, 30) + (safeProduct.name.length > 30 ? '...' : ''),
-            price: safeProduct.price
-          });
-          
-          // IMPORTANTE: Disparar eventos para sincronizar contador global com dados limpos
-          window.dispatchEvent(new CustomEvent('cartUpdated', { 
-            detail: { 
-              product: safeProduct, 
-              quantity: 1,
-              timestamp: Date.now(),
-              // Dados completos para suportar o sistema de carrinho melhorado
-              fullCart: result.cart,
-              totalItems: result.cart.items_count || result.cart.items?.length || 0,
-              totalItemTypes: result.cart.totalItemTypes || result.cart.items?.length || 0
-            } 
-          }));
-            
-          window.dispatchEvent(new CustomEvent('productAddedToCart', {
-            detail: {
-              productId: productId,
-              productName: safeProduct.name,
-              quantity: 1,
-              timestamp: Date.now(),
-              // Incluir dados completos para processamento de eventos
-              fullCart: result.cart
-            }
-          }));
-            
-          // Atualizar contador global se disponível
-          if (window.updateCartCount && typeof window.updateCartCount === 'function') {
-            try {
-              // Usar timeout para evitar problemas de concorrência
-              setTimeout(async () => {
-                await window.updateCartCount();
-                console.log('[Xiaomi Page] ✅ Contador global atualizado');
-              }, 100);
-            } catch (updateError) {
-              console.log('[Xiaomi Page] ⚠️ Erro ao atualizar contador global:', updateError);
-            }
-          }
-          
-          // NOVO: Atualizar contador no botão minicart do cabeçalho, se existir
-          try {
-            const minicartCounterEl = document.querySelector('.minicart-count');
-            if (minicartCounterEl) {
-              minicartCounterEl.textContent = result.cart.items_count || result.cart.items?.length || '?';
-              minicartCounterEl.classList.add('pulse-animation');
-              setTimeout(() => minicartCounterEl.classList.remove('pulse-animation'), 2000);
-            }
-          } catch (uiError) {
-            console.log('[Xiaomi Page] ⚠️ Erro ao atualizar UI:', uiError);
-          }
-          
-          // Mostrar ícone de sucesso por 2 segundos
-          setSuccessProductId(product.id);
-          setTimeout(() => {
-            setSuccessProductId(null);
-          }, 2000);
-          
-          // Vibração de sucesso no mobile
-          if (navigator.vibrate) {
-            navigator.vibrate([200, 100, 200]);
-          }
-        } else {
-          console.error('❌ [Xiaomi Page] Erro ao adicionar ao carrinho via REST:', result?.error || 'Erro desconhecido');
-          alert('Não foi possível adicionar o produto ao carrinho. Tente novamente.');
-          
-          // Definir estado de erro
-          setErrorProductId(product.id);
-          setTimeout(() => {
-            setErrorProductId(null);
-          }, 2000);
-        }
-      } catch (error) {
-        console.error('❌ [Xiaomi Page] Exceção ao adicionar ao carrinho:', error);
-        
-        // Use notificação em vez de alert para melhor experiência do usuário
-        if (window.showNotification && typeof window.showNotification === 'function') {
-          window.showNotification('Erro ao adicionar produto ao carrinho. Tente novamente.', 'error');
-        } else {
-          alert('Erro ao adicionar produto ao carrinho. Tente novamente.');
-        }
-        
-        // Definir estado de erro
-        setErrorProductId(product.id);
-        setTimeout(() => {
-          setErrorProductId(null);
-        }, 2000);
+      // CASO 1: Se o produto não existir ou não tiver propriedade de imagem
+      if (!product) {
+        console.log('❌ [Xiaomi Page] Produto não existe');
+        return null;
       }
-    } finally {
-      // Garantir que os estados de processamento sejam limpos com um pequeno delay
-      // para permitir que a animação de loading seja vista pelo usuário
-      setTimeout(() => {
-        setAddingProductId(null);
-        setAddingToCart(false);
-      }, 300);
+
+      // CASO NOVO 1: Formato REST API - array de imagens com src (formato Motorola)
+      if (Array.isArray(product.images) && product.images.length > 0) {
+        const firstImage = product.images[0].src || product.images[0].sourceUrl || product.images[0].url;
+        if (firstImage) {
+          console.log('✅ [Xiaomi Page] Imagem encontrada em array images[0].src:', firstImage);
+          return firstImage;
+        }
+      }
+
+      // CASO NOVO 2: Campo image_url ou imageUrl direto (outro formato REST)
+      if (product.image_url) {
+        console.log('✅ [Xiaomi Page] Imagem encontrada em image_url:', product.image_url);
+        return product.image_url;
+      }
+      
+      if (product.imageUrl) {
+        console.log('✅ [Xiaomi Page] Imagem encontrada em imageUrl:', product.imageUrl);
+        return product.imageUrl;
+      }
+      
+      // Logando o conteúdo completo do produto para debug
+      console.log('🔄 [Xiaomi Page] Estrutura completa do produto:', JSON.stringify(product, null, 2));
+      
+      // CASO 2: Se a imagem for diretamente uma string (URL)
+      if (typeof product.image === 'string') {
+        console.log('✅ [Xiaomi Page] Imagem encontrada como URL direta:', product.image);
+        return product.image;
+      }
+      
+      // CASO 3: Se a imagem for um objeto com sourceUrl (padrão WooGraphQL)
+      if (product.image?.sourceUrl) {
+        console.log('✅ [Xiaomi Page] Imagem encontrada em image.sourceUrl:', product.image.sourceUrl);
+        return product.image.sourceUrl;
+      }
+      
+      // CASO 4: Estrutura diferente - objeto.node.sourceUrl (alguns casos GraphQL)
+      if (product.image?.node?.sourceUrl) {
+        console.log('✅ [Xiaomi Page] Imagem encontrada em image.node.sourceUrl:', product.image.node.sourceUrl);
+        return product.image.node.sourceUrl;
+      }
+      
+      // CASO 5: featuredImage como usado em algumas queries
+      if (product.featuredImage?.node?.sourceUrl) {
+        console.log('✅ [Xiaomi Page] Imagem encontrada em featuredImage.node.sourceUrl:', product.featuredImage.node.sourceUrl);
+        return product.featuredImage.node.sourceUrl;
+      }
+      
+      // CASO 6: URLs padrão em outras propriedades
+      if (product.thumbnail) {
+        console.log('✅ [Xiaomi Page] Imagem encontrada em thumbnail:', product.thumbnail);
+        return product.thumbnail;
+      }
+      
+      if (product.src) {
+        console.log('✅ [Xiaomi Page] Imagem encontrada em src:', product.src);
+        return product.src;
+      }
+      
+      if (product.url) {
+        console.log('✅ [Xiaomi Page] Imagem encontrada em url:', product.url);
+        return product.url;
+      }
+      
+      // CASO 7: Se o próprio produto for uma URL de imagem (raro, mas possível)
+      if (typeof product === 'string' && (product.startsWith('http') || product.startsWith('data:'))) {
+        console.log('✅ [Xiaomi Page] O próprio produto é uma URL de imagem:', product);
+        return product;
+      }
+      
+      // CASO ESPECIAL: Gerar um mock URL para esse produto para evitar placeholder
+      const mockImageUrl = `https://via.placeholder.com/400x400?text=${encodeURIComponent(product.name || 'Produto')}`;
+      console.log('⚠️ [Xiaomi Page] Usando imagem mockada:', mockImageUrl);
+      return mockImageUrl;
     }
-  };
+    
+    // Tenta extrair a URL da imagem
+    let safeProductImage = extractImageUrl(product) || DEFAULT_PLACEHOLDER;// Use Cart v2 API with EXACT same structure as homepage AddToCartButton
+    const response = await fetch('/api/v2/cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        product: {
+          id: productId,
+          name: safeProductName,
+          price: product?.price || product?.regularPrice || 220.00,
+          image: typeof safeProductImage === 'string' && safeProductImage ? safeProductImage : null,
+          slug: product?.slug || null
+        },
+        quantity: 1
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      console.log('✅ [Xiaomi Page] Product added successfully!');
+
+      // Phase 2: Success state
+      button.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+      button.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+          <span>Adicionado!</span>
+        </div>
+      `;
+
+      // Update global cart counter
+      const cartCountElements = document.querySelectorAll('.cart-count, [data-cart-count]');
+      cartCountElements.forEach(element => {
+        const currentCount = parseInt(element.textContent) || 0;
+        element.textContent = currentCount + 1;
+        element.style.display = 'inline-block';
+      });
+
+      // Dispatch custom event for cart updates
+      window.dispatchEvent(new CustomEvent('cartUpdated', { 
+        detail: { 
+          action: 'add', 
+          product: result.product || product,
+          source: 'xiaomi-page-enhanced'
+        } 
+      }));
+
+      // Mobile vibration feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
+
+      // Show notification if system exists
+      if (window.showNotification) {
+        window.showNotification(`${product.name} foi adicionado ao carrinho!`, 'success');
+      }
+
+    } else {
+      throw new Error(result.message || 'Falha ao adicionar produto ao carrinho');
+    }
+
+  } catch (error) {
+    console.error('❌ [Xiaomi Page] Add to cart error:', error);
+
+    // Phase 2: Error state
+    button.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+    button.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+        <span>Erro!</span>
+      </div>
+    `;
+
+    // Show error notification if system exists
+    if (window.showNotification) {
+      window.showNotification('Erro ao adicionar produto ao carrinho. Tente novamente.', 'error');
+    }
+  }
+
+  // Phase 3: Reset button after 2 seconds
+  setTimeout(() => {
+    button.disabled = false;
+    button.classList.remove('loading');
+    button.style.background = '';
+    button.innerHTML = originalContent;
+  }, 2000);
+};
 
   // Buscar produtos da categoria/marca Xiaomi
   useEffect(() => {
@@ -1239,9 +1302,8 @@ export default function XiaomiPage({ initialProducts = [] }) {
                               fontSize: '16px',
                               fontWeight: 'bold'
                             }}>✕</span>
-                          </span>
-                        ) : (
-                          <span>Adicionar ao Carrinho</span>
+                          </span>                        ) : (
+                          <span>Adicionar ao carrinho</span>
                         )}
                       </button>
                     </div>

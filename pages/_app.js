@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import App from 'next/app';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
 import { ApolloProvider } from '@apollo/client';
 import client from '../src/components/ApolloClient';
 import { useRouter } from 'next/router';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
-import { CartProvider } from '../src/contexts/CartContext';
+import CartV2Provider from '../src/v2/cart/context/CartProvider';
 import CartNotifications from '../src/components/cart/CartNotifications';
 import { AppProvider } from '../src/contexts/AppContext';
 import { ToastProvider, ToastContainer } from '../src/components/ui/Toast';
@@ -18,15 +19,23 @@ import '../src/styles/cart.css';
 import '../styles/cart-mobile.css'; // Estilos específicos para mobile do carrinho
 // Importar o utilitário de limpeza de sessão
 import '../src/utils/sessionCleanup';
-import dynamic from 'next/dynamic';
+// Importar o fix para o CartProvider
+import '../public/fix-cart-provider';
+// Importar ponte de notificação global para botões
+import '../public/global-notification-bridge';
+// Importar ponte para contador do carrinho
+import '../public/global-cart-counter';
 
 /**
  * Componente principal da aplicação Next.js
  * Configura o Apollo Provider com o cliente correto que possui middleware/afterware
+ * Integra o Cart v2 com feature flags
  */
 function MyApp({ Component, pageProps }) {
   const apolloClient = client;
   const router = useRouter();
+
+  console.log('[_app.js] Cart v2 SEMPRE ATIVO - Sistema unificado');
 
   useEffect(() => {
     const handleStart = () => {
@@ -82,23 +91,21 @@ function MyApp({ Component, pageProps }) {
     () => import('../src/components/cart/CartStateManager'),
     { ssr: false }
   );
-
   return (
     <ApolloProvider client={apolloClient}>
-      <AppProvider>
-        <AuthProvider>
+      <AppProvider>        <AuthProvider>
           <NotificationProvider>
             <ToastProvider>
-              <CartProvider>
+              {/* SEMPRE usar Cart v2 - Sistema único */}
+              {console.log('[_app.js] 🚀 Using Cart v2 Provider (EXCLUSIVE)')}
+              <CartV2Provider>
                 <Head>
                   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 </Head>
                 <Component {...pageProps} />
                 <CartNotifications />
                 <ToastContainer />
-                {/* Adiciona gerenciador de estado do carrinho */}
-                <CartStateManager logging={process.env.NODE_ENV === 'development'} />
-              </CartProvider>
+              </CartV2Provider>
             </ToastProvider>
           </NotificationProvider>
         </AuthProvider>
