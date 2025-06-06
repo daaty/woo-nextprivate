@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ['python3', 'gcc', 'sqlite', 'pkg-config', 'openssl', 'nodejs-18_x', 'npm']
+nixPkgs = ['python3', 'gcc', 'sqlite', 'pkg-config', 'openssl', 'nodejs-18_x']
 
 [phases.build]
 cmds = [
