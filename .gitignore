@@ -20,6 +20,10 @@ test-*.js
 test-*.html
 debug-*.html
 
+# Arquivos específicos de teste do carrinho
+src/components/CartTestComponent.js
+src/components/cart/CartDebugInfo.js
+
 # Arquivos de backup
 backup/
 *-backup.*
