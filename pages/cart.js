@@ -100,40 +100,85 @@ const Cart = () => {
     contextReady, // Se o contexto está pronto
     refetchCart
   } = useCart(); // Agora é REST puro!
-
-  // ADICIONADO: Fix para o problema de sessão entre adição e exibição de produtos
+  // 🔧 FIX: Estados para resolver problema de hidratação e cache
+  const [hydrated, setHydrated] = useState(false);
+  const [clientCartItems, setClientCartItems] = useState([]);
+    // 🔧 FIX: Hidratação adequada para evitar problemas de SSR
   useEffect(() => {
-    // Verificar se precisa aplicar a correção (via query param)
-    const shouldApplyFix = router?.query?.fix === 'true' || localStorage.getItem('apply_cart_fix') === 'true';
+    setHydrated(true);
     
-    // Limpar flag se existir
-    if (localStorage.getItem('apply_cart_fix')) {
-      localStorage.removeItem('apply_cart_fix');
-    }
-    
-    // Garantir sessão consistente
-    const ensureConsistentSession = async () => {
-      const sessionId = localStorage.getItem('cart_v2_session_id');
-      
-      if (!sessionId) {
-        console.log('[Cart Fix] Nenhum ID de sessão encontrado. Criando um novo...');
-        // Não precisa criar aqui, o CartProvider vai criar um
-      } else {
-        console.log('[Cart Fix] ID de sessão encontrado:', sessionId);
+    // CORRIGIDO: Verificar Cart v2 session storage em vez do localStorage v1
+    if (typeof window !== 'undefined') {
+      try {
+        // Primeiro, tentar verificar se há dados do Cart v2
+        const cartV2SessionId = localStorage.getItem('cart_v2_session_id');
+        if (cartV2SessionId) {
+          console.log('[Cart Fix] Cart v2 session ID encontrado:', cartV2SessionId);
+          // Carregar dados do Cart v2 via API
+          fetch('/api/v2/cart', {
+            headers: {
+              'X-Cart-Session-Id': cartV2SessionId
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.items && data.items.length > 0) {
+              console.log('[Cart Fix] Cart v2 items carregados via API:', data.items.length);
+              // Os items serão carregados pelo contexto, não precisamos setar aqui
+            }
+          })
+          .catch(error => {
+            console.warn('[Cart Fix] Erro ao carregar Cart v2 via API:', error);
+          });
+        } else {
+          // Fallback: verificar localStorage v1 antigo (apenas para debug)
+          const storedCart = localStorage.getItem('woo-next-cart');
+          if (storedCart) {
+            console.log('[Cart Fix] Detectado carrinho v1 antigo, mas estamos usando v2');
+          }
+        }
+      } catch (error) {
+        console.warn('[Cart Fix] Erro ao verificar storage:', error);
       }
-      
-      // Forçar atualização do carrinho
-      if (refetchCart && typeof refetchCart === 'function') {
-        console.log('[Cart Fix] Forçando atualização do carrinho...');
-        refetchCart();
+    }
+  }, []);
+    // 🔧 FIX: Sincronizar cart items do contexto com estado local
+  useEffect(() => {
+    if (contextReady && Array.isArray(cartItems)) {
+      // Deep comparison
+      const hasChanges = JSON.stringify(cartItems) !== JSON.stringify(clientCartItems);
+      if (hasChanges) {
+        console.log('[Cart] Detectada mudança nos itens, atualizando estado local');
+        setClientCartItems(cartItems);
+        // Também atualiza o subtotal
+        const newSubtotal = calculateCartSubtotal(cartItems);
+        setManualSubtotal(newSubtotal);
+      }
+    }
+  }, [contextReady, cartItems, clientCartItems]);
+    // 🔧 FIX: Sistema de recuperação de carrinho melhorado para Cart v2
+  useEffect(() => {
+    if (!hydrated) return;
+    
+    const recoverCart = async () => {
+      // Se o contexto está pronto mas não temos items, tentar recuperar
+      if (contextReady && (!cartItems || cartItems.length === 0)) {
+        const sessionId = localStorage.getItem('cart_v2_session_id');
+        
+        if (sessionId && refetchCart) {
+          console.log('[Cart Fix] Recuperando carrinho v2 para session:', sessionId);
+          await refetchCart();
+        } else if (sessionId) {
+          console.log('[Cart Fix] Session ID encontrado mas refetchCart não disponível');
+        } else {
+          console.log('[Cart Fix] Nenhuma session v2 encontrada');
+        }
       }
     };
     
-    if (shouldApplyFix) {
-      console.log('[Cart Fix] Aplicando correção de sessão do carrinho...');
-      ensureConsistentSession();
-    }
-  }, [router.query, refetchCart]);
+    const timer = setTimeout(recoverCart, 100);
+    return () => clearTimeout(timer);
+  }, [hydrated, contextReady, cartItems, refetchCart]);
 
   // Funções para controlar a visibilidade dos campos de frete e cupom
   const toggleDeliveryField = () => setShowDeliveryField(!showDeliveryField);
@@ -148,12 +193,10 @@ const Cart = () => {
     
     // Exibir uma mensagem de boas-vindas ao carrinho apenas uma vez
     if (!notificationMessageShown.current) {
-      setTimeout(() => {
-        notification.info(`${Array.isArray(cartItems) ? cartItems.length : 0} itens no carrinho`);
+      setTimeout(() => {        notification.info(`${Array.isArray(clientCartItems) ? clientCartItems.length : 0} itens no carrinho`);
         notificationMessageShown.current = true;
       }, 500);
-    }
-  }, [notification]);
+    }    }, [notification, clientCartItems]);
     // ADICIONADO: Efeito para verificar se o valor da compra qualifica para frete grátis
   useEffect(() => {
     // Se temos valor do carrinho válido, verifica limite para frete grátis
@@ -238,12 +281,10 @@ const Cart = () => {
     }, 3000); 
     
     return () => clearTimeout(timer);
-  }, []);
-  // Efeito para sair do estado de carregamento quando os itens estiverem disponíveis
+  }, []);  // Efeito para sair do estado de carregamento quando os itens estiverem disponíveis
   useEffect(() => {
-    console.log('CartContext data:', { 
-      loading, error, cartItems: cartItems || [], cartTotal 
-    });
+    // REMOVIDO: Log excessivo que causava spam
+    // console.log('CartContext data:', { loading, error, cartItems: cartItems || [], cartTotal });
     
     if (Array.isArray(cartItems) || loading === false) {
       setIsInitialLoading(false);
@@ -257,75 +298,40 @@ const Cart = () => {
         cartItems.length === 0 && 
         !loading) {
       
-      console.log('[Cart] Detectada possível desincronização do carrinho. Forçando refresh...');
+      // REMOVIDO: Log excessivo
+      // console.log('[Cart] Detectada possível desincronização do carrinho. Forçando refresh...');
       // Tentar recarregar os dados do carrinho
       if (refetchCart) {
         refetchCart();
       }
     }
-  }, [loading, cartItems, refetchCart]);
-
-  // ADICIONADO: Efeito para monitorar mudanças no cartItems e suas imagens
+  }, [loading, cartItems?.length, refetchCart]); // CORREÇÃO: Dependência apenas do length
+  // REMOVIDO: Logs excessivos que causavam loop infinito
+  // useEffect(() => {
+  //   console.log(`🔄 [Cart Monitor] CartItems mudaram! Quantidade: ${Array.isArray(cartItems) ? cartItems.length : 'não é array'}`);
+  // }, [cartItems]);  // MODIFICADO: Efeito mais robusto para cálculo do subtotal - COM GUARD PARA EVITAR LOOP
   useEffect(() => {
-    console.log(`🔄 [Cart Monitor] CartItems mudaram! Quantidade: ${Array.isArray(cartItems) ? cartItems.length : 'não é array'}`);
-    
-    if (Array.isArray(cartItems) && cartItems.length > 0) {
-      console.log(`📊 [Cart Monitor] Analisando ${cartItems.length} itens do carrinho:`);
-      
-      cartItems.forEach((item, index) => {
-        console.log(`\n📦 [Cart Monitor] Item ${index + 1}:`, {
-          name: item.name,
-          cartKey: item.cartKey,
-          key: item.key,
-          productId: item.productId,
-          hasImage: !!(item.image || item.product?.image),
-          imageUrl: item.image?.sourceUrl || item.product?.image?.sourceUrl || item.image || 'N/A',
-          completeImageStructure: {
-            'item.image': item.image,
-            'item.product?.image': item.product?.image,
-            'item.product_data?.image': item.product_data?.image,
-            'item.data?.image': item.data?.image
-          }
-        });
-      });
-    } else if (cartItems === null || cartItems === undefined) {
-      console.log(`⚠️ [Cart Monitor] CartItems é ${cartItems === null ? 'null' : 'undefined'}`);
-    } else if (!Array.isArray(cartItems)) {
-      console.log(`⚠️ [Cart Monitor] CartItems não é um array:`, typeof cartItems, cartItems);
-    } else {
-      console.log(`📭 [Cart Monitor] Carrinho vazio (array com 0 itens)`);
-    }
-  }, [cartItems]);
-
-  // MODIFICADO: Efeito mais robusto para cálculo do subtotal
-  useEffect(() => {
-    if (Array.isArray(cartItems) && cartItems.length > 0) {
+    if (Array.isArray(clientCartItems) && clientCartItems.length > 0) {
       // Usar função centralizada para calcular subtotal
-      const calculatedSubtotal = calculateCartSubtotal(cartItems);
+      const calculatedSubtotal = calculateCartSubtotal(clientCartItems);
       
-      if (calculatedSubtotal !== manualSubtotal && !isNaN(calculatedSubtotal)) {
+      // GUARD: Só atualizar se realmente mudou e por uma diferença significativa
+      if (Math.abs(calculatedSubtotal - manualSubtotal) > 0.01 && !isNaN(calculatedSubtotal)) {
         setManualSubtotal(calculatedSubtotal);
         
         // Armazenar para uso em outros componentes
         if (typeof window !== 'undefined') {
           window._calculatedSubtotal = calculatedSubtotal;
         }
-        
-        // Log detalhado de debug
-        console.log('[Cart] 🧮 Subtotal calculado manualmente:', {
-          calculatedValue: calculatedSubtotal,
-          formatted: safeFormatPrice(calculatedSubtotal),
-          contextValue: subtotal,
-          contextFormatted: formattedSubtotal,
-        });
       }
-    } else {
+    } else if (manualSubtotal !== 0) {
       setManualSubtotal(0);
     }
-  }, [cartItems, subtotal, formattedSubtotal]); // Dependência explícita nos valores do contexto
+  }, [clientCartItems.length]); // CORREÇÃO: Dependência apenas do length para evitar loops
 
   // Verificar se o carrinho está vazio com segurança
-  const cartEmpty = !cartItems || !Array.isArray(cartItems) || cartItems.length === 0;
+  // 🔧 FIX: Cálculo de carrinho vazio que considera hidratação
+  const cartEmpty = !hydrated || (!clientCartItems || !Array.isArray(clientCartItems) || clientCartItems.length === 0);
   
   // MODIFICADO: Função para lidar com erros do carrinho
   const handleCartOperation = async (operation, ...args) => {
@@ -338,8 +344,7 @@ const Cart = () => {
         context: { 
           page: 'cart', 
           operation: operation.name
-        },
-        setCartItems: Array.isArray(cartItems) ? (items) => {
+        },        setCartItems: Array.isArray(clientCartItems) ? (items) => {
           refetchCart();
         } : null
       });
@@ -359,28 +364,40 @@ const Cart = () => {
       notification.error('Falha ao limpar o carrinho');
     }
   };
-  const handleUpdateCartItem = (key, quantity, productName = '') => {
+  const handleUpdateCartItem = async (key, quantity, productName = '') => {
     try {
-      if (!key) {
-        console.error('❌ Chave do produto inválida:', key);
-        notification.error('Erro: Chave do produto inválida');
-        return;
+      // Salvar o estado atual para caso precise reverter
+      const currentItem = clientCartItems.find(item => item.cartKey === key);
+      const currentQty = currentItem?.qty || 0;
+
+      // Atualização otimista do estado local
+      setClientCartItems(prevItems => 
+        prevItems.map(item => 
+          item.cartKey === key 
+            ? { ...item, qty: quantity, quantity: quantity }
+            : item
+        )
+      );
+
+      const result = await updateCartItem(key, quantity, productName);
+
+      if (result?.success) {
+        // Buscar os dados mais recentes do carrinho
+        await refetchCart();
+        
+        notification.success(`${productName || 'Item'} atualizado para ${quantity} unidades`);
+      } else {
+        // Reverter para o estado anterior em caso de erro
+        setClientCartItems(prevItems => 
+          prevItems.map(item => 
+            item.cartKey === key 
+              ? { ...item, qty: currentQty, quantity: currentQty }
+              : item
+          )
+        );
+        
+        notification.error('Falha ao atualizar quantidade');
       }
-      
-      if (operationInProgress) {
-        console.log('Operação já em andamento, ignorando...');
-        return;
-      }
-      
-      console.log('✅ Atualizando item - Key:', key, 'Quantity:', quantity);
-      
-      handleCartOperation(updateCartItem, key, quantity).then((result) => {
-        if (result?.success) {
-          notification.info(`${productName || 'Item'} atualizado para ${quantity} ${quantity === 1 ? 'unidade' : 'unidades'}`);
-        } else {
-          notification.error('Falha ao atualizar quantidade');
-        }
-      });
     } catch (err) {
       console.error('Erro ao atualizar item:', err);
       notification.error('Falha ao atualizar quantidade');
@@ -506,13 +523,12 @@ const Cart = () => {
           sessionStorage.setItem('cartZipCode', zipCode);
           sessionStorage.setItem('checkoutInitiated', 'true');
           sessionStorage.setItem('checkoutTimestamp', Date.now().toString());
-          if (selectedShipping) {
-            sessionStorage.setItem('selectedShipping', JSON.stringify(selectedShipping));
+          if (selectedShipping) {          sessionStorage.setItem('selectedShipping', JSON.stringify(selectedShipping));
           }
           
           // Salvar o carrinho atual em caso de precaução
-          if (cartItems && Array.isArray(cartItems)) {
-            sessionStorage.setItem('cartItemsBackup', JSON.stringify(cartItems));
+          if (clientCartItems && Array.isArray(clientCartItems)) {
+            sessionStorage.setItem('cartItemsBackup', JSON.stringify(clientCartItems));
           }
         } catch (storageError) {
           console.error('Erro ao salvar dados na sessionStorage:', storageError);
@@ -643,10 +659,9 @@ const Cart = () => {
           if (selectedShipping) {
             sessionStorage.setItem('selectedShipping', JSON.stringify(selectedShipping));
           }
-          
-          // Salvar o carrinho atual em caso de precaução
-          if (cartItems && Array.isArray(cartItems)) {
-            sessionStorage.setItem('cartItemsBackup', JSON.stringify(cartItems));
+            // Salvar o carrinho atual em caso de precaução
+          if (clientCartItems && Array.isArray(clientCartItems)) {
+            sessionStorage.setItem('cartItemsBackup', JSON.stringify(clientCartItems));
           }
         } catch (storageError) {
           console.error('Erro ao salvar dados na sessionStorage:', storageError);
@@ -692,10 +707,9 @@ const Cart = () => {
           if (selectedShipping) {
             sessionStorage.setItem('selectedShipping', JSON.stringify(selectedShipping));
           }
-          
-          // Salvar o carrinho atual em caso de precaução
-          if (cartItems && Array.isArray(cartItems)) {
-            sessionStorage.setItem('cartItemsBackup', JSON.stringify(cartItems));
+            // Salvar o carrinho atual em caso de precaução
+          if (clientCartItems && Array.isArray(clientCartItems)) {
+            sessionStorage.setItem('cartItemsBackup', JSON.stringify(clientCartItems));
           }
         } catch (storageError) {
           console.error('Erro ao salvar dados na sessionStorage:', storageError);
@@ -759,9 +773,8 @@ const Cart = () => {
     
     try {
       // Salvar o CEP para uso futuro
-      localStorage.setItem('user_zip_code', zipCode);
-        // Preparar dados para a API de cálculo de frete
-      const produtos = Array.isArray(cartItems) ? cartItems.map(item => {
+      localStorage.setItem('user_zip_code', zipCode);      // Preparar dados para a API de cálculo de frete
+      const produtos = Array.isArray(clientCartItems) ? clientCartItems.map(item => {
         // Extrair informações necessárias para cálculo de frete
         // Usar valores padrão se não houver informações de dimensões nos produtos
         const peso = parseFloat(item.weight || 0.3); // Peso em kg (mínimo 0.3kg)
@@ -1063,9 +1076,8 @@ const Cart = () => {
       }
     }
   }, [contextReady, cartItems, refetchCart]);
-
-  // Estados de loading e erro
-  if (isInitialLoading && loading && !Array.isArray(cartItems)) {
+  // 🔧 FIX: Estados de loading considerando hidratação
+  if (!hydrated || (isInitialLoading && loading && !Array.isArray(clientCartItems))) {
     return (
       <Layout>
         <div className="container mx-auto py-12 px-6 text-center">
@@ -1119,19 +1131,10 @@ const Cart = () => {
           </div>
         </div>
       </Layout>
-    );
-  }
-  // LOGS DETALHADOS: Estado do carrinho no momento da renderização
-  console.log("🎯 [Cart Render] === INÍCIO DA RENDERIZAÇÃO ===");
-  console.log("🎯 [Cart Render] Estado do cartItems:", {
-    type: typeof cartItems,
-    isArray: Array.isArray(cartItems),
-    length: cartItems?.length,
-    isEmpty: !cartItems || !Array.isArray(cartItems) || cartItems.length === 0,
-    loading: loading,
-    error: error,
-    contextReady: contextReady
-  });
+    );  }
+  // REMOVIDO: Logs excessivos que causavam loop infinito
+  // console.log("🎯 [Cart Render] === INÍCIO DA RENDERIZAÇÃO ===");
+  // console.log("🎯 [Cart Render] Estado do cartItems:", { ... });
   
   if (Array.isArray(cartItems) && cartItems.length > 0) {
     console.log("🎯 [Cart Render] ITEMS DETALHADOS:");
@@ -1151,11 +1154,10 @@ const Cart = () => {
                        'DEFAULT_PLACEHOLDER'
         }
       });
-    });
-  }
+    });  }
 
-  // Exibir dados brutos do carrinho para depuração
-  console.log("Renderizando carrinho com itens:", cartItems);
+  // REMOVIDO: Log excessivo que causava spam no console
+  // console.log("Renderizando carrinho com itens:", cartItems);
 
   // Carrinho com itens - Layout restruturado
   return (
@@ -1888,7 +1890,7 @@ const Cart = () => {
         }
 
         .section-button:hover:not(:disabled) {
-          background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+          background: linear-gradient(135deg, #ea580c  0%, #f97316 100%);
           transform: translateY(-2px);
           box-shadow: 0 6px 20px rgba(255, 105, 0, 0.3);
         }
@@ -1901,6 +1903,7 @@ const Cart = () => {
 
         .button-text {
           font-weight: 600;
+       
         }
 
         /* Responsividade Mobile para seções de frete e cupom */
@@ -2060,10 +2063,9 @@ const Cart = () => {
           <div className="cart-main">
             {/* Caixa de itens do carrinho */}
             <div className="cart-box">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-800">
-                  Itens do Carrinho ({Array.isArray(cartItems) ? cartItems.length : 0})
-                </h2>                {!cartEmpty && (
+              <div className="flex justify-between items-center mb-6">                <h2 className="text-xl font-semibold text-gray-800">
+                  Itens do Carrinho ({Array.isArray(clientCartItems) ? clientCartItems.length : 0})
+                </h2>{!cartEmpty && (
                   <button 
                     onClick={handleClearCart} 
                     className="clear-cart-btn"
@@ -2077,7 +2079,7 @@ const Cart = () => {
               </div>
                 {/* Lista de produtos no carrinho */}
               <div className="cart-items">
-                {Array.isArray(cartItems) && cartItems.map((item, index) => (                  <div key={item.cartKey || index} className="cart-item" id={`basket-item-${item.cartKey}`}>                    {/* Imagem do produto */}
+                {Array.isArray(clientCartItems) && clientCartItems.map((item, index) => (                  <div key={item.cartKey || index} className="cart-item" id={`basket-item-${item.cartKey}`}>                    {/* Imagem do produto */}
                     {(() => {
                       // LOGS DETALHADOS: Investigando por que as imagens não carregam
                       console.log(`🔍 [Cart Debug] Processando imagem para produto: "${item.name}"`);
@@ -2350,13 +2352,12 @@ const Cart = () => {
           <div className="cart-sidebar">            
             <div className="cart-box cart-summary">
               <h2 className="text-xl font-semibold text-orange-600 mb-6">Resumo do Pedido</h2>
-              
-              {/* Linhas de resumo - MODIFICADO para usar preferencialmente o valor do contexto */}
+                {/* Linhas de resumo - MODIFICADO para usar preferencialmente o valor do contexto */}
               <div className="summary-row">
                 <span className="text-gray-600">Subtotal:</span>
                 <span className="font-medium">
                   {/* Se houver itens e manualSubtotal > 0, sempre priorize ele */}
-                  {(Array.isArray(cartItems) && cartItems.length > 0 && manualSubtotal > 0)
+                  {(Array.isArray(clientCartItems) && clientCartItems.length > 0 && manualSubtotal > 0)
                     ? formatPrice(manualSubtotal)
                     : (formattedSubtotal && formattedSubtotal !== 'R$ 0,00')
                       ? formattedSubtotal
@@ -2394,9 +2395,8 @@ const Cart = () => {
                 </div>
               )}
                 <div className="summary-row total">                
-                <span className="text-orange-600 font-semibold">Total:</span>
-                <span className="text-orange-600">
-                  {(Array.isArray(cartItems) && cartItems.length > 0 && manualSubtotal > 0)
+                <span className="text-orange-600 font-semibold">Total:</span>                <span className="text-orange-600">
+                  {(Array.isArray(clientCartItems) && clientCartItems.length > 0 && manualSubtotal > 0)
                     ? formatPrice(manualSubtotal + (typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0)) - (typeof discountAmount === 'number' ? discountAmount : priceToNumber(discountAmount || 0)))
                     : selectedShipping ? (
                       (() => {
