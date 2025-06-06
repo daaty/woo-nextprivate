@@ -16,6 +16,7 @@
     "@svgr/cli": "^5.5.0",
     "@woocommerce/woocommerce-rest-api": "^1.0.1",
     "axios": "^0.21.1",
+    "better-sqlite3": "^11.10.0",
     "caniuse-lite": "^1.0.30001712",
     "classnames": "^2.3.1",
     "cookie": "^1.0.2",
