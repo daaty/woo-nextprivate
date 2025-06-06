@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ['python3', 'gcc', 'sqlite', 'pkg-config', 'openssl']
+
+[phases.build]
+cmds = [
+  "npm install --production=false",
+  "npm run build"
+]
+
+[phases.install]
+cmds = ["npm install --production"]
+
+[start]
+cmd = "npm start"
