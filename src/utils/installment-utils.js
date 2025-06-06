@@ -30,5 +30,5 @@ export const calculateInstallmentValue = (total, installments) => {
  * @returns {number} Valor total com juros
  */
 export const calculateTotalWithInterest = (total) => {
-    return calculateInstallmentValue(total) * MAX_INSTALLMENTS;
+    return calculateInstallmentValue(total, MAX_INSTALLMENTS) * MAX_INSTALLMENTS;
 };
