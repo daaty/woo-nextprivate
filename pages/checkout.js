@@ -49,6 +49,7 @@ const Checkout = ({countriesData}) => {
 		cartItems, 
 		cartTotal, 
 		cartCount, 
+		itemCount, // <-- adicionar itemCount
 		formattedTotal,
 		subtotal,
 		formattedSubtotal,
@@ -2413,7 +2414,7 @@ const processOtherPayment = async (orderData) => {
 										{getBestSubtotalFormatted()}
 									</div>
 									<div className="text-sm opacity-75">
-										{cartCount || 0} {(cartCount || 0) === 1 ? 'item' : 'itens'}
+										{itemCount || 0} {(itemCount || 0) === 1 ? 'item' : 'itens'}
 									</div>
 								</div>
 								
@@ -2512,13 +2513,12 @@ const processOtherPayment = async (orderData) => {
 													// Calcular total com desconto (8% à vista)
 													const total = baseValue + freightValue;
 													return formatPrice(total * 0.92);
-												})()}											</span> (8% desc.)</p>
-											<p>📅 Em 12x de <span className="font-medium">
+												})()}											</span> (8% desc.)</p>											<p>📅 Em 12x de <span className="font-medium">
 												{(() => {
 													const baseValue = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
 													const freightValue = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
 													const total = baseValue + freightValue;
-													return formatPrice(calculateInstallmentValue(total));
+													return formatPrice(calculateInstallmentValue(total, MAX_INSTALLMENTS));
 												})()}
 											</span> com juros de {INSTALLMENT_INTEREST_RATE}% ao mês
 											</p>
