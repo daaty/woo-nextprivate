@@ -3,24 +3,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import styles from '../Layout.module.css';
-import { useCartContext } from '../../contexts/CartContext';
+import { CartCounterV2 } from '../../v2/cart/components/CartCounterV2';
 
 const Header = () => {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');  const [expandedCategory, setExpandedCategory] = useState(null); // Para controlar qual categoria está expandida
-  const { cartCount, contextReady } = useCartContext();
-  
-  // Debug log para o contador
-  useEffect(() => {
-    console.log('[Header] 📊 Contador do carrinho atualizado:', {
-      cartCount,
-      contextReady,
-      type: typeof cartCount
-    });
-  }, [cartCount, contextReady]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedCategory, setExpandedCategory] = useState(null);
+    // Contador removido - usando CartCounterV2
   
   const megaMenuRef = useRef(null);
   const megaBtnRef = useRef(null);
@@ -367,17 +359,16 @@ const Header = () => {
                   <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </a>
-            </Link>
-              {/* Botão de carrinho */}
+            </Link>              {/* Botão de carrinho com novo contador V2 */}
             <Link href="/cart">
-              <a className={styles.cartBtn} aria-label="Carrinho"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none">
+              <a className={styles.cartBtn} aria-label="Carrinho">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none">
                   <circle cx="9" cy="21" r="1" />
                   <circle cx="20" cy="21" r="1" />
                   <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                {contextReady && cartCount > 0 && (
-                  <span className={styles.cartCount}>{cartCount}</span>
-                )}</a>
+                <CartCounterV2 />
+              </a>
             </Link>
           </div>
           

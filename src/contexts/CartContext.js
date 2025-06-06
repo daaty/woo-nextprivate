@@ -6,7 +6,6 @@ import { useCart } from '../v2/cart/hooks/useCart'; // Using Cart v2
 const CartContext = createContext({
   // Core cart data
   cartItems: [],
-  cartCount: 0,
   cartTotal: '0',
   formattedTotal: 'R$ 0,00',
   
@@ -41,7 +40,6 @@ const CartContext = createContext({
  * Enhanced Cart Provider with state manager integration
  */
 export const CartProvider = ({ children }) => {
-  const [cartCount, setCartCount] = useState(0);
   const [contextReady, setContextReady] = useState(false);
   const [lastOperation, setLastOperation] = useState(null);
   const [cartTotalValue, setCartTotalValue] = useState(0);
@@ -323,11 +321,9 @@ export const CartProvider = ({ children }) => {
       currency: 'BRL'
     }).format(value || 0);
   };
-
   // Criar valor do contexto enriquecido 
   const contextValue = {
     ...cartData,
-    cartCount: cartCount || (cartData.cartItems?.length || 0), // Fallback se cartCount for zero
     cartTotal: cartTotalValue || cartData.cartTotal || 0, // NOVO: Usar valor total calculado
     formattedTotal: formatCurrency(cartTotalValue || cartData.cartTotal || 0), // NOVO: Formatar o total
     subtotal: cartTotalValue || cartData.cartTotal || 0, // Novo campo para clareza
@@ -427,16 +423,7 @@ export const useCartContext = () => {
   return context;
 };
 
-// NOVO: Hook específico para o contador do carrinho
-export const useCartCount = () => {
-  const { cartCount, contextReady, updateCartCount } = useCartContext();
-  
-  return {
-    cartCount,
-    contextReady,
-    updateCartCount
-  };
-};
+// Hook removido - usar useCartCountV2 do novo sistema
 
 /**
  * Convenience hook for cart summary data only

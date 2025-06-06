@@ -7,6 +7,8 @@ import { isEmpty } from 'lodash';
 import Head from 'next/head';
 import SEO from '../../src/components/seo/SEO';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
+import { calculateInstallmentValue, INSTALLMENT_INTEREST_RATE, MAX_INSTALLMENTS } from '../../src/utils/installment-utils';
+import { priceToNumber, formatPrice } from '../../src/utils/format-price';
 
 // Importação de componentes
 import GalleryCarousel from "../../src/components/single-product/gallery-carousel";
@@ -18,7 +20,7 @@ import ShareButtons from "../../src/components/single-product/ShareButtons";
 import StarRating from "../../src/components/single-product/StarRating";
 
 // Função utilitária para formatar preço em reais
-const formatPrice = (price) => {
+const formatPriceBRL = (price) => {
   if (!price) return 'R$ 0,00';
   
   // Se o preço já vier formatado com R$, remove para processar corretamente
@@ -85,40 +87,21 @@ export default function ProdutoDetalhe() {
     
     const totalPrice = basePrice * quantity;
     return formatPrice(totalPrice);
-  };
-  // Função para calcular o preço de parcela baseado na quantidade
+  };  // Função para calcular o preço de parcela baseado na quantidade
   const getInstallmentPriceWithQuantity = () => {
     if (!product || !product.price) return 'R$ 0,00';
-    
-    let basePrice = product.price;
-    
-    if (typeof basePrice === 'string') {
-      basePrice = basePrice.replace(/R\$\s*|&nbsp;|&#\d+;/g, '');
-      basePrice = parseFloat(basePrice.replace(/\./g, '').replace(',', '.'));
-    }
-    
-    if (isNaN(basePrice)) return 'R$ 0,00';
-    
-    const totalPrice = basePrice * quantity;
-    const installmentValue = totalPrice / 12;
+    const totalPrice = priceToNumber(product.price) * quantity;
+    const installmentValue = calculateInstallmentValue(totalPrice, MAX_INSTALLMENTS);
     return formatPrice(installmentValue);
   };
 
   // Função para calcular preço de parcela (versão original para compatibilidade)
   const getInstallmentPrice = (price) => {
     if (!price) return 'R$ 0,00';
-    
-    let numericPrice = price;
-    if (typeof price === 'string') {
-      numericPrice = price.replace(/R\$\s*|&nbsp;|&#\d+;/g, '');
-      numericPrice = parseFloat(numericPrice.replace(/\./g, '').replace(',', '.'));
-    }
-    
-    if (isNaN(numericPrice)) return 'R$ 0,00';
-    
-    const installmentValue = numericPrice / 12;
+    const numericPrice = priceToNumber(price);
+    const installmentValue = calculateInstallmentValue(numericPrice, MAX_INSTALLMENTS);
     return formatPrice(installmentValue);
-  };  // Função para adicionar produto ao carrinho com feedback visual melhorado
+  };// Função para adicionar produto ao carrinho com feedback visual melhorado
   const handleAddToCart = (e) => {
     e.preventDefault();
     
@@ -2137,9 +2120,8 @@ export default function ProdutoDetalhe() {
                   <span className="original-price text-lg">{formatPrice(parseFloat(product.regularPrice.replace(/R\$\s*|&nbsp;|&#\d+;/g, '').replace(/\./g, '').replace(',', '.')) * quantity)}</span>
                 )}
                 <span className="price">{calculateTotalPrice()}</span>
-              </div>
-              <div className="installment-info">
-                ou em até <strong>12x</strong> de <strong>{getInstallmentPriceWithQuantity()}</strong> sem juros
+              </div>              <div className="installment-info">
+                ou em até <strong>12x</strong> de <strong>{getInstallmentPriceWithQuantity()}</strong> no cartão de crédito
               </div>
             </div>
               {/* Métodos de Pagamento */}

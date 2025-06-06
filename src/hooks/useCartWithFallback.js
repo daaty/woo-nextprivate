@@ -14,33 +14,13 @@ const DEFAULT_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZ
  * Hook adaptador que decide qual versão usar baseado nas feature flags
  * Mantém a mesma interface para não quebrar a página existente
  */
-export const useCartWithFallback = () => {
-  // Feature flags
-  const cartV2Enabled = process.env.NEXT_PUBLIC_CART_V2_ENABLED === 'true';
-  const cartV2API = process.env.NEXT_PUBLIC_CART_V2_API === 'true';
-  const cartV2Percentage = parseInt(process.env.NEXT_PUBLIC_CART_V2_PERCENTAGE || '0');
-  
-  // Debug logs for feature flags
-  console.log('[Cart Hook] Feature Flags Debug:', {
-    NEXT_PUBLIC_CART_V2_ENABLED: process.env.NEXT_PUBLIC_CART_V2_ENABLED,
-    NEXT_PUBLIC_CART_V2_API: process.env.NEXT_PUBLIC_CART_V2_API,
-    NEXT_PUBLIC_CART_V2_PERCENTAGE: process.env.NEXT_PUBLIC_CART_V2_PERCENTAGE,
-    cartV2Enabled,
-    cartV2API,
-    cartV2Percentage
-  });
-  
-  // Decidir qual versão usar
-  const shouldUseCartV2 = cartV2Enabled && cartV2API && cartV2Percentage >= 100;
-  
-  console.log('[Cart Hook] Decision Logic:', {
-    shouldUseCartV2,
-    conditions: {
-      cartV2Enabled,
-      cartV2API,
-      cartV2Percentage_gte_100: cartV2Percentage >= 100
-    }
-  });  // Usar Cart v2
+export const useCartWithFallback = () => {  // 🔧 CORRIGIDO: Forçar Cart v2 sempre, já que está configurado no _app.js
+  // O _app.js já usa CartV2Provider exclusivamente, então sempre usar v2
+  const shouldUseCartV2 = true;
+    // Debug logs para confirmar
+  console.log('[Cart Hook] 🚀 FORCED Cart v2 (bypass feature flags) - sempre ativo via _app.js');
+
+  // Usar Cart v2 sempre
   if (shouldUseCartV2) {
     console.log('[Cart Hook] Using Cart v2 🚀');
     const cartV2 = useCartV2();
@@ -205,11 +185,10 @@ export const useCartWithFallback = () => {
             };
           });
       },
-      
-      // Estados adicionais - adaptar para v2
+        // Estados adicionais - adaptar para v2
       operationInProgress: cartV2.loading,
       contextReady: !cartV2.loading,
-      refetchCart: cartV2.refreshCart,
+      refetchCart: cartV2.loadCart,
         // Informações extras do v2
       itemCount: cartV2.cartCount,
       sessionId: 'cart_v2_session', // Will be available from context after next improvement

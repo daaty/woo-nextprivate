@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './CountdownOffers.module.css';
+import { calculateInstallmentValue, INSTALLMENT_INTEREST_RATE, MAX_INSTALLMENTS } from '../../utils/installment-utils';
+import { priceToNumber, formatPrice } from '../../utils/format-price';
 
 // Componente para o cartão do produto
 const ProductCard = ({ product, discount }) => {
   // Formatar preço para o formato brasileiro
   const formatPrice = (price) => {
-    console.group(`Formatando preço: "${price}" (${typeof price})`);
+    console.group(`Formatandconst salePrice = priceData.salePrice || product.price;
+const numericPrice = parseFloat(salePrice.replace(/[^\d.,]/g, '').replace(',', '.'));
+const installmentValue = calculateInstallmentValue(numericPrice, MAX_INSTALLMENTS);
+const formattedInstallmentValue = formatPrice(installmentValue);eço: "${price}" (${typeof price})`);
     
     if (!price) {
       console.log("Preço vazio, retornando R$ 0,00");
@@ -457,6 +462,11 @@ const ProductCard = ({ product, discount }) => {
     })();
   };
   
+  const salePrice = priceData.salePrice || product.price;
+  const numericPrice = priceToNumber(salePrice);
+  const installmentValue = calculateInstallmentValue(numericPrice, MAX_INSTALLMENTS);
+  const formattedInstallmentValue = formatPrice(installmentValue);
+
   return (
     <div className={styles.productCard}>
       {priceData.hasDiscount && priceData.discountPercent > 0 && (
@@ -503,7 +513,7 @@ const ProductCard = ({ product, discount }) => {
             </div>
             
             <div className={styles.installments}>
-              em até <strong>12x</strong> sem juros
+              em até <strong>{MAX_INSTALLMENTS}x</strong> de {formattedInstallmentValue}
             </div>
             
             {isLimitedStock && (

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './FeaturedProducts.module.css';
 import { useCartContext } from '../../contexts/CartContext';
+import { calculateInstallmentValue, INSTALLMENT_INTEREST_RATE, MAX_INSTALLMENTS } from '../../utils/installment-utils';
+import { priceToNumber, formatPrice } from '../../utils/format-price';
 
 const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
@@ -106,41 +108,11 @@ const FeaturedProducts = () => {
   // Calcular quantos slides precisamos baseado no número de produtos (3 por slide)
   const totalSlides = Math.max(1, Math.ceil(products.length / 3));
   
-  // Formatador de preço
-  const formatPrice = (price) => {
-    if (!price) return 'R$ 0,00';
-    
-    try {
-      // Limpa o preço e converte para número
-      let numericValue;
-      
-      // Detectar formato do preço
-      if (typeof price === 'string') {
-        // Se tem ponto de milhar e vírgula decimal (formato BR: 1.000,00)
-        if (price.includes('.') && price.includes(',')) {
-          numericValue = parseFloat(price.replace(/\./g, '').replace(',', '.'));
-        } 
-        // Se tem apenas vírgula (1000,00)
-        else if (price.includes(',')) {
-          numericValue = parseFloat(price.replace(',', '.'));
-        } 
-        // Se tem apenas ponto (1000.00) ou é numérico
-        else {
-          numericValue = parseFloat(price);
-        }
-      } else {
-        numericValue = price;
-      }
-      
-      // Formatar o preço no padrão brasileiro
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }).format(numericValue);
-    } catch (e) {
-      console.error("Erro ao formatar preço:", e);
-      return `R$ ${price}`;
-    }
+  // Calcular o valor da parcela usando priceToNumber
+  const calculateInstallment = (price) => {
+    const numericPrice = priceToNumber(price);
+    const installmentValue = calculateInstallmentValue(numericPrice, MAX_INSTALLMENTS);
+    return formatPrice(installmentValue);
   };
   
   return (
@@ -226,6 +198,9 @@ const FeaturedProducts = () => {
                                   {formatPrice(product.price)}
                                 </div>
                               )}
+                              <div className={styles.installments}>
+                                em até <strong>{MAX_INSTALLMENTS}x</strong> de {calculateInstallment(product.price)}
+                              </div>
                             </div>
                               <div className={styles.addToCartWrapper}>
                               <button 

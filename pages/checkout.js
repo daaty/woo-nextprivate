@@ -14,9 +14,17 @@ import SEO from '../src/components/seo/SEO';
 import { useCartWithFallback as useCart } from '../src/hooks/useCartWithFallback';
 import { 
   formatPrice,
-  calculateCartSubtotal
+  calculateCartSubtotal,
+  priceToNumber
 } from '../src/utils/cart-utils';
-import { priceToNumber } from '../src/utils/format-price';
+import {
+  calculateInstallmentValue,
+  calculateTotalWithInterest,
+  INSTALLMENT_INTEREST_RATE,
+  MAX_INSTALLMENTS,
+  CASH_PAYMENT_DISCOUNT_PERCENT,
+  CASH_PAYMENT_MULTIPLIER
+} from '../src/utils/installment-utils';
 import { handleCartError } from '../src/middleware/cart-error-handler';
 import LoadingSpinner from '../src/components/LoadingSpinner';
 // Importar logger para debugging (versão frontend)
@@ -70,8 +78,7 @@ const Checkout = ({countriesData}) => {
 	const [selectedShipping, setSelectedShipping] = useState(null);
 	const [shippingError, setShippingError] = useState(null);
 	const [shippingCost, setShippingCost] = useState(0); // MOVIDO: Declarado antes de ser usado
-	const [hasFreightFree, setHasFreightFree] = useState(false);
-	const [isFinalizingOrder, setIsFinalizingOrder] = useState(false);
+	const [hasFreightFree, setHasFreightFree] = useState(false);	const [isFinalizingOrder, setIsFinalizingOrder] = useState(false);
 	const FREE_SHIPPING_THRESHOLD = 199;
 	
 	// Calcular subtotal manualmente a partir dos itens do carrinho
@@ -544,7 +551,7 @@ const Checkout = ({countriesData}) => {
 			if (!selectedPaymentMethod) {
 				checkoutLogger.log('❌ ERRO: Método de pagamento não selecionado');
 				notification.warning('Por favor, selecione um método de pagamento');
-				setIsFinalizingOrder(false);
+				setIsFinalizandoOrder(false);
 				return;
 			}
 			
@@ -556,7 +563,7 @@ const Checkout = ({countriesData}) => {
 					shippingOptionsCount: shippingOptions?.length || 0
 				});
 				notification.warning('Por favor, selecione uma opção de entrega para calcular o frete');
-				setIsFinalizingOrder(false);
+				setIsFinalizandoOrder(false);
 				return;
 			}
 
@@ -568,7 +575,7 @@ const Checkout = ({countriesData}) => {
 					shippingOptions: shippingOptions
 				});
 				notification.warning('Erro no cálculo do frete. Por favor, recalcule o frete');
-				setIsFinalizingOrder(false);
+				setIsFinalizandoOrder(false);
 				return;
 			}			// 4. Validar total do pedido
 			// MODIFICADO: Usar manualSubtotal diretamente como fonte primária para o cálculo
@@ -588,7 +595,7 @@ const Checkout = ({countriesData}) => {
 					totalCalculated
 				});
 				notification.error('Erro no total do pedido. Por favor, recarregue a página');
-				setIsFinalizingOrder(false);
+				setIsFinalizandoOrder(false);
 				return;
 			}
 
@@ -629,7 +636,7 @@ const Checkout = ({countriesData}) => {
 					console.error('🚨 [DEBUG] Erro ao chamar notification.error:', error);
 				}
 				
-				setIsFinalizingOrder(false);
+				setIsFinalizandoOrder(false);
 				return;
 			}
 
@@ -908,7 +915,7 @@ const Checkout = ({countriesData}) => {
 			}
 		} finally {
 			// Sempre desabilitar o estado de loading, mesmo em caso de erro
-			setIsFinalizingOrder(false);
+			setIsFinalizandoOrder(false);
 		}
 	};const processInfinitepayPayment = async (orderData) => {
 	try {
@@ -1762,7 +1769,7 @@ const processOtherPayment = async (orderData) => {
 					font-weight: bold;
 					font-size: 14px;
 					margin-right: 12px;
-				}
+							}
 				
 				.checkout-box-title h2 {
 					margin: 0;
@@ -2514,20 +2521,25 @@ const processOtherPayment = async (orderData) => {
 													// Calcular total com desconto (8% à vista)
 													const total = baseValue + freightValue;
 													return formatPrice(total * 0.92);
-												})()}
-											</span> (8% desc.)</p><p>📅 ou 12x de <span className="font-medium">
+												})()}											</span> (8% desc.)</p>
+											<p>📅 Em 12x de <span className="font-medium">
 												{(() => {
-													// Garantir que o valor seja calculado corretamente
 													const baseValue = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
-													
-													// Garantir que o frete seja um número válido
 													const freightValue = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
-													
-													// Calcular valor da parcela
 													const total = baseValue + freightValue;
-													return formatPrice(total / 12);
+													return formatPrice(calculateInstallmentValue(total));
 												})()}
-											</span> sem juros</p>
+											</span> com juros de {INSTALLMENT_INTEREST_RATE}% ao mês
+											</p>
+											<p className="text-sm text-gray-600">
+												Total com juros: {' '}
+												{(() => {
+													const baseValue = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
+													const freightValue = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
+													const total = baseValue + freightValue;
+													return formatPrice(calculateTotalWithInterest(total));
+												})()}
+											</p>
 										</div>
 									</div>
 								</div>

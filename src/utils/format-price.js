@@ -2,6 +2,13 @@
  * Utilitário para formatação consistente de preços em toda a aplicação
  */
 
+// Constantes de formatação
+const formatConfig = {
+  locale: 'pt-BR',
+  currency: 'BRL',
+  maxValue: 999999999
+};
+
 /**
  * Formata um valor para o formato de moeda brasileira (R$)
  * 
@@ -61,11 +68,11 @@ export const formatPrice = (price, showSymbol = true) => {
     
     // Garante que o valor seja positivo e não seja muito grande (prevenção de overflow)
     if (numericPrice < 0) numericPrice = 0;
-    if (numericPrice > 999999999) numericPrice = 999999999;
+    if (numericPrice > formatConfig.maxValue) numericPrice = formatConfig.maxValue;
     
-    return new Intl.NumberFormat('pt-BR', {
+    return new Intl.NumberFormat(formatConfig.locale, {
       style: 'currency',
-      currency: 'BRL',
+      currency: formatConfig.currency,
       currencyDisplay: showSymbol ? 'symbol' : 'code'
     }).format(numericPrice);
   } catch (error) {
@@ -99,6 +106,7 @@ export const priceToNumber = (price) => {
       try {
         price = String(price);
       } catch (e) {
+        console.error('[priceToNumber] Erro ao converter para string:', e);
         return 0;
       }
     }
@@ -141,9 +149,9 @@ export const priceToNumber = (price) => {
     if (isNaN(numericPrice) || !isFinite(numericPrice)) return 0;
     
     // Garante que o valor não é absurdamente grande
-    if (Math.abs(numericPrice) > 999999999) {
+    if (Math.abs(numericPrice) > formatConfig.maxValue) {
       console.warn('[priceToNumber] Valor muito grande detectado, limitando:', { original: numericPrice, price });
-      return numericPrice > 0 ? 999999999 : -999999999;
+      return numericPrice > 0 ? formatConfig.maxValue : -formatConfig.maxValue;
     }
     
     return numericPrice;
@@ -168,15 +176,4 @@ export const calculateDiscount = (regularPrice, salePrice) => {
   
   const discount = ((regular - sale) / regular) * 100;
   return Math.round(discount);
-};
-
-/**
- * Formata um valor de desconto como porcentagem
- * 
- * @param {number} discount - O valor do desconto (0-100)
- * @returns {string} - O desconto formatado (ex: "20%")
- */
-export const formatDiscount = (discount) => {
-  if (!discount || discount <= 0) return '';
-  return `${Math.round(discount)}%`;
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import styles from './gallery-carousel/gallery-carousel.module.css';
 
 console.log('🚀 LOADING GalleryCarousel.js - ARQUIVO CARREGADO! v2.0');
 
@@ -9,7 +10,6 @@ const GalleryCarousel = ({ gallery = [] }) => {
   
   const [currentImage, setCurrentImage] = useState(0);
   const [showZoom, setShowZoom] = useState(false);
-  const [showModal, setShowModal] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
@@ -124,73 +124,6 @@ const GalleryCarousel = ({ gallery = [] }) => {
     touchStartY.current = 0;
   };
 
-  // Controle por teclado
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (!showModal) return;
-      
-      switch (e.key) {
-        case 'ArrowLeft':
-          prevImage();
-          break;
-        case 'ArrowRight':
-          nextImage();
-          break;
-        case 'Escape':
-          closeModal();
-          break;
-        case '+':
-        case '=':
-          setZoomLevel(prev => Math.min(5, prev + 0.5));
-          break;
-        case '-':
-          setZoomLevel(prev => Math.max(1, prev - 0.5));
-          break;
-      }
-    };
-
-    if (showModal) {
-      document.addEventListener('keydown', handleKeyPress);
-      return () => document.removeEventListener('keydown', handleKeyPress);
-    }
-  }, [showModal, nextImage, prevImage]);
-
-  // Preload das imagens adjacentes
-  useEffect(() => {
-    if (processedGallery.current.length > 1) {
-      const preloadImage = (src) => {
-        const img = new Image();
-        img.src = src;
-      };
-      
-      // Preload da próxima imagem
-      const nextIndex = (currentImage + 1) % processedGallery.current.length;
-      if (processedGallery.current[nextIndex]) {
-        preloadImage(processedGallery.current[nextIndex].sourceUrl);
-      }
-      
-      // Preload da imagem anterior
-      const prevIndex = currentImage === 0 ? processedGallery.current.length - 1 : currentImage - 1;
-      if (processedGallery.current[prevIndex]) {
-        preloadImage(processedGallery.current[prevIndex].sourceUrl);
-      }
-    }
-  }, [currentImage]);
-  // Função para abrir a modal em tela cheia
-  const openModal = () => {
-    console.log('🔍 GalleryCarousel: Tentando abrir modal');
-    setShowModal(true);
-    setZoomLevel(2);
-    document.body.style.overflow = 'hidden';
-  };
-  
-  // Função para fechar a modal
-  const closeModal = () => {
-    setShowModal(false);
-    setZoomLevel(2);
-    document.body.style.overflow = 'auto';
-  };
-
   // Callback para quando a imagem carrega
   const handleImageLoad = () => {
     setImageLoading(false);
@@ -239,10 +172,7 @@ const GalleryCarousel = ({ gallery = [] }) => {
           className="main-image-container"
           onMouseEnter={() => setShowZoom(true)}
           onMouseLeave={() => setShowZoom(false)}
-          onMouseMove={handleMouseMove}
-          onClick={(e) => {
-            console.log('🖱️ GalleryCarousel: Click detectado na imagem principal');
-            openModal();          }}
+          onMouseMove={handleMouseMove}          onClick={() => {}}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           ref={mainImageRef}
@@ -274,17 +204,6 @@ const GalleryCarousel = ({ gallery = [] }) => {
                   backgroundSize: `${zoomLevel * 100}%`
                 }}
               />
-            )}
-            
-            {/* Gradiente de indicação de zoom */}
-            {showZoom && !imageLoading && (
-              <div className="zoom-indicator">
-                <svg width="24" height="24" viewBox="0 0 24 24">
-                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                  <path d="M12 10h-2v2H9v-2H7V9h2V7h1v2h2v1z"/>
-                </svg>
-                <span>Clique para ampliar</span>
-              </div>
             )}
           </div>
             {/* Botões de navegação modernos */}
@@ -318,20 +237,7 @@ const GalleryCarousel = ({ gallery = [] }) => {
               </button>
             </>
           )}
-          
-          {/* Ícone de expandir melhorado */}
-          <button 
-            className="expand-button" 
-            onClick={(e) => {
-              e.stopPropagation();
-              openModal();
-            }}
-            aria-label="Ver em tela cheia"
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20">
-              <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" fill="currentColor" />
-            </svg>
-          </button>
+  
           
           {/* Contador de imagem melhorado */}
           {processedGallery.current.length > 1 && (
@@ -371,7 +277,7 @@ const GalleryCarousel = ({ gallery = [] }) => {
                   src={item.sourceUrl}
                   alt={item.altText || `Thumbnail ${index + 1}`}
                   width={80}
-                  height={70}
+                  height={80}
                   className="thumbnail-image"
                   onError={handleImageError}
                   loading="lazy"
@@ -393,141 +299,37 @@ const GalleryCarousel = ({ gallery = [] }) => {
             </div>
           )}
         </div>
-      </div>        {/* Modal de visualização em tela cheia avançada */}
-        {showModal && (
-          <div className="fullscreen-modal" onClick={closeModal}>
-          {/* Header da modal */}
-          <div className="modal-header">
-            <div className="modal-title">
-              <span>Visualização de Produto</span>
-              <span className="modal-counter">
-                {currentImage + 1} de {processedGallery.current.length}
-              </span>
-            </div>
-            <div className="modal-controls">
-              {/* Controles de zoom */}
-              <div className="zoom-controls">
-                <button 
-                  className="zoom-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setZoomLevel(prev => Math.max(1, prev - 0.5));
-                  }}
-                  disabled={zoomLevel <= 1}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24">
-                    <path d="M19 13H5v-2h14v2z" fill="currentColor"/>
-                  </svg>
-                </button>
-                <span className="zoom-level">{Math.round(zoomLevel * 100)}%</span>
-                <button 
-                  className="zoom-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setZoomLevel(prev => Math.min(5, prev + 0.5));
-                  }}
-                  disabled={zoomLevel >= 5}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24">
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
-                  </svg>
-                </button>
-              </div>
-              
-              <button className="close-modal" onClick={closeModal}>
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            {/* Navegação anterior */}
-            {processedGallery.current.length > 1 && (
-              <button 
-                className="modal-nav prev" 
-                onClick={prevImage}
-                disabled={isTransitioning}
-              >
-                <svg width="32" height="32" viewBox="0 0 24 24">
-                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/>
-                </svg>
-              </button>
-            )}
-            
-            {/* Container da imagem com zoom */}
-            <div className="modal-image-container">
-              <div 
-                className="modal-image"
-                style={{
-                  transform: `scale(${zoomLevel})`,
-                  cursor: zoomLevel > 1 ? 'grab' : 'zoom-in'
-                }}
-              >
-                <img
-                  src={processedGallery.current[currentImage]?.sourceUrl}
-                  alt={processedGallery.current[currentImage]?.altText || `Product image ${currentImage + 1}`}
-                  className="modal-product-image"
-                  onError={handleImageError}
-                  draggable={false}
-                />
-              </div>
-            </div>
-            
-            {/* Navegação próxima */}
-            {processedGallery.current.length > 1 && (
-              <button 
-                className="modal-nav next" 
-                onClick={nextImage}
-                disabled={isTransitioning}
-              >
-                <svg width="32" height="32" viewBox="0 0 24 24">
-                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/>
-                </svg>
-              </button>
-            )}
-          </div>
-          
-          {/* Footer da modal com miniaturas */}
-          {processedGallery.current.length > 1 && (
-            <div className="modal-footer">
-              <div className="modal-thumbnails">
-                {processedGallery.current.map((item, index) => (
-                  <button
-                    key={`modal-thumb-${index}`}
-                    className={`modal-thumbnail ${index === currentImage ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      selectImage(index);
-                    }}
-                  >
-                    <img
-                      src={item.sourceUrl}
-                      alt={item.altText || `Thumbnail ${index + 1}`}
-                      className="modal-thumbnail-image"
-                      onError={handleImageError}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      </div>
         <style jsx>{`        .product-gallery-container {
           position: relative;
           display: flex;
           gap: 24px;
-          height: 577px;
+          height: 100%;
           background: linear-gradient(135deg, rgba(255, 105, 0, 0.02), rgba(0, 168, 225, 0.02));
           border-radius: 16px;
-          padding: 20px;
+          padding: 10px;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
           isolation: isolate;
+        }
+
+        .main-image-container {
+          position: absolute;
+          top: 0;
+          left: 130px;
+          width: calc(100% - 130px);
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: zoom-in;
+          background: white;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }        .thumbnails-container {
           width: 120px;
-          max-height: 693px;
+          max-height: 800px;
           overflow-y: auto;
           overflow-x: visible;
           display: flex;
@@ -559,8 +361,8 @@ const GalleryCarousel = ({ gallery = [] }) => {
           background: white;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          width: 80px;
-          height: 100px;
+          width: 100px;
+          height: 105px;
           z-index: 7;
         }
           .thumbnail-item:hover {
@@ -616,19 +418,19 @@ const GalleryCarousel = ({ gallery = [] }) => {
           transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }        .main-image-container {
           position: absolute;
-          top: 20px;
-          left: 170px;
-          width: calc(100% - 170px);
-          height: calc(100% - 40px);
+          top: 0px;
+          left: 130px;
+          width: calc(100% - 130px);
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           cursor: zoom-in;
           background: white;
           border-radius: 16px;
           overflow: hidden;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          pointer-events: auto;
-          user-select: none;
-          z-index: 1;
         }
         
         .main-image-container:hover {
@@ -675,7 +477,7 @@ const GalleryCarousel = ({ gallery = [] }) => {
           position: relative;
           overflow: hidden;
           width: 100%;
-          height: 500px;
+          height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -688,6 +490,8 @@ const GalleryCarousel = ({ gallery = [] }) => {
         }
         
         .main-product-image {
+          width: 100%;
+          height: 100%;
           max-width: 100%;
           max-height: 100%;
           object-fit: contain;
@@ -710,40 +514,6 @@ const GalleryCarousel = ({ gallery = [] }) => {
         
         .main-image-container:hover .zoom-overlay {
           opacity: 1;
-        }
-        
-        .zoom-indicator {
-          position: absolute;
-          bottom: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 12px 16px;
-          border-radius: 25px;
-          font-size: 14px;
-          font-weight: 500;
-          z-index: 5;
-          opacity: 0;
-          animation: fadeInUp 0.3s ease-out 0.5s forwards;
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateX(-50%) translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-          }
-        }
-        
-        .zoom-indicator svg {
-          color: #ff6900;
         }
         
         .nav-button {

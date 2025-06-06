@@ -75,11 +75,25 @@ const Cart = () => {
   // Manual total calculation for better precision
   const [manualSubtotal, setManualSubtotal] = useState(0);
   
-  // Constantes de configuração - centralizadas para fácil manutenção
-  const FREE_SHIPPING_THRESHOLD = 199; // Mínimo para frete grátis (R$ 199,00)
-  const CASH_PAYMENT_DISCOUNT_PERCENT = 8; // Desconto de 8% para pagamento à vista
-  const CASH_PAYMENT_MULTIPLIER = (100 - CASH_PAYMENT_DISCOUNT_PERCENT) / 100; // Multiplica por 0.92 para 8% de desconto
-  const MAX_INSTALLMENTS = 12; // Número máximo de parcelas sem juros
+  // Constantes de configuração - Usando variáveis de ambiente
+  const FREE_SHIPPING_THRESHOLD = 199;
+  const MAX_INSTALLMENTS = process.env.NEXT_PUBLIC_MAX_INSTALLMENTS ? parseInt(process.env.NEXT_PUBLIC_MAX_INSTALLMENTS) : 12;
+  const INSTALLMENT_INTEREST_RATE = process.env.NEXT_PUBLIC_INSTALLMENT_INTEREST_RATE ? parseFloat(process.env.NEXT_PUBLIC_INSTALLMENT_INTEREST_RATE) : 1.99;
+  const CASH_PAYMENT_DISCOUNT_PERCENT = process.env.NEXT_PUBLIC_CASH_PAYMENT_DISCOUNT ? parseFloat(process.env.NEXT_PUBLIC_CASH_PAYMENT_DISCOUNT) : 8;
+  const CASH_PAYMENT_MULTIPLIER = (100 - CASH_PAYMENT_DISCOUNT_PERCENT) / 100;
+
+  // Função para calcular valor da parcela com juros
+  const calculateInstallmentValue = (total) => {
+    const rate = INSTALLMENT_INTEREST_RATE / 100;
+    const coefficient = (rate * Math.pow(1 + rate, MAX_INSTALLMENTS)) / (Math.pow(1 + rate, MAX_INSTALLMENTS) - 1);
+    const installmentValue = total * coefficient;
+    return installmentValue;
+  };
+
+  // Função para calcular valor total com juros
+  const calculateTotalWithInterest = (total) => {
+    return calculateInstallmentValue(total) * MAX_INSTALLMENTS;
+  };
   
   // Use nosso sistema de notificações personalizado
   const { notification } = useNotification();
@@ -1874,6 +1888,7 @@ const Cart = () => {
 
         .section-button {
           background: linear-gradient(135deg, #ff6900 0%, #ff8f00 100%);
+         
           color: white;
           border: none;
           padding: 12px 20px;
@@ -2456,28 +2471,50 @@ const Cart = () => {
                         </span>
                       </span>
                     </p>
-                    
-                    <p className="flex items-center">
-                      <CheckIcon />                      <span className="ml-2">
-                        <strong>Parcelado:</strong> em até {MAX_INSTALLMENTS}x de {' '}                        {(() => {
-                          // Calcular o valor parcelado
-                          let subtotal = 0;
-                          if (typeof cartTotal === 'string') {
-                            subtotal = priceToNumber(cartTotal);
-                          } else {
-                            subtotal = cartTotal || 0;
-                          }
-                          
-                          // Garantir que o frete seja um número
-                          const shipping = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
-                          const discount = typeof discountAmount === 'number' ? discountAmount : priceToNumber(discountAmount || 0);
-                          
-                          const total = subtotal + shipping - discount;
-                          const installmentValue = total / MAX_INSTALLMENTS;
-                          
-                          return formatPrice(installmentValue);
-                        })()}
-                        <span className="ml-1">sem juros</span>
+                      <p className="flex items-center">
+                      <CheckIcon />
+                      <span className="ml-2">
+                        <strong>Parcelado:</strong>
+                        <div className="flex flex-col">
+                          {/* Opção com juros */}
+                          <div>
+                            Em {MAX_INSTALLMENTS}x de {' '}
+                            {(() => {
+                              let subtotal = 0;
+                              if (typeof cartTotal === 'string') {
+                                subtotal = priceToNumber(cartTotal);
+                              } else {
+                                subtotal = cartTotal || 0;
+                              }
+                              
+                              const shipping = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
+                              const discount = typeof discountAmount === 'number' ? discountAmount : priceToNumber(discountAmount || 0);
+                              
+                              const total = subtotal + shipping - discount;
+                              const installmentValue = calculateInstallmentValue(total);
+                              
+                              return formatPrice(installmentValue);
+                            })()}
+                            <span className="ml-1">com juros de {INSTALLMENT_INTEREST_RATE}% ao mês</span>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            Total: {' '}
+                            {(() => {
+                              let subtotal = 0;
+                              if (typeof cartTotal === 'string') {
+                                subtotal = priceToNumber(cartTotal);
+                              } else {
+                                subtotal = cartTotal || 0;
+                              }
+                              
+                              const shipping = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
+                              const discount = typeof discountAmount === 'number' ? discountAmount : priceToNumber(discountAmount || 0);
+                              
+                              const total = subtotal + shipping - discount;
+                              return formatPrice(calculateTotalWithInterest(total));
+                            })()}
+                          </div>
+                        </div>
                       </span>
                     </p>
                     

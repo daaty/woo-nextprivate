@@ -3,7 +3,10 @@
  * Ajuda a manter consistência entre cart.js e checkout.js
  */
 
-import { formatPrice as formatPriceOriginal, priceToNumber } from './format-price';
+import { formatPrice as formatPriceOriginal, priceToNumber as priceToNumberOriginal } from './format-price.js';
+
+// Re-export the priceToNumber function for use in other modules
+export { priceToNumberOriginal as priceToNumber };
 
 /**
  * Formata um preço com tratamento robusto de fallbacks
@@ -14,10 +17,9 @@ export const formatPrice = (value) => {
   if (value === undefined || value === null) {
     return 'R$ 0,00';
   }
-  
-  // Se for string, extrair valor numérico
+    // Se for string, extrair valor numérico
   if (typeof value === 'string') {
-    const numericValue = priceToNumber(value);
+    const numericValue = priceToNumberOriginal(value);
     return formatPriceOriginal(isNaN(numericValue) ? 0 : numericValue);
   }
   
@@ -96,9 +98,8 @@ export const getBestSubtotalValue = (input = {}) => {
   }
   if (typeof cartTotal === 'number' && !isNaN(cartTotal) && cartTotal > 0) {
     return cartTotal;
-  }
-  if (typeof cartTotal === 'string') {
-    const parsed = priceToNumber(cartTotal);
+  }  if (typeof cartTotal === 'string') {
+    const parsed = priceToNumberOriginal(cartTotal);
     if (!isNaN(parsed) && parsed > 0) {
       return parsed;
     }

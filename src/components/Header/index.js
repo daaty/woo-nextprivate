@@ -50,14 +50,19 @@ const Header = ({ header, cartCount = 0, contextReady = false }) => { // NOVO: R
             </Link>
           </li>
         </ul>
-      </nav>
-
-      {/* Contador do carrinho */}        <div className="cart-counter-container">
+      </nav>      {/* Contador do carrinho */}        <div className="cart-counter-container">
         <Link href="/cart">
           <a className="cart-link">
-            <svg /* ícone do carrinho */ />
-            {contextReady && cartCount > 0 && (
-              <span className="Layout_cartCount__PzqLI">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path 
+                d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17C17 18.1 16.1 19 15 19H9C7.9 19 7 18.1 7 17V13M17 13H7" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>            {contextReady && cartCount > 0 && (
+              <span className="cart-count" data-cart-counter={cartCount}>
                 {cartCount > 99 ? '99+' : cartCount}
               </span>
             )}
@@ -201,9 +206,7 @@ const Header = ({ header, cartCount = 0, contextReady = false }) => { // NOVO: R
           position: relative;
           display: inline-block;
           padding: 8px;
-        }
-
-        .Layout_cartCount__PzqLI {
+        }        .cart-count {
           position: absolute;
           top: -8px;
           right: -8px;
@@ -215,9 +218,8 @@ const Header = ({ header, cartCount = 0, contextReady = false }) => { // NOVO: R
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
-          font-weight: 600;
-          animation: ${cartCount > 0 ? 'counterPulse 0.6s ease-out' : 'none'};
+          font-size: 12px;          font-weight: 600;
+          animation: counterPulse 0.6s ease-out;
           z-index: 10;
         }
 
