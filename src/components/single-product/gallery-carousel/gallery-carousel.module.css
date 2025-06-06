@@ -1,0 +1,55 @@
+/* Gallery carousel component styles */
+
+.thumbnail-item {
+  margin: 4px 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.thumbnail-wrapper {
+  height: 70px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+}
+
+.thumbnail-wrapper:hover {
+  border-color: #ddd;
+}
+
+.thumbnail-item.active .thumbnail-wrapper {
+  border-color: #ff6700;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: #fff;
+  transition: transform 0.3s ease;
+}
+
+.thumbnail-wrapper:hover .thumbnail-image {
+  transform: scale(1.1);
+}
+
+.active-indicator {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 0 6px 6px;
+  border-color: transparent transparent transparent #ff6700;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.thumbnail-item.active .active-indicator {
+  opacity: 1;
+}
