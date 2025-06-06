@@ -5,11 +5,9 @@
  */
 
 import { getProductData } from '../../../../src/v2/cart/services/wooCommerceIntegration.js';
-
-// Simple in-memory cart storage for development
-if (!global.cartStorageV2) {
-  global.cartStorageV2 = {};
-}
+const cartStorage = require('../../../../lib/cart-storage.cjs');
+const { setupSQLitePermissions } = require('../../../../src/middleware/sqlitePermissions');
+const { parse: parseCookie } = require('cookie');
 
 // Simple logging
 const log = (message, data = null) => {
@@ -18,17 +16,33 @@ const log = (message, data = null) => {
 };
 
 /**
- * Get session ID from request - SIMPLE VERSION
+ * Get session ID from request - ENHANCED VERSION
+ * Prioridade: Cookie > Header > Query Param > Novo ID
  */
-const getSessionIdFromRequest = (req) => {
-  // Check header first
-  let sessionId = req.headers['x-cart-session-id'];
+const getSessionIdFromRequest = (req, res) => {
+  // 1. Tentar obter do cookie
+  const cookies = parseCookie(req.headers.cookie || '');
+  let sessionId = cookies.cart_session_id;
   
+  // 2. Tentar obter do header
   if (!sessionId) {
-    // Generate new session if none provided
+    sessionId = req.headers['x-cart-session-id'];
+  }
+  
+  // 3. Tentar obter da query string
+  if (!sessionId) {
+    sessionId = req.query.sessionId;
+  }
+
+  // 4. Gerar novo ID se nenhum encontrado
+  if (!sessionId) {
     sessionId = `cart_v2_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     log(`Generated new session: ${sessionId}`);
   }
+
+  // Sempre definir/atualizar o cookie
+  const cookie = `cart_session_id=${sessionId}; Path=/; Max-Age=2592000; SameSite=Strict; HttpOnly`;
+  res.setHeader('Set-Cookie', cookie);
   
   return sessionId;
 };
@@ -158,22 +172,18 @@ const createCartItem = (product, quantity = 1) => {
  * Main API handler
  */
 export default async function handler(req, res) {
-  const sessionId = getSessionIdFromRequest(req);
+  // Garantir que as permissões do SQLite estejam corretas
+  setupSQLitePermissions();
   
-  // Ensure cart exists for session
-  if (!global.cartStorageV2[sessionId]) {
-    global.cartStorageV2[sessionId] = [];
-  }
+  const sessionId = getSessionIdFromRequest(req, res);
 
   try {
     switch (req.method) {
-      case 'GET':
-        // Get cart contents
-        const cartItems = global.cartStorageV2[sessionId] || [];
+      case 'GET': {
+        // Buscar carrinho no SQLite
+        const cartItems = cartStorage.getCart(sessionId) || [];
         const totals = calculateCartTotals(cartItems);
-        
         log(`GET cart for session ${sessionId}: ${cartItems.length} items`);
-        
         return res.status(200).json({
           success: true,
           items: cartItems,
@@ -181,131 +191,82 @@ export default async function handler(req, res) {
           total: totals.subtotal,
           session: sessionId,
         });
-
-      case 'POST':
-        // Add item to cart
+      }
+      case 'POST': {
         const { product, quantity = 1 } = req.body;
-        
         if (!product || !product.id) {
-          return res.status(400).json({
-            success: false,
-            error: 'Product data is required',
-          });
-        }
-
-        // Check if item already exists in cart
-        const existingItemIndex = global.cartStorageV2[sessionId].findIndex(
-          item => item.productId === product.id
-        );
-
+          return res.status(400).json({ success: false, error: 'Product data is required' });
+        }        // Buscar carrinho atual
+        let cartItems = cartStorage.getCart(sessionId) || [];
+        // Verificar se item já existe
+        const existingItemIndex = cartItems.findIndex(item => item.productId === product.id);
         if (existingItemIndex >= 0) {
-          // Update quantity if item exists
-          global.cartStorageV2[sessionId][existingItemIndex].quantity += parseInt(quantity);
-          log(`Updated existing item ${product.id} in cart ${sessionId}`);
-        } else {
-          // Add new item
+          cartItems[existingItemIndex].quantity += parseInt(quantity);
+          log(`Updated existing item ${product.id} in cart ${sessionId}`);        } else {
           const cartItem = createCartItem(product, quantity);
-          global.cartStorageV2[sessionId].push(cartItem);
+          cartItems.push(cartItem);
           log(`Added new item ${product.id} to cart ${sessionId}`);
         }
-
-        const postTotals = calculateCartTotals(global.cartStorageV2[sessionId]);
-        
+        cartStorage.saveCart(sessionId, cartItems);
+        const postTotals = calculateCartTotals(cartItems);
         return res.status(200).json({
           success: true,
-          items: global.cartStorageV2[sessionId],
+          items: cartItems,
           count: postTotals.totalItems,
           total: postTotals.subtotal,
           message: 'Product added to cart',
         });
-
-      case 'PUT':
-        // Update item quantity
-        const { itemId, quantity: newQuantity } = req.body;
-        
-        if (!itemId || newQuantity === undefined) {
-          return res.status(400).json({
-            success: false,
-            error: 'Item ID and quantity are required',
-          });
+      }
+      case 'PUT': {
+        const { itemId, quantity: newQuantity } = req.body;        if (!itemId || newQuantity === undefined) {
+          return res.status(400).json({ success: false, error: 'Item ID and quantity are required' });
         }
-
-        const updateIndex = global.cartStorageV2[sessionId].findIndex(
-          item => item.id === itemId || item.productId === itemId
-        );
-
+        let cartItems = cartStorage.getCart(sessionId) || [];
+        const updateIndex = cartItems.findIndex(item => item.id === itemId || item.productId === itemId);
         if (updateIndex >= 0) {
           if (parseInt(newQuantity) <= 0) {
-            // Remove item if quantity is 0 or negative
-            global.cartStorageV2[sessionId].splice(updateIndex, 1);
+            cartItems.splice(updateIndex, 1);
             log(`Removed item ${itemId} from cart ${sessionId}`);
-          } else {
-            // Update quantity
-            global.cartStorageV2[sessionId][updateIndex].quantity = parseInt(newQuantity);
+          } else {            cartItems[updateIndex].quantity = parseInt(newQuantity);
             log(`Updated item ${itemId} quantity to ${newQuantity} in cart ${sessionId}`);
           }
+          cartStorage.saveCart(sessionId, cartItems);
         } else {
-          return res.status(404).json({
-            success: false,
-            error: 'Item not found in cart',
-          });
+          return res.status(404).json({ success: false, error: 'Item not found in cart' });
         }
-
-        const putTotals = calculateCartTotals(global.cartStorageV2[sessionId]);
-        
+        const putTotals = calculateCartTotals(cartItems);
         return res.status(200).json({
           success: true,
-          items: global.cartStorageV2[sessionId],
+          items: cartItems,
           count: putTotals.totalItems,
           total: putTotals.subtotal,
         });
-
-      case 'DELETE':
-        // Remove item from cart
-        const { itemId: deleteItemId } = req.body;
-        
-        if (!deleteItemId) {
-          return res.status(400).json({
-            success: false,
-            error: 'Item ID is required',
-          });
+      }
+      case 'DELETE': {
+        const { itemId: deleteItemId } = req.body;        if (!deleteItemId) {
+          return res.status(400).json({ success: false, error: 'Item ID is required' });
         }
-
-        const deleteIndex = global.cartStorageV2[sessionId].findIndex(
-          item => item.id === deleteItemId || item.productId === deleteItemId
-        );
-
-        if (deleteIndex >= 0) {
-          global.cartStorageV2[sessionId].splice(deleteIndex, 1);
+        let cartItems = cartStorage.getCart(sessionId) || [];
+        const deleteIndex = cartItems.findIndex(item => item.id === deleteItemId || item.productId === deleteItemId);
+        if (deleteIndex >= 0) {          cartItems.splice(deleteIndex, 1);
           log(`Removed item ${deleteItemId} from cart ${sessionId}`);
+          cartStorage.saveCart(sessionId, cartItems);
         } else {
-          return res.status(404).json({
-            success: false,
-            error: 'Item not found in cart',
-          });
+          return res.status(404).json({ success: false, error: 'Item not found in cart' });
         }
-
-        const deleteTotals = calculateCartTotals(global.cartStorageV2[sessionId]);
-        
+        const deleteTotals = calculateCartTotals(cartItems);
         return res.status(200).json({
           success: true,
-          items: global.cartStorageV2[sessionId],
+          items: cartItems,
           count: deleteTotals.totalItems,
           total: deleteTotals.subtotal,
         });
-
+      }
       default:
-        return res.status(405).json({
-          success: false,
-          error: 'Method not allowed',
-        });
+        return res.status(405).json({ success: false, error: 'Method not allowed' });
     }
   } catch (error) {
     console.error('[CartAPI v2] Error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Internal server error',
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, error: 'Internal server error', message: error.message });
   }
 }
