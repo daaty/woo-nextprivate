@@ -2611,14 +2611,23 @@ const processOtherPayment = async (orderData) => {
 export default Checkout;
 
 export async function getStaticProps() {
-	const { data } = await client.query({
-		query: GET_COUNTRIES
-	});
-
-	return {
-		props: {
-			countriesData: data?.countries || []
-		},
-		revalidate: 600,
-	};
+  try {
+    const { data } = await client.query({
+      query: GET_COUNTRIES
+    });
+    return {
+      props: {
+        countriesData: data?.countries || []
+      },
+      revalidate: 600,
+    };
+  } catch (error) {
+    console.error('Erro ao buscar países no checkout:', error);
+    return {
+      props: {
+        countriesData: []
+      },
+      revalidate: 600,
+    };
+  }
 }
