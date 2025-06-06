@@ -1,4 +1,4 @@
-import { getSession } from 'next-auth/react';
+// Wishlist API - Versão simplificada sem next-auth
 // import { connectToDatabase } from '../../../src/utils/mongodb'; // Comentado temporariamente
 
 export default async function handler(req, res) {
@@ -7,7 +7,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const session = await getSession({ req });
+    // Por enquanto, retornar sucesso sem persistir dados
+    // TODO: Implementar persistência quando necessário
+    console.log('[Wishlist] Add endpoint chamado:', req.body);
     
     if (!session) {
       return res.status(401).json({ message: 'Not authenticated' });

@@ -3,9 +3,6 @@
 
 const WooCommerceRestApi = require("@woocommerce/woocommerce-rest-api").default;
 
-// Importar logger para debugging
-const { apiLogger } = require('../../../debug-checkout-logs');
-
 // Inicializar API do WooCommerce
 const wooApi = new WooCommerceRestApi({
     url: process.env.NEXT_PUBLIC_WORDPRESS_URL,
@@ -22,7 +19,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Método não permitido' });
     }    try {
         const { items, customer, shipping, billing, total, paymentMethod } = req.body;        // === LOG DEBUGGING: Capturar dados recebidos pela API ===
-        apiLogger.log('📨 API CREATE-LINK - Dados recebidos', {
+        console.log('📨 API CREATE-LINK - Dados recebidos', {
             itemsCount: items?.length || 0,
             total: total,
             totalType: typeof total,
@@ -37,7 +34,7 @@ export default async function handler(req, res) {
         });
 
         // LOG CRÍTICO: Verificar estrutura completa do shipping recebido
-        apiLogger.log('🚚 SHIPPING RECEBIDO - Estrutura completa', {
+        console.log('🚚 SHIPPING RECEBIDO - Estrutura completa', {
             shipping: shipping,
             hasShippingCost: !!shipping?.cost,
             shippingCostValue: shipping?.cost,
@@ -47,7 +44,7 @@ export default async function handler(req, res) {
 
         // Log detalhado dos itens
         if (items && items.length > 0) {
-            apiLogger.log('📦 Itens recebidos detalhados', {
+            console.log('📦 Itens recebidos detalhados', {
                 items: items.map(item => ({
                     name: item.name,
                     price: item.price,
@@ -193,7 +190,7 @@ export default async function handler(req, res) {
                 };            }),            // === CÁLCULO CRÍTICO DE SHIPPING_LINES ===
             shipping_lines: (() => {
                 // LOG CRÍTICO: Verificar se temos dados de shipping
-                apiLogger.log('🚚 SHIPPING_LINES - Iniciando cálculo', {
+                console.log('🚚 SHIPPING_LINES - Iniciando cálculo', {
                     hasShippingCost: !!shipping?.cost,
                     shippingCost: shipping?.cost,
                     finalOrderTotal: finalOrderTotal,
@@ -205,7 +202,7 @@ export default async function handler(req, res) {
                     // Usar o valor do frete enviado pelo frontend
                     const shippingCostValue = parseFloat(shipping.cost);
                     
-                    apiLogger.log('✅ SHIPPING_LINES - Usando shipping.cost do frontend', {
+                    console.log('✅ SHIPPING_LINES - Usando shipping.cost do frontend', {
                         shippingCostOriginal: shipping.cost,
                         shippingCostParsed: shippingCostValue,
                         shippingFixed: shippingCostValue.toFixed(2)
@@ -217,7 +214,7 @@ export default async function handler(req, res) {
                         total: shippingCostValue.toFixed(2)
                     }];
 
-                    apiLogger.log('✅ SHIPPING_LINES - Resultado usando shipping.cost', {
+                    console.log('✅ SHIPPING_LINES - Resultado usando shipping.cost', {
                         shippingLines: shippingLines
                     });
 
@@ -225,7 +222,7 @@ export default async function handler(req, res) {
                 }
 
                 // Fallback: calcular pela diferença (método antigo)
-                apiLogger.log('⚠️  FALLBACK: shipping.cost não encontrado, calculando pela diferença', {
+                console.log('⚠️  FALLBACK: shipping.cost não encontrado, calculando pela diferença', {
                     shipping: shipping
                 });
                 
@@ -239,7 +236,7 @@ export default async function handler(req, res) {
                 const shippingTotal = finalOrderTotal - itemsTotal;
                 
                 // LOG CRÍTICO: Detalhar cálculo do frete
-                apiLogger.log('📊 SHIPPING_LINES - Cálculo detalhado (fallback)', {
+                console.log('📊 SHIPPING_LINES - Cálculo detalhado (fallback)', {
                     totalFromSite: finalOrderTotal,
                     itemsTotal: itemsTotal,
                     shippingCalculated: shippingTotal,
@@ -254,7 +251,7 @@ export default async function handler(req, res) {
                 });
                 
                 if (shippingTotal <= 0) {
-                    apiLogger.log('⚠️  AVISO: Shipping calculado <= 0, retornando array vazio', {
+                    console.log('⚠️  AVISO: Shipping calculado <= 0, retornando array vazio', {
                         shippingTotal: shippingTotal
                     });
                     return [];
@@ -267,7 +264,7 @@ export default async function handler(req, res) {
                 }];
 
                 // LOG FINAL: Resultado do shipping_lines
-                apiLogger.log('✅ SHIPPING_LINES - Resultado final (fallback)', {
+                console.log('✅ SHIPPING_LINES - Resultado final (fallback)', {
                     shippingLines: shippingLines
                 });
 

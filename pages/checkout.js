@@ -27,8 +27,6 @@ import {
 } from '../src/utils/installment-utils';
 import { handleCartError } from '../src/middleware/cart-error-handler';
 import LoadingSpinner from '../src/components/LoadingSpinner';
-// Importar logger para debugging (versão frontend)
-const { checkoutLogger } = require('../debug-checkout-logs-frontend');
 
 // Componentes auxiliares
 const CheckIcon = () => <span className="text-green-500">✓</span>;
@@ -546,38 +544,34 @@ const Checkout = ({countriesData}) => {
 		
 		try {
 			// === VALIDAÇÕES CRÍTICAS ANTES DE FINALIZAR ===
-			
-			// 1. Validar método de pagamento
+					// 1. Validar método de pagamento
 			if (!selectedPaymentMethod) {
-				checkoutLogger.log('❌ ERRO: Método de pagamento não selecionado');
+				console.log('❌ ERRO: Método de pagamento não selecionado');
 				notification.warning('Por favor, selecione um método de pagamento');
-				setIsFinalizandoOrder(false);
+				setIsFinalizingOrder(false);
 				return;
 			}
-			
-			// 2. Validar seleção de frete
+					// 2. Validar seleção de frete
 			if (!selectedShipping) {
-				checkoutLogger.log('❌ ERRO: Frete não selecionado', {
+				console.log('❌ ERRO: Frete não selecionado', {
 					selectedShipping: selectedShipping,
 					shippingOptions: shippingOptions,
 					shippingOptionsCount: shippingOptions?.length || 0
 				});
 				notification.warning('Por favor, selecione uma opção de entrega para calcular o frete');
-				setIsFinalizandoOrder(false);
+				setIsFinalizingOrder(false);
 				return;
-			}
-
-			// 3. Validar valor do frete
+			}			// 3. Validar valor do frete
 			if (shippingCost === null || shippingCost === undefined) {
-				checkoutLogger.log('❌ ERRO: Custo de frete não definido', {
+				console.log('❌ ERRO: Custo de frete não definido', {
 					shippingCost: shippingCost,
 					selectedShipping: selectedShipping,
 					shippingOptions: shippingOptions
 				});
 				notification.warning('Erro no cálculo do frete. Por favor, recalcule o frete');
-				setIsFinalizandoOrder(false);
+				setIsFinalizingOrder(false);
 				return;
-			}			// 4. Validar total do pedido
+			}// 4. Validar total do pedido
 			// MODIFICADO: Usar manualSubtotal diretamente como fonte primária para o cálculo
 			const totalCalculated = (typeof manualSubtotal === 'number' ? manualSubtotal : 0) + (typeof shippingCost === 'number' ? shippingCost : 0);
 			
@@ -585,9 +579,8 @@ const Checkout = ({countriesData}) => {
 				manualSubtotal,
 				shippingCost,
 				totalCalculated
-			});
-					if (totalCalculated <= 0) {
-				checkoutLogger.log('❌ ERRO: Total do pedido inválido', {
+			});			if (totalCalculated <= 0) {
+				console.log('❌ ERRO: Total do pedido inválido', {
 					subtotal,
 					cartTotal,
 					manualSubtotal,
@@ -595,7 +588,7 @@ const Checkout = ({countriesData}) => {
 					totalCalculated
 				});
 				notification.error('Erro no total do pedido. Por favor, recarregue a página');
-				setIsFinalizandoOrder(false);
+				setIsFinalizingOrder(false);
 				return;
 			}
 
@@ -623,7 +616,7 @@ const Checkout = ({countriesData}) => {
 				return false;
 			})();			if (!phoneValidation) {
 				console.log('🚨 [DEBUG] Telefone não encontrado, exibindo notificação...');
-				checkoutLogger.log('❌ ERRO: Telefone não encontrado no usuário', {
+				console.log('❌ ERRO: Telefone não encontrado no usuário', {
 					combinedUserData: combinedUserData
 				});
 				
@@ -639,9 +632,8 @@ const Checkout = ({countriesData}) => {
 				setIsFinalizandoOrder(false);
 				return;
 			}
-
 		// LOG: Validações aprovadas
-		checkoutLogger.log('✅ VALIDAÇÕES APROVADAS - Iniciando finalização', {
+		console.log('✅ VALIDAÇÕES APROVADAS - Iniciando finalização', {
 			selectedPaymentMethod: selectedPaymentMethod,
 			selectedShipping: selectedShipping,
 			shippingCost: shippingCost,
@@ -680,8 +672,8 @@ const Checkout = ({countriesData}) => {
 				// Definir endereço de cobrança
 		const billingAddress = combinedUserData?.billing || addressToUse;
 		console.log('[Checkout] Endereço de cobrança:', billingAddress);
-		console.log('[Checkout] Tem billing separado?', !!combinedUserData?.billing);		// === LOG DEBUGGING: Capturar estado real do checkout ===
-		checkoutLogger.log('🛒 CHECKOUT - Preparando dados do pedido', {
+		console.log('[Checkout] Tem billing separado?', !!combinedUserData?.billing);		// === LOG DEBUGGING: Capturar estado real do checkout ===		console.log('🛒 CHECKOUT - Preparando dados do pedido', {
+					console.log('🛒 CHECKOUT - Preparando dados do pedido', {
 			cartTotal: cartTotal,
 			cartTotalParsed: priceToNumber(cartTotal),
 			shippingCost: shippingCost,
@@ -695,7 +687,7 @@ const Checkout = ({countriesData}) => {
 		
 		// Validação crítica: verificar se frete foi selecionado
 		if (!selectedShipping || shippingCost === 0) {
-			checkoutLogger.log('⚠️  AVISO: Frete não selecionado ou com valor zero', {
+			console.log('⚠️  AVISO: Frete não selecionado ou com valor zero', {
 				selectedShipping: selectedShipping,
 				shippingCost: shippingCost,
 				hasShippingOptions: shippingOptions?.length > 0,
@@ -888,9 +880,8 @@ const Checkout = ({countriesData}) => {
 			shippingCost: orderData.shippingCost,
 			total: orderData.total
 		});
-
 		// LOG CRÍTICO: Verificar se shipping.cost está sendo enviado
-		checkoutLogger.log('🚀 CHECKOUT - Dados enviados para API', {
+		console.log('🚀 CHECKOUT - Dados enviados para API', {
 			shippingHasCost: !!orderData.shipping?.cost,
 			shippingCostValue: orderData.shipping?.cost,
 			shippingCostSeparate: orderData.shippingCost,
