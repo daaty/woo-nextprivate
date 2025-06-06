@@ -9,8 +9,18 @@ dist/
 .cache
 .next
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .now
 .qodo
+
+# SQLite
+/data/*.sqlite
+/data/*.sqlite-journal
+/data/*.db
+/data/*.db-journal
 
 # Arquivos de debug e teste
 debug-*.js
@@ -49,6 +59,22 @@ src/v2/cart/tests/
 
 # Arquivos de diagnóstico
 diagnose-*.js
+
+# SQLite e dados
+/data/*.sqlite
+/data/*.db
+*.sqlite-journal
+
+# Variáveis de ambiente
+.env.*
+.env.local
+.env.development
+.env.production
+!.env.example
+
+# Logs e dados de runtime
+/logs/
+*.log.*
 *-diagnose.js
 diagnosticar-*.html
 
