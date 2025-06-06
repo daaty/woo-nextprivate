@@ -19,12 +19,6 @@ import '../src/styles/cart.css';
 import '../styles/cart-mobile.css'; // Estilos específicos para mobile do carrinho
 // Importar o utilitário de limpeza de sessão
 import '../src/utils/sessionCleanup';
-// Importar o fix para o CartProvider
-import '../public/fix-cart-provider';
-// Importar ponte de notificação global para botões
-import '../public/global-notification-bridge';
-// Importar ponte para contador do carrinho
-import '../public/global-cart-counter';
 
 /**
  * Componente principal da aplicação Next.js
