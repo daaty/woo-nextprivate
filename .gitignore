@@ -11,3 +11,56 @@ dist/
 .env
 .now
 .qodo
+
+# Arquivos de debug e teste
+debug-*.js
+test-*.js
+*-test.js
+*.test.js
+test-*.html
+debug-*.html
+
+# Arquivos de backup
+backup/
+*-backup.*
+*-backup/
+
+# Arquivos temporários
+temp-*
+*.temp
+
+# Diretórios de teste
+src/v2/cart/tests/
+**/tests/
+
+# Arquivos de documentação de desenvolvimento
+*.instructions.md
+*-PLAN.md
+*-GUIDE.md
+*-REPORT.md
+*-STATUS.md
+*-COMPLETE.md
+*-SOLUTION.md
+*-FIX.md
+
+# Arquivos de diagnóstico
+diagnose-*.js
+*-diagnose.js
+diagnosticar-*.html
+
+# Ferramentas de desenvolvimento
+clear-*.js
+clear-*.html
+enable-*.js
+validate-*.js
+verify-*.js
+
+# Páginas de teste
+pages/cart-*.js
+pages/api/v2/cart/test-*.js
+
+# Arquivos públicos de teste
+public/test-*.js
+public/test-*.html
+public/*-fix.js
+public/*-bridge.js
