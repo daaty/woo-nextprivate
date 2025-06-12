@@ -1,0 +1,88 @@
+/* 
+ * Estilos para o componente OptimizedCartIcon 
+ * Inclui animações e estilos avançados para feedback visual
+ */
+
+.cartIconContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.cartIconContainer:hover {
+  transform: scale(1.05);
+}
+
+.cartIcon {
+  color: currentColor;
+  width: 24px;
+  height: 24px;
+}
+
+/* Estilo do contador de itens */
+.cartCount {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #ff5722;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(25%, -25%);
+  transition: all 0.3s ease;
+}
+
+/* Animação quando o contador é atualizado */
+.cartCountAnimate {
+  animation: cartCountUpdate 0.8s ease-out;
+}
+
+@keyframes cartCountUpdate {
+  0% {
+    transform: translate(25%, -25%) scale(1);
+  }
+  50% {
+    transform: translate(25%, -25%) scale(1.5);
+    background-color: #ff9800;
+  }
+  100% {
+    transform: translate(25%, -25%) scale(1);
+  }
+}
+
+/* Variante para modo escuro */
+:global(.dark-theme) .cartIcon {
+  color: #f0f0f0;
+}
+
+:global(.dark-theme) .cartCount {
+  background-color: #ff7043;
+}
+
+/* Adaptação para dispositivos móveis */
+@media (max-width: 768px) {
+  .cartIconContainer {
+    padding: 6px;
+  }
+  
+  .cartIcon {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .cartCount {
+    min-width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+}

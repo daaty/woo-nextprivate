@@ -8,10 +8,46 @@ import {isEmpty, isArray} from 'lodash'
  * @return {any}
  */
 export const getFloatVal = ( string ) => {
-
-	let floatValue = string.match( /[+-]?\d+(\.\d+)?/g )[0];
-	return ( null !== floatValue ) ? parseFloat( parseFloat( floatValue ).toFixed( 2 ) ) : '';
-
+	// Se for undefined ou null, retorna 0
+	if (!string) return 0;
+	
+	// Se for um número, retorna diretamente
+	if (typeof string === 'number') return parseFloat(string.toFixed(2));
+	
+	try {
+		// Usar a função utilitária de conversão de preço para número para maior consistência
+		if (typeof window !== 'undefined' && window.priceToNumber) {
+			const numericValue = window.priceToNumber(string);
+			// Verificação de segurança
+			if (!isNaN(numericValue) && isFinite(numericValue)) {
+				return parseFloat(numericValue.toFixed(2));
+			}
+		}
+		
+		// Método de fallback se a função global não estiver disponível
+		// Remover entidades HTML e caracteres não numéricos exceto ponto e vírgula
+		const cleanString = string.toString()
+			.replace(/&nbsp;/g, ' ')
+			.replace(/[^\d,.]/g, '');
+		
+		// Tratar formato brasileiro com pontos de milhar e vírgula decimal
+		let floatValue;
+		if (cleanString.includes('.') && cleanString.includes(',')) {
+			// Formato brasileiro (1.234,56)
+			floatValue = parseFloat(cleanString.replace(/\./g, '').replace(',', '.'));
+		} else if (cleanString.includes(',')) {
+			// Formato europeu (1234,56)
+			floatValue = parseFloat(cleanString.replace(',', '.'));
+		} else {
+			// Formato americano ou simples (1234.56)
+			floatValue = parseFloat(cleanString);
+		}
+		
+		return isNaN(floatValue) ? 0 : parseFloat(floatValue.toFixed(2));
+	} catch (error) {
+		console.error('[getFloatVal] Erro ao extrair valor numérico:', error, {string});
+		return 0;
+	}
 };
 
 /**
@@ -48,8 +84,16 @@ export const addFirstProduct = ( product ) => {
  */
 export const createNewProduct = ( product, productPrice, qty ) => {
 
+	// Validar se temos dados mínimos necessários
+	const productId = product.productId || product.databaseId || product.id;
+	
+	if (!productId) {
+		console.error('[createNewProduct] Produto sem ID válido:', product);
+		throw new Error('Produto sem ID válido não pode ser adicionado ao carrinho');
+	}
+
 	return  {
-		productId: product.productId,
+		productId: productId,
 		image: product.image,
 		name: product.name,
 		price: productPrice,
@@ -139,8 +183,14 @@ export const getUpdatedProducts = ( existingProductsInCart, product, qtyToBeAdde
  */
 const isProductInCart = ( existingProductsInCart, productId ) => {
 
+	// Validar se temos um productId válido
+	if (!productId) {
+		return -1;
+	}
+
 	const returnItemThatExits = ( item, index ) => {
-		if ( productId === item.productId ) {
+		// Adicionar validação para evitar comparação com valores null/undefined
+		if ( productId === item.productId && item.productId ) {
 			return item;
 		}
 	};
@@ -199,31 +249,118 @@ export const removeItemFromCart = ( productId ) => {
  * @param {String} data Cart data
  */
 export const getFormattedCart = ( data ) => {
+	console.log('[getFormattedCart] Iniciando formatação do carrinho:', data);
 
-	let formattedCart = null;
+	// Se não há dados ou o cart não existe, tentar usar o carrinho atual do localStorage
+	if ( undefined === data || !data.cart ) {
+		console.log('[getFormattedCart] Dados ausentes, verificando localStorage');
+		
+		// Tentar recuperar do localStorage para manter a persistência
+		try {
+			if (typeof window !== 'undefined') {
+				const localCart = localStorage.getItem('woo-next-cart');
+				if (localCart) {
+					const parsedCart = JSON.parse(localCart);
+					console.log('[getFormattedCart] Recuperando carrinho do localStorage:', parsedCart);
+					return parsedCart;
+				}
+			}
+		} catch (e) {
+			console.error('[getFormattedCart] Erro ao ler localStorage:', e);
+		}
+		
+		// Se não tiver no localStorage, retornar vazio
+		console.log('[getFormattedCart] Dados ausentes, retornando carrinho vazio');
+		return {
+			products: [],
+			totalProductsCount: 0,
+			totalProductsPrice: '0'
+		};
+	}
 
-	if ( undefined === data || ! data.cart.contents.nodes.length ) {
-		return formattedCart;
+	// Verificar se o conteúdo do carrinho está presente
+	if ( !data.cart.contents || !data.cart.contents.nodes ) {
+		console.warn('[getFormattedCart] Estrutura do carrinho inválida:', data.cart);
+		
+		// Tentar recuperar do localStorage para manter a persistência
+		try {
+			if (typeof window !== 'undefined') {
+				const localCart = localStorage.getItem('woo-next-cart');
+				if (localCart) {
+					const parsedCart = JSON.parse(localCart);
+					console.log('[getFormattedCart] Usando carrinho do localStorage devido a estrutura inválida:', parsedCart);
+					return parsedCart;
+				}
+			}
+		} catch (e) {
+			console.error('[getFormattedCart] Erro ao ler localStorage:', e);
+		}
+		
+		return {
+			products: [],
+			totalProductsCount: 0,
+			totalProductsPrice: data.cart.total || '0'
+		};
+	}
+	
+	// Se o cart existe mas não tem itens, verificar se houve um item adicionado recentemente em localStorage
+	if ( !data.cart.contents.nodes.length ) {
+		console.log('[getFormattedCart] Carrinho existe mas está vazio - nodes.length =', data.cart.contents.nodes.length);
+		
+		// CORREÇÃO CRÍTICA: Não usar backups quando estamos processando uma resposta válida da API
+		// Se a API retorna explicitamente que não há itens, aceitar isso como verdade
+		console.log('[getFormattedCart] API confirma carrinho vazio, retornando estado vazio');
+		return {
+			products: [],
+			totalProductsCount: 0,
+			totalProductsPrice: data?.cart?.total ?? '0'
+		};
 	}
 
 	const givenProducts = data.cart.contents.nodes;
+	console.log('[getFormattedCart] Processando', givenProducts.length, 'produtos');
 
 	// Create an empty object.
-	formattedCart = {};
+	let formattedCart = {};
 	formattedCart.products = [];
 	let totalProductsCount = 0;
-
+	
 	for( let i = 0; i < givenProducts.length; i++  ) {
 		const givenProduct = givenProducts?.[ i ]?.product?.node;
 		const product = {};
-		const total = getFloatVal( givenProducts[ i ].total );
+		let total = getFloatVal( givenProducts[ i ].total );
 
-		product.productId = givenProduct?.productId ?? '';
+		// Melhor validação para productId - tentar múltiplas fontes
+		const productId = givenProduct?.productId || givenProduct?.databaseId || givenProduct?.id;
+		
+		// Se não conseguirmos obter um productId válido, pular este item
+		if (!productId) {
+			console.warn('[getFormattedCart] Item sem productId válido ignorado:', givenProduct);
+			continue;
+		}
+
+		product.productId = productId;
 		product.cartKey = givenProducts?.[ i ]?.key ?? '';
+		product.key = product.cartKey; // Alias para compatibilidade
 		product.name = givenProduct?.name ?? '';
 		product.qty = givenProducts?.[ i ]?.quantity;
-		product.price = total / product?.qty;
-		product.totalPrice = givenProducts?.[ i ]?.total ?? '';
+		
+		// Melhor tratamento de preços
+		const rawTotal = givenProducts?.[ i ]?.total ?? '0';
+		total = getFloatVal(rawTotal);
+		
+		// Se o total for 0, tentamos obter o preço do produto diretamente
+		if (total === 0 && givenProduct?.price) {
+			const productPrice = getFloatVal(givenProduct.price);
+			product.price = productPrice;
+			product.totalPrice = (productPrice * product.qty).toFixed(2);
+			console.log(`[getFormattedCart] Preço corrigido para ${product.name}: ${product.price} (total: ${product.totalPrice})`);
+		} else {
+			// Normal flow - calculate from total
+			product.price = product.qty > 0 ? total / product.qty : 0;
+			product.totalPrice = rawTotal;
+		}
+		
 		product.image = {
 			sourceUrl: givenProduct?.image?.sourceUrl ?? '',
 			srcSet: givenProduct?.image?.srcSet ?? '',
@@ -236,12 +373,41 @@ export const getFormattedCart = ( data ) => {
 		// Push each item into the products array.
 		formattedCart.products.push( product );
 	}
-
+	
 	formattedCart.totalProductsCount = totalProductsCount;
-	formattedCart.totalProductsPrice = data?.cart?.total ?? '';
+	
+	// Calcular o total manualmente se necessário
+	let calculatedTotal = 0;
+	// Somar preços de todos os produtos
+	formattedCart.products.forEach(product => {
+		// Usar o preço unitário * quantidade
+		if (typeof product.price === 'number' && typeof product.qty === 'number') {
+			calculatedTotal += product.price * product.qty;
+		}
+	});
+	
+	// Salvar os valores
+	formattedCart.numericTotal = calculatedTotal;
+	
+	// Se o total retornado pela API for zero ou duvidoso, mas temos produtos, usar o total calculado
+	const apiTotal = getFloatVal(data?.cart?.total);
+	
+	// Verificar se o total da API é confiável (pode ser zero ou muito diferente do calculado)
+	const isApiTotalReliable = apiTotal > 0 && Math.abs(apiTotal - calculatedTotal) < (calculatedTotal * 0.1); // 10% de tolerância
+	
+	if (!isApiTotalReliable && calculatedTotal > 0) {
+		console.log(`[getFormattedCart] API retornou total ${apiTotal}, mas temos ${calculatedTotal} calculado manualmente`);
+		formattedCart.totalProductsPrice = `R$ ${calculatedTotal.toFixed(2).replace('.', ',')}`;
+		// Salvar também o valor numérico correto
+		formattedCart.numericTotalFinal = calculatedTotal;
+	} else {
+		formattedCart.totalProductsPrice = data?.cart?.total ?? '';
+		// Sempre salvar o valor numérico do total, seja da API ou calculado
+		formattedCart.numericTotalFinal = apiTotal > 0 ? apiTotal : calculatedTotal;
+	}
 
+	console.log('[getFormattedCart] Carrinho formatado final:', formattedCart);
 	return formattedCart;
-
 };
 
 export const createCheckoutData = ( order ) => {

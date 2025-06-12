@@ -59,6 +59,105 @@
   height: 20px;
 }
 
+.saleButton {
+  margin-left: 15px;
+}
+
+.saleButton a {
+  background-color: #ff6900;
+  color: #fff;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.saleButton a:hover {
+  background-color: #e25c00;
+}
+
+/* Estilos para os botões de marca */
+.brandsButtons {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.brandButton {
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 13px;
+  margin: 0 3px;
+  transition: all 0.2s ease;
+}
+
+.brandButton:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estilos específicos para cada marca */
+.brandsButtons a[href="/marca/apple"] {
+  background: linear-gradient(45deg, #007aff, #5ac8fa);
+  color: white;
+}
+
+.brandsButtons a[href="/marca/samsung"] {
+  background: linear-gradient(45deg, #1428a0, #5ac8fa); 
+  color: white;
+}
+
+.brandsButtons a[href="/marca/xiaomi"] {
+  background: linear-gradient(45deg, #ff6700, #ffac38);
+  color: white;
+}
+
+.brandsButtons a[href="/marca/motorola"] {
+  background: linear-gradient(45deg, #e1140a, #ff5c5c);
+  color: white;
+}
+
+/* Estilos para o botão do carrinho e contador de itens */
+.cartButton {
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  color: #333;
+  transition: color 0.2s ease;
+}
+
+.cartButton:hover {
+  color: #ff6700;
+}
+
+.cartCount {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ff6700;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
 /* Responsividade para dispositivos móveis */
 @media (max-width: 767px) {
   .topBar {

@@ -1,0 +1,35 @@
+.cartIconContainer {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.cartIcon {
+  color: #333;
+  transition: color 0.2s ease;
+}
+
+.cartIconContainer:hover .cartIcon {
+  color: #666;
+}
+
+.cartCount {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #e53e3e;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.cartIconContainer:hover .cartCount {
+  transform: scale(1.1);
+}

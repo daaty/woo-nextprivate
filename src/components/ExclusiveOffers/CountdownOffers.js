@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './CountdownOffers.module.css';
+import { calculateInstallmentValue, INSTALLMENT_INTEREST_RATE, MAX_INSTALLMENTS } from '../../utils/installment-utils';
+import { priceToNumber, formatPrice } from '../../utils/format-price';
 
 // Componente para o cartão do produto
 const ProductCard = ({ product, discount }) => {
   // Formatar preço para o formato brasileiro
   const formatPrice = (price) => {
-    console.group(`Formatando preço: "${price}" (${typeof price})`);
+    console.group(`Formatandconst salePrice = priceData.salePrice || product.price;
+const numericPrice = parseFloat(salePrice.replace(/[^\d.,]/g, '').replace(',', '.'));
+const installmentValue = calculateInstallmentValue(numericPrice, MAX_INSTALLMENTS);
+const formattedInstallmentValue = formatPrice(installmentValue);eço: "${price}" (${typeof price})`);
     
     if (!price) {
       console.log("Preço vazio, retornando R$ 0,00");
@@ -78,7 +83,7 @@ const ProductCard = ({ product, discount }) => {
   const isLimitedStock = product.stock_quantity && product.stock_quantity < 5;
   
   // Criar URL segura para o produto
-  const productLink = product.slug ? `/produto/${product.slug}` : '#';
+  const productLink = product.slug ? `/product/${product.slug}` : '#';
   
   // Obter URL da imagem com fallback
   const getImageUrl = () => {
@@ -161,7 +166,307 @@ const ProductCard = ({ product, discount }) => {
   
   // Obter preços reais diretamente dos dados do WooCommerce
   const priceData = getProductPrices();
+
+  // Função para adicionar ao carrinho usando a mesma lógica do AddToCartButton
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    
+    const button = e.currentTarget;
+    
+    // Não permitir múltiplos cliques
+    if (button.classList.contains('loading') || button.disabled) {
+      return;
+    }
+    
+    // Salvar estado original do botão
+    const originalContent = button.innerHTML;
+    const originalStyles = {
+      background: button.style.background,
+      color: button.style.color,
+      border: button.style.border,
+      padding: button.style.padding,
+      borderRadius: button.style.borderRadius,
+      fontSize: button.style.fontSize,
+      fontWeight: button.style.fontWeight,
+      textTransform: button.style.textTransform,
+      boxShadow: button.style.boxShadow,
+    };
+    
+    // Adicionar classe de loading e desabilitar o botão
+    button.classList.add('loading');
+    button.disabled = true;
+    
+    // FASE 1: MOSTRAR SPINNER DE LOADING
+    button.innerHTML = '';
+    button.style.position = 'relative';
+    button.style.minHeight = '48px';
+    
+    const spinnerContainer = document.createElement('div');
+    spinnerContainer.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+    
+    spinnerContainer.innerHTML = `
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes spin-reverse {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(-360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        @keyframes successPulse {
+          0% { transform: scale(0.7); opacity: 0.5; }
+          50% { transform: scale(1.05); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      </style>
+      <div style="
+          position: relative;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      ">
+          <div style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              border: 2px solid rgba(0, 168, 225, 0.3);
+              border-radius: 50%;
+              animation: pulse 2s infinite;
+          "></div>
+          <div style="
+              position: absolute;
+              width: 24px;
+              height: 24px;
+              border: 2px solid transparent;
+              border-left: 2px solid #00a8e1;
+              border-bottom: 2px solid #ff6900;
+              border-radius: 50%;
+              animation: spin-reverse 1.5s linear infinite;
+          "></div>
+      </div>
+    `;
+    
+    button.appendChild(spinnerContainer);
+    
+    // Processar a adição ao carrinho de forma assíncrona
+    (async () => {
+      try {
+        // Extrair dados do produto
+        const productData = {
+          id: product.id,
+          name: product.name || 'Produto sem nome',
+          price: priceData.salePrice || product.price,
+          image: getImageUrl()
+        };
+        
+        console.log('🔍 [CountdownOffers Button] Dados do produto:', productData);
+        
+        // Chamar a API REST v2
+        const response = await fetch('/api/v2/cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            product: {
+              id: productData.id,
+              name: productData.name,
+              price: productData.price,
+              image: productData.image
+            },
+            quantity: 1
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('✅ [CountdownOffers Button] Produto adicionado com sucesso!');
+          
+          // FASE 2: MOSTRAR FEEDBACK DE SUCESSO
+          button.innerHTML = '';
+          button.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          button.style.border = 'none';
+          button.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+          button.style.color = 'white';
+          
+          // Container do ícone de sucesso
+          const successContainer = document.createElement('div');
+          successContainer.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+          `;
+          
+          successContainer.innerHTML = `
+            <div style="
+              width: 40px;
+              height: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: white;
+              border-radius: 50%;
+              animation: successPulse 0.6s ease-out;
+            ">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          `;
+          
+          button.appendChild(successContainer);
+          
+          // Vibração de sucesso no mobile
+          if (navigator.vibrate) {
+            navigator.vibrate(100);
+          }
+          
+          // Mostrar notificação de sucesso se disponível
+          if (window.showNotification) {
+            window.showNotification('Produto adicionado ao carrinho!', 'success');
+          }
+          
+          // Atualizar contador do carrinho se disponível
+          if (window.updateCartCount) {
+            window.updateCartCount();
+          }
+          
+          // Disparar evento personalizado para atualizar outras partes da aplicação
+          window.dispatchEvent(new CustomEvent('cartUpdated', { 
+            detail: { product: productData, quantity: 1 } 
+          }));
+          
+          // Disparar evento específico para o contador do Layout
+          window.dispatchEvent(new CustomEvent('productAddedToCart', {
+            detail: {
+              productId: productData.id,
+              productName: productData.name,
+              quantity: 1,
+              timestamp: Date.now()
+            }
+          }));
+          
+          // FASE 3: AGUARDAR 2 SEGUNDOS E RESTAURAR O BOTÃO ORIGINAL
+          setTimeout(() => {
+            button.classList.remove('loading');
+            button.disabled = false;
+            button.innerHTML = originalContent;
+            button.style.background = originalStyles.background;
+            button.style.color = originalStyles.color;
+            button.style.border = originalStyles.border;
+            button.style.padding = originalStyles.padding;
+            button.style.borderRadius = originalStyles.borderRadius;
+            button.style.fontSize = originalStyles.fontSize;
+            button.style.fontWeight = originalStyles.fontWeight;
+            button.style.textTransform = originalStyles.textTransform;
+            button.style.boxShadow = originalStyles.boxShadow;
+            button.style.minHeight = '';
+            button.style.position = '';
+          }, 2000);
+          
+        } else {
+          throw new Error(result.error || 'Erro ao adicionar produto');
+        }
+        
+      } catch (error) {
+        console.error('❌ [CountdownOffers Button] Erro:', error);
+        
+        // FASE 2 (ERRO): MOSTRAR FEEDBACK DE ERRO
+        button.innerHTML = '';
+        button.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        button.style.border = 'none';
+        button.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)';
+        button.style.color = 'white';
+        
+        const errorContainer = document.createElement('div');
+        errorContainer.style.cssText = `
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        `;
+        
+        errorContainer.innerHTML = `
+          <div style="
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+          ">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3">
+              <line x1="18" y1="6" x2="6" y2="18" stroke-linecap="round" />
+              <line x1="6" y1="6" x2="18" y2="18" stroke-linecap="round" />
+            </svg>
+          </div>
+        `;
+        
+        button.appendChild(errorContainer);
+        
+        // Mostrar notificação de erro se disponível
+        if (window.showNotification) {
+          window.showNotification('Erro ao adicionar produto ao carrinho', 'error');
+        }
+        
+        // FASE 3: AGUARDAR 2 SEGUNDOS E RESTAURAR O BOTÃO ORIGINAL
+        setTimeout(() => {
+          button.classList.remove('loading');
+          button.disabled = false;
+          button.innerHTML = originalContent;
+          button.style.background = originalStyles.background;
+          button.style.color = originalStyles.color;
+          button.style.border = originalStyles.border;
+          button.style.padding = originalStyles.padding;
+          button.style.borderRadius = originalStyles.borderRadius;
+          button.style.fontSize = originalStyles.fontSize;
+          button.style.fontWeight = originalStyles.fontWeight;
+          button.style.textTransform = originalStyles.textTransform;
+          button.style.boxShadow = originalStyles.boxShadow;
+          button.style.minHeight = '';
+          button.style.position = '';
+        }, 2000);
+      }
+    })();
+  };
   
+  const salePrice = priceData.salePrice || product.price;
+  const numericPrice = priceToNumber(salePrice);
+  const installmentValue = calculateInstallmentValue(numericPrice, MAX_INSTALLMENTS);
+  const formattedInstallmentValue = formatPrice(installmentValue);
+
   return (
     <div className={styles.productCard}>
       {priceData.hasDiscount && priceData.discountPercent > 0 && (
@@ -208,7 +513,7 @@ const ProductCard = ({ product, discount }) => {
             </div>
             
             <div className={styles.installments}>
-              em até <strong>12x</strong> sem juros
+              em até <strong>{MAX_INSTALLMENTS}x</strong> de {formattedInstallmentValue}
             </div>
             
             {isLimitedStock && (
@@ -220,7 +525,14 @@ const ProductCard = ({ product, discount }) => {
         </a>
       </Link>
       
-      <button className={styles.addToCart}>
+      <button 
+        className={styles.addToCart}
+        onClick={handleAddToCart}
+        data-product-id={product.id}
+        data-product-name={product.name}
+        data-product-price={priceData.salePrice}
+        data-product-image={getImageUrl()}
+      >
         Adicionar ao Carrinho
       </button>
     </div>
@@ -254,10 +566,7 @@ const CountdownOffers = () => {
         const fetchStartTime = performance.now();
         console.log(`Iniciando busca: ${new Date().toLocaleString()}`);
         
-        // Tentar buscar produtos em oferta primeiro
-        let productData = [];
-        let saleEndDateFromAPI = null;
-        
+        // Tentar buscar produtos em oferta
         try {
           console.log("Buscando produtos em oferta via GraphQL...");
           const response = await fetch('/api/products?on_sale=true&per_page=4');
@@ -267,92 +576,55 @@ const CountdownOffers = () => {
             throw new Error(`API retornou status ${response.status}: ${response.statusText}`);
           }
           
+          // Nova estrutura de resposta: { products: [...], saleEndDate: "..." }
           const responseData = await response.json();
           
-          // O formato mudou, agora temos {products: [...], saleEndDate: "..."}
-          if (responseData.products && Array.isArray(responseData.products)) {
-            productData = responseData.products;
-            saleEndDateFromAPI = responseData.saleEndDate;
+          if (responseData && responseData.products) {
+            console.log(`✅ Recebidos ${responseData.products.length} produtos em oferta`);
             
-            console.log(`✅ Recebidos ${productData.length} produtos em oferta`);
-            console.log(`✅ Data de expiração da oferta: ${saleEndDateFromAPI}`);
+            // Processar produtos
+            setProducts(responseData.products);
             
-            if (saleEndDateFromAPI) {
-              // Usar a data de expiração da API
+            // Processar data de expiração
+            if (responseData.saleEndDate) {
               try {
-                const apiEndDate = new Date(saleEndDateFromAPI);
-                setEndTime(apiEndDate);
-                console.log(`Data de expiração definida para: ${apiEndDate.toLocaleString()}`);
+                const saleEndDate = new Date(responseData.saleEndDate);
+                console.log(`✅ Data de expiração da oferta recebida: ${saleEndDate.toLocaleString()}`);
+                setEndTime(saleEndDate);
               } catch (dateError) {
-                console.error(`Erro ao processar data de expiração: ${dateError}`);
+                console.error("Erro ao processar data de expiração:", dateError);
                 // Fallback para data padrão
-                const fallbackDate = new Date();
-                fallbackDate.setDate(fallbackDate.getDate() + 30);
-                setEndTime(fallbackDate);
+                const defaultDate = new Date();
+                defaultDate.setDate(defaultDate.getDate() + 30);
+                setEndTime(defaultDate);
               }
             } else {
-              // Se não recebeu data da API, usar padrão
+              console.warn("Nenhuma data de expiração recebida, usando padrão");
               const defaultDate = new Date();
               defaultDate.setDate(defaultDate.getDate() + 30);
               setEndTime(defaultDate);
-              console.log(`Usando data de expiração padrão: ${defaultDate.toLocaleString()}`);
+            }
+            
+            // Log detalhado do primeiro produto
+            if (responseData.products.length > 0) {
+              const firstProduct = responseData.products[0];
+              console.log("Primeiro produto recebido:", {
+                nome: firstProduct.name,
+                preco: firstProduct.price,
+                precoRegular: firstProduct.regular_price,
+                emOferta: firstProduct.on_sale || firstProduct.is_on_sale,
+                dataFim: firstProduct.sale_end_date
+              });
             }
           } else {
-            // Formato antigo ou inesperado
-            console.warn("Formato de resposta inesperado:", responseData);
-            productData = Array.isArray(responseData) ? responseData : [];
-            
-            // Data padrão
-            const defaultDate = new Date();
-            defaultDate.setDate(defaultDate.getDate() + 30);
-            setEndTime(defaultDate);
-          }
-          
-          // Validação dos dados recebidos e debug
-          if (productData && productData.length > 0) {
-            console.log("Primeiro produto recebido:", {
-              nome: productData[0].name,
-              preco: productData[0].price,
-              precoRegular: productData[0].regular_price,
-              emOferta: productData[0].on_sale || productData[0].is_on_sale,
-              dataFim: productData[0].sale_end_date
-            });
-          } else {
-            console.warn("Nenhum produto em oferta encontrado");
-            throw new Error("Nenhum produto em oferta encontrado");
+            // Formato de resposta inesperado ou sem produtos
+            console.warn("Resposta da API em formato inesperado:", responseData);
+            throw new Error("Formato de resposta inválido ou nenhum produto encontrado");
           }
         } catch (error) {
-          console.warn("❌ Falha ao buscar produtos em oferta:", error);
-          
-          // Vamos tentar buscar produtos regulares como fallback
-          try {
-            console.log("Buscando produtos regulares via GraphQL...");
-            const fallbackResponse = await fetch('/api/products?per_page=4');
-            
-            if (!fallbackResponse.ok) {
-              throw new Error(`Fallback API retornou status ${fallbackResponse.status}`);
-            }
-            
-            productData = await fallbackResponse.json();
-            console.log(`✅ Recebidos ${productData.length} produtos regulares`);
-            
-            if (!productData || productData.length === 0) {
-              throw new Error("Nenhum produto regular encontrado");
-            }
-          } catch (fallbackError) {
-            console.error("❌ Falha no fallback para produtos regulares:", fallbackError);
-            throw fallbackError;
-          }
+          console.error("❌ Erro ao buscar produtos:", error);
+          throw error; // Propagar para tratamento externo
         }
-        
-        // Verificar explicitamente que temos um array de produtos
-        if (!Array.isArray(productData)) {
-          console.error("Dados de produto inválidos:", productData);
-          throw new Error("Formato de dados inválido");
-        }
-        
-        // Definir produtos encontrados
-        setProducts(productData);
         
         // Log de conclusão
         const fetchEndTime = performance.now();
@@ -360,8 +632,14 @@ const CountdownOffers = () => {
         console.groupEnd();
         
       } catch (error) {
-        console.error("❌ Erro ao buscar produtos:", error);
+        console.error("❌ Erro geral:", error);
         setError(`Falha ao carregar ofertas: ${error.message}`);
+        setProducts([]);
+        
+        // Definir data padrão em caso de erro
+        const defaultDate = new Date();
+        defaultDate.setDate(defaultDate.getDate() + 30);
+        setEndTime(defaultDate);
       } finally {
         setLoading(false);
       }
@@ -384,14 +662,18 @@ const CountdownOffers = () => {
         return;
       }
       
-      // Calcular horas, minutos e segundos restantes
+      // Calcular dias, horas, minutos e segundos restantes
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
       
+      // Se faltam mais de 24 horas, mostrar o total de horas
+      const totalHours = days * 24 + hours;
+      
       // Formatar os números para sempre terem dois dígitos
       setTimeLeft({
-        hours: hours.toString().padStart(2, '0'),
+        hours: totalHours.toString().padStart(2, '0'),
         minutes: minutes.toString().padStart(2, '0'),
         seconds: seconds.toString().padStart(2, '0')
       });

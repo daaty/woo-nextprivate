@@ -1,0 +1,550 @@
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
+  }
+
+  try {
+    const { product_id, quantity = 1, variation_id, product_name, product_price, product_image } = req.body;
+    
+    if (!product_id) {
+      return res.status(400).json({ success: false, message: 'Product ID é obrigatório' });
+    }
+
+    console.log('[API Simple Cart Add] 🛒 Adicionando produto:', { product_id, quantity, variation_id });
+    
+    const startTime = Date.now();
+
+    // BUSCAR DADOS REAIS DO PRODUTO VIA WooCommerce REST API
+    let productData = null;
+    let productName = `Produto ${product_id}`;
+    let productPrice = 220.00;
+    let productImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRjY5MDAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCI+UHJvZHV0bzwvdGV4dD48L3N2Zz4=';
+    
+    // Tentar múltiplas variações de nome das credenciais
+    const consumerKey = process.env.WC_CONSUMER_KEY || process.env.WOO_CONSUMER_KEY;
+    const consumerSecret = process.env.WC_CONSUMER_SECRET || process.env.WOO_CONSUMER_SECRET;
+    
+    // Usar dados enviados pelo frontend se disponíveis
+    if (product_name && product_name !== `Produto ${product_id}`) {
+      productName = product_name;
+    }
+    
+    if (product_price && !isNaN(parseFloat(product_price))) {
+      productPrice = parseFloat(product_price);
+    }
+    
+    if (product_image && product_image !== null && !product_image.includes('placeholder')) {
+      productImage = product_image;
+    }
+    
+    if (consumerKey && consumerSecret) {
+      try {
+        console.log('[API Simple Cart Add] 🔍 Tentando buscar dados do produto:', product_id);
+        console.log('[API Simple Cart Add] 🔑 Credenciais encontradas:', {
+          hasKey: !!consumerKey,
+          hasSecret: !!consumerSecret,
+          keyPrefix: consumerKey ? consumerKey.substring(0, 8) + '...' : 'none'
+        });
+        
+        const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
+        
+        // Tentar múltiplas estratégias de autenticação
+        const strategies = [
+          {
+            name: 'Basic Auth Header',
+            url: `${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products/${product_id}`,
+            headers: {
+              'Authorization': `Basic ${auth}`,
+              'Content-Type': 'application/json'
+            }
+          },
+          {
+            name: 'Query Parameters',
+            url: `${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products/${product_id}?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          },
+          {
+            name: 'WordPress REST API',
+            url: `${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wp/v2/product/${product_id}`,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        ];
+        
+        for (const strategy of strategies) {
+          try {
+            console.log(`[API Simple Cart Add] 🔄 Tentando estratégia: ${strategy.name}`);
+            
+            const productResponse = await fetch(strategy.url, {
+              headers: strategy.headers,
+              timeout: 3000
+            });
+
+            console.log(`[API Simple Cart Add] 📊 ${strategy.name} - Status: ${productResponse.status}`);
+
+            if (productResponse.ok) {
+              productData = await productResponse.json();
+              
+              // Extrair dados REAIS do produto
+              productName = productData.name || productName;
+              productPrice = productData.price ? parseFloat(productData.price) : productPrice;
+              productImage = productData.images?.[0]?.src || productImage;
+              
+              console.log('[API Simple Cart Add] ✅ Dados REAIS obtidos com estratégia:', strategy.name, {
+                name: productName,
+                price: productPrice,
+                hasImage: !!productData.images?.[0]?.src
+              });
+              break;
+            } else if (productResponse.status === 401) {
+              console.log(`[API Simple Cart Add] 🔐 ${strategy.name} - Não autorizado`);
+              continue;
+            }
+          } catch (strategyError) {
+            console.log(`[API Simple Cart Add] ⚠️ ${strategy.name} falhou:`, strategyError.message);
+            continue;
+          }
+        }
+        
+        if (!productData) {
+          console.log('[API Simple Cart Add] ⚠️ Todas as estratégias falharam, usando dados do frontend ou padrão');
+        }
+      } catch (productError) {
+        console.log('[API Simple Cart Add] ⚠️ Erro geral ao buscar produto:', productError.message);
+      }
+    } else {
+      console.log('[API Simple Cart Add] ⚠️ Credenciais WooCommerce não configuradas, usando dados do frontend');
+    }
+    
+    // Buscar ou criar carrinho da sessão com tratamento de erro
+    let sessionCart = { items: [] };
+    try {
+      if (req.cookies['simple_cart']) {
+        try {
+          // Verificar se o cookie está URI encoded (nova estratégia)
+          let cookieContent = req.cookies['simple_cart'];
+          if (/%[\dA-F]{2}/i.test(cookieContent)) {
+            console.log('[API Simple Cart Add] 🔍 Cookie aparenta estar URI encoded, decodificando...');
+            cookieContent = decodeURIComponent(cookieContent);
+          }
+          
+          sessionCart = JSON.parse(cookieContent);
+          
+          // Validar que o carrinho tem um formato válido
+          if (!sessionCart || typeof sessionCart !== 'object') {
+            console.log('[API Simple Cart Add] ⚠️ Carrinho com formato inválido, criando novo');
+            sessionCart = { items: [] };
+          }
+          
+          // Garantir que o array de itens existe
+          if (!Array.isArray(sessionCart.items)) {
+            console.log('[API Simple Cart Add] ⚠️ Propriedade items não é um array, corrigindo');
+            sessionCart.items = [];
+          }
+          
+          // Remover itens inválidos
+          sessionCart.items = sessionCart.items.filter(item => 
+            item && typeof item === 'object' && item.productId && (item.quantity || item.qty)
+          );
+          
+        } catch (parseError) {
+          console.log('[API Simple Cart Add] ⚠️ Cookie corrompido, criando carrinho vazio:', parseError.message);
+          console.log('[API Simple Cart Add] 🔍 Conteúdo do cookie corrompido:', 
+            req.cookies['simple_cart'].substring(0, 100) + (req.cookies['simple_cart'].length > 100 ? '...' : ''));
+          sessionCart = { items: [] };
+        }
+      }
+    } catch (parseError) {
+      console.log('[API Simple Cart Add] ⚠️ Cookie corrompido, criando carrinho vazio:', parseError.message);
+      sessionCart = { items: [] };
+    }
+    
+    // Verificar se o produto já existe no carrinho
+    const existingItemIndex = sessionCart.items.findIndex(item => 
+      item.productId === parseInt(product_id) && 
+      item.variationId === (variation_id ? parseInt(variation_id) : null)
+    );
+    
+    if (existingItemIndex >= 0) {
+      // Atualizar quantidade do produto existente
+      sessionCart.items[existingItemIndex].quantity += parseInt(quantity);
+      sessionCart.items[existingItemIndex].qty += parseInt(quantity);
+      
+      // ATUALIZAR DADOS DO PRODUTO EXISTENTE COM DADOS REAIS
+      sessionCart.items[existingItemIndex].name = productName;
+      sessionCart.items[existingItemIndex].price = productPrice;
+      sessionCart.items[existingItemIndex].image = {
+        sourceUrl: productImage,
+        alt: productName
+      };
+      
+      // Recalcular preço total do item
+      const item = sessionCart.items[existingItemIndex];
+      const itemTotal = item.price * item.quantity;
+      item.totalPrice = `R$ ${itemTotal.toFixed(2).replace('.', ',')}`;
+      
+      console.log('[API Simple Cart Add] 🔄 Item atualizado com dados reais');
+    } else {
+      // Adicionar novo produto ao carrinho COM DADOS REAIS
+      const newItem = {
+        cartKey: `${product_id}_${variation_id || 'no_var'}_${Date.now()}`,
+        productId: parseInt(product_id),
+        variationId: variation_id ? parseInt(variation_id) : null,
+        name: productName, // NOME REAL
+        quantity: parseInt(quantity),
+        qty: parseInt(quantity),
+        price: productPrice, // PREÇO REAL
+        totalPrice: `R$ ${(productPrice * parseInt(quantity)).toFixed(2).replace('.', ',')}`,
+        image: {
+          sourceUrl: productImage, // IMAGEM REAL
+          alt: productName
+        },
+        attributes: [],
+        // Dados extras do WooCommerce se disponíveis
+        sku: productData?.sku || '',
+        weight: productData?.weight || '0.3',
+        dimensions: {
+          length: productData?.dimensions?.length || '16',
+          width: productData?.dimensions?.width || '11', 
+          height: productData?.dimensions?.height || '2'
+        }
+      };
+      
+      sessionCart.items.push(newItem);
+      console.log('[API Simple Cart Add] ➕ Novo item adicionado com dados reais');
+    }
+    
+    // Calcular totais
+    const totalItems = sessionCart.items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = sessionCart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    sessionCart.items_count = totalItems;
+    sessionCart.total = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+    sessionCart.total_numeric = totalPrice;
+    sessionCart.subtotal = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+    sessionCart.shipping = 'R$ 0,00';
+    sessionCart.taxes = 'R$ 0,00';
+    
+    // Nova propriedade para controle de páginas de itens
+    sessionCart.allItems = [...sessionCart.items]; // Manter todos os itens em uma propriedade separada
+    sessionCart.totalItemTypes = sessionCart.items.length;
+    
+    try {
+      // Processar carrinho para garantir dados válidos em JSON
+      // Remove campos que podem causar circularidade ou caracteres especiais
+      const cleanCart = {
+        ...sessionCart,
+        items: sessionCart.items.map(item => {
+          // Criar um objeto limpo para evitar referências circulares ou dados não serializáveis
+          return {
+            // Garantir que todos os valores são serializáveis
+            cartKey: item.cartKey || `${item.productId}_${item.variationId || 'no_var'}_${Date.now()}`,
+            productId: parseInt(item.productId) || 0,
+            variationId: item.variationId ? parseInt(item.variationId) : null,
+            quantity: parseInt(item.quantity || 1),
+            qty: parseInt(item.qty || 1),
+            price: parseFloat(item.price || 0),
+            // Sanitização rigorosa para o nome do produto - remove qualquer caractere que possa quebrar o JSON
+            name: typeof item.name === 'string' ? 
+              item.name
+                .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove caracteres de controle
+                .replace(/\\/g, '\\\\')  // Escapa barras invertidas
+                .replace(/"/g, '\\"')    // Escapa aspas duplas
+                .replace(/\n/g, ' ')     // Remove quebras de linha
+                .replace(/\r/g, ' ')     // Remove retornos de carro
+                .replace(/\t/g, ' ')     // Remove tabulações
+                .substring(0, 100) // Limita o tamanho do nome para evitar cookies muito grandes
+              : `Produto ${item.productId}`,
+            image: {
+              sourceUrl: typeof item.image?.sourceUrl === 'string' ? 
+                item.image.sourceUrl
+                  .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+                  .replace(/\\/g, '\\\\')
+                  .replace(/"/g, '\\"')
+                  .substring(0, 250) // Limita o tamanho da URL para evitar cookies muito grandes
+                : '',
+              alt: typeof item.image?.alt === 'string' ? 
+                item.image.alt
+                  .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+                  .replace(/\\/g, '\\\\')
+                  .replace(/"/g, '\\"')
+                  .substring(0, 50) // Limita o tamanho do texto alt
+                : ''
+            },
+            totalPrice: typeof item.totalPrice === 'string' ? 
+              item.totalPrice
+                .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+                .replace(/\\/g, '\\\\')
+                .replace(/"/g, '\\"')
+              : `R$ ${(parseFloat(item.price || 0) * parseInt(item.quantity || 1)).toFixed(2).replace('.', ',')}`,
+            // Incluir campos opcionais de forma segura
+            sku: typeof item.sku === 'string' ? item.sku.substring(0, 20) : '',
+            weight: typeof item.weight === 'string' ? item.weight.substring(0, 5) : '0.3',
+            dimensions: {
+              length: typeof item.dimensions?.length === 'string' ? item.dimensions.length.substring(0, 3) : '16',
+              width: typeof item.dimensions?.width === 'string' ? item.dimensions.width.substring(0, 3) : '11',
+              height: typeof item.dimensions?.height === 'string' ? item.dimensions.height.substring(0, 3) : '2'
+            }
+          };
+        })
+      };
+      
+      // Testar serialização antes de salvar no cookie para evitar erros
+      try {
+        // Ordenar itens pelo cartKey para garantir que os mais recentes sejam salvos
+        const sortedItems = [...cleanCart.items].sort((a, b) => {
+          // Extrair timestamp do cartKey
+          const getTimestamp = (key) => {
+            if (!key) return 0;
+            const parts = key.split('_');
+            return parts.length > 2 ? parseInt(parts[2]) : 0;
+          };
+          return getTimestamp(b.cartKey) - getTimestamp(a.cartKey);
+        });
+        
+        // Tratar campos com valores potencialmente problemáticos de forma ainda mais segura
+        const superSafeCart = {
+          ...cleanCart,
+          items: sortedItems.map(item => ({
+            ...item,
+            // Garantir que propriedades críticas são 100% seguras para JSON
+            name: typeof item.name === 'string' 
+              ? item.name.replace(/[^\w\s\-.,]/g, '') // Manter apenas caracteres seguros
+              : `Produto ${item.productId}`,
+            image: {
+              sourceUrl: typeof item.image?.sourceUrl === 'string'
+                ? item.image.sourceUrl.replace(/[^\w\s\-.:\/]/g, '') // URL segura
+                : '',
+              alt: typeof item.image?.alt === 'string'
+                ? item.image.alt.replace(/[^\w\s\-.,]/g, '')
+                : ''
+            }
+          })),
+          totalItemTypes: sortedItems.length,
+          // Acompanhar o número total de itens para uso no frontend
+          totalItemsCount: totalItems
+        };
+        
+        // Use JSON.stringify com replacer function para tratar casos específicos
+        const cookieValue = JSON.stringify(superSafeCart, (key, value) => {
+          // Tratar valores undefined, NaN, Infinity que podem quebrar JSON
+          if (value === undefined) return null;
+          if (typeof value === 'number' && (isNaN(value) || !isFinite(value))) return 0;
+          return value;
+        });
+        
+        // Validar explicitamente
+        JSON.parse(cookieValue); // Testa se o resultado é um JSON válido
+        
+        // Verificar o tamanho do cookie para evitar exceder o limite do navegador (4KB)
+        const cookieSize = encodeURIComponent(cookieValue).length;
+        console.log(`[API Simple Cart Add] 📊 Tamanho do cookie: ${cookieSize} bytes`);
+        
+        let finalCookieValue = cookieValue;
+        let finalCart = superSafeCart;
+        
+        // Se o cookie estiver se aproximando do limite (3700 bytes), manter apenas os items mais recentes
+        if (cookieSize > 3700) {
+          console.log('[API Simple Cart Add] ⚠️ Cookie se aproximando do limite! Otimizando...');
+          
+          // Determinar quantos itens manter baseado no tamanho
+          let itemsToKeep = 5; // Começa com 5 como máximo
+          
+          // Se estiver muito grande, reduz para 3
+          if (cookieSize > 3900) itemsToKeep = 3;  
+          
+          // Limitar a itemsToKeep itens mais recentes para garantir que caibam no cookie
+          const limitedItems = sortedItems.slice(0, itemsToKeep);
+            
+          // Criar versão limitada do carrinho
+          finalCart = {
+            ...superSafeCart,
+            items: limitedItems,
+            // Acompanhar o número original de itens
+            totalItemTypes: sortedItems.length,
+            hasMoreItems: sortedItems.length > limitedItems.length,
+            itemsInCookie: limitedItems.length
+          };
+          
+          // Recalcular totais (manter os totais reais do carrinho completo)
+          // Não alteramos os totais para manter a consistência com todos os itens
+          
+          // Regenerar cookie value com itens limitados
+          finalCookieValue = JSON.stringify(finalCart, (key, value) => {
+            if (value === undefined) return null;
+            if (typeof value === 'number' && (isNaN(value) || !isFinite(value))) return 0;
+            return value;
+          });
+          
+          // Verificar o tamanho final
+          const limitedCookieSize = encodeURIComponent(finalCookieValue).length;
+          console.log(`[API Simple Cart Add] ✅ Cookie otimizado: ${limitedItems.length}/${sortedItems.length} itens (${limitedCookieSize} bytes)`);
+          
+          // Se ainda for muito grande, reduzir ainda mais (reduzir campos, URLs de imagem, etc.)
+          if (limitedCookieSize > 4000) {
+            console.log('[API Simple Cart Add] ⚠️ Cookie ainda muito grande! Simplificando mais...');
+            
+            const bareMinimumItems = limitedItems.map(item => ({
+              cartKey: item.cartKey,
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price,
+              name: typeof item.name === 'string' ? item.name.substring(0, 50) : `Produto ${item.productId}`,
+              // Reduzir drasticamente ou remover URL de imagem
+              image: {
+                sourceUrl: '',
+                alt: ''
+              }
+            }));
+            
+            const minimizedCart = {
+              items: bareMinimumItems,
+              items_count: totalItems,
+              total: `R$ ${totalPrice.toFixed(2).replace('.', ',')}`,
+              total_numeric: totalPrice,
+              subtotal: `R$ ${totalPrice.toFixed(2).replace('.', ',')}`,
+              totalItemTypes: sortedItems.length,
+              hasMoreItems: true,
+              itemsInCookie: bareMinimumItems.length
+            };
+            
+            finalCookieValue = JSON.stringify(minimizedCart);
+            finalCart = minimizedCart;
+            
+            const finalSize = encodeURIComponent(finalCookieValue).length;
+            console.log(`[API Simple Cart Add] ✅ Cookie ultra otimizado: ${finalSize} bytes`);
+          }
+        }
+        
+        // Salvar carrinho no cookie com encode URI para maior segurança
+        const cartCookie = `simple_cart=${encodeURIComponent(finalCookieValue)}; Path=/; Max-Age=86400; SameSite=Lax`;
+        res.setHeader('Set-Cookie', cartCookie);
+        
+        console.log(`[API Simple Cart Add] ✅ Cookie do carrinho salvo com sucesso (${finalCookieValue.length} bytes)`);
+        
+        // Retornar o carrinho completo na resposta, mesmo que o cookie tenha apenas parte dele
+        const fullCart = {
+          ...sessionCart,
+          totalItemTypes: sessionCart.items.length,
+          hasMoreItems: finalCart.hasMoreItems || false,
+          itemsInCookie: finalCart.itemsInCookie || sessionCart.items.length
+        };
+        
+        // Retornar resposta de sucesso com dados atualizados
+        const responseTime = Date.now() - startTime;
+        
+        console.log(`[API Simple Cart Add] ✅ Produto adicionado em ${responseTime}ms`);
+        console.log(`[API Simple Cart Add] 📊 Carrinho agora tem ${sessionCart.items.length} tipos de produtos`);
+        console.log(`[API Simple Cart Add] 💰 Total do carrinho: ${sessionCart.total}`);
+
+        // NOVO: Incluir informações detalhadas para o minicart
+        const responseData = {
+          success: true,
+          message: `${product_name} adicionado ao carrinho com sucesso!`,
+          product: {
+            id: product_id,
+            name: productName,
+            quantity: quantity,
+            price: productPrice,
+            image: productImage
+          },
+          cart: {
+            items: fullCart.items,  // Enviar TODOS os itens na resposta, não apenas os do cookie
+            itemsCount: fullCart.items_count,
+            total: fullCart.total,
+            totalNumeric: fullCart.total_numeric,
+            subtotal: fullCart.subtotal,
+            totalItemTypes: fullCart.totalItemTypes,
+            hasMoreItems: fullCart.hasMoreItems,
+            itemsInCookie: fullCart.itemsInCookie
+          },
+          responseTime
+        };
+
+        return res.status(200).json(responseData);
+        
+      } catch (jsonError) {
+        console.error('[API Simple Cart Add] ❌ Erro na serialização JSON:', jsonError.message);
+        
+        // Tentar criar uma versão minimalista do carrinho
+        const minimalCart = {
+          items_count: sessionCart.items.length,
+          total: `R$ ${totalPrice.toFixed(2).replace('.', ',')}`,
+          total_numeric: totalPrice,
+          items: sessionCart.items.map(item => ({
+            productId: parseInt(item.productId),
+            quantity: parseInt(item.quantity || 1),
+            price: parseFloat(item.price || 0)
+          }))
+        };
+        
+        try {
+          // Tentar salvar versão minimalista
+          const minimalCookieValue = JSON.stringify(minimalCart);
+          const fallbackCookie = `simple_cart=${encodeURIComponent(minimalCookieValue)}; Path=/; Max-Age=86400; SameSite=Lax`;
+          res.setHeader('Set-Cookie', fallbackCookie);
+          console.log('[API Simple Cart Add] ⚠️ Salvo cookie minimalista como fallback');
+          
+          // Reportar na resposta
+          return res.status(200).json({
+            success: true,
+            message: `${product_name} adicionado ao carrinho com sucesso!`,
+            warning: 'Usando formato minimalista do carrinho devido a erro de serialização',
+            cart: minimalCart,
+            responseTime: Date.now() - startTime
+          });
+          
+        } catch (fallbackError) {
+          // Em último caso, limpar o cookie
+          res.setHeader('Set-Cookie', 'simple_cart={}; Path=/; Max-Age=86400; SameSite=Lax');
+          console.log('[API Simple Cart Add] ❌ Erro no fallback, limpando cookie:', fallbackError.message);
+          
+          // Reportar na resposta
+          return res.status(200).json({
+            success: true,
+            message: `${product_name} adicionado ao carrinho com sucesso!`,
+            warning: 'Cookie do carrinho resetado devido a erro de serialização',
+            error: fallbackError.message,
+            cart: {
+              items: [],
+              items_count: 0,
+              total: 'R$ 0,00',
+              total_numeric: 0
+            },
+            responseTime: Date.now() - startTime
+          });
+        }
+      }
+    } catch (cookieError) {
+      console.error('[API Simple Cart Add] ❌ Erro ao serializar carrinho para cookie:', cookieError);
+      // Em caso de erro, salvar uma versão simplificada no cookie
+      const simpleCart = {
+        items_count: totalItems,
+        total: `R$ ${totalPrice.toFixed(2).replace('.', ',')}`,
+        total_numeric: totalPrice
+      };
+      const fallbackCookie = `simple_cart=${encodeURIComponent(JSON.stringify(simpleCart))}; Path=/; Max-Age=86400; SameSite=Lax`;
+      res.setHeader('Set-Cookie', fallbackCookie);
+      
+      // Reportar na resposta
+      return res.status(200).json({
+        success: true,
+        message: `${product_name} adicionado ao carrinho com sucesso!`,
+        warning: 'Usando formato super simplificado do carrinho devido a erro',
+        cart: simpleCart,
+        responseTime: Date.now() - startTime
+      });
+    }
+  } catch (error) {
+    console.error('[API Simple Cart Add] ❌ Erro:', error);
+    
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Erro ao adicionar produto ao carrinho',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+}

@@ -15,8 +15,8 @@ export const config = {
 
 const api = new WooCommerceRestApi({
     url: process.env.NEXT_PUBLIC_WORDPRESS_URL,
-    consumerKey: process.env.WC_CONSUMER_KEY,
-    consumerSecret: process.env.WC_CONSUMER_SECRET,
+    consumerKey: process.env.WOO_CONSUMER_KEY,
+    consumerSecret: process.env.WOO_CONSUMER_SECRET,
     version: "wc/v3"
 });
 

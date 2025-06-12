@@ -1,0 +1,293 @@
+.pageContainer {
+  width: 100%;
+}
+
+.bannerHero {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('/banners/apple-banner.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Fallback caso a imagem não exista */
+@supports (background-image: attr(data-image url)) {
+  .bannerHero {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1530319067432-f2a729c03db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+  }
+}
+
+.bannerContent {
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.bannerTitle {
+  font-size: 40px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.bannerSubtitle {
+  font-size: 18px;
+  margin-top: 10px;
+  opacity: 0.9;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.banner {
+  width: 100%;
+  height: 300px;
+  background-color: #000;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/banners/apple-banner.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.bannerContent {
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.bannerContent h1 {
+  font-size: 42px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.bannerContent p {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.productsSection {
+  margin-bottom: 60px;
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #333;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #ff6700;
+}
+
+.categoriesSection {
+  padding: 60px 20px;
+  background-color: #f8f8f8;
+  margin-bottom: 60px;
+}
+
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.categoryCard {
+  background-color: white;
+  padding: 30px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.categoryCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.categoryCard h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.categoryCard p {
+  color: #666;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.benefitsSection {
+  padding: 60px 20px;
+  margin-bottom: 60px;
+}
+
+.benefitsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.benefitCard {
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  text-align: center;
+  transition: border-color 0.3s;
+}
+
+.benefitCard:hover {
+  border-color: #ff6700;
+}
+
+.benefitCard h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.benefitCard p {
+  color: #666;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.introSection {
+  text-align: center;
+  padding: 0 20px 40px;
+}
+
+.sectionTitle {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.introText {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #555;
+}
+
+.infoSection {
+  background-color: #f5f5f7;
+  padding: 50px 0;
+  margin-top: 40px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.infoItem {
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.infoItem h3 {
+  font-size: 20px;
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #1d1d1f;
+}
+
+.infoItem p {
+  margin: 0;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Estilos específicos Apple */
+.bannerHero {
+  background-color: #000;
+}
+
+.sectionTitle {
+  color: #1d1d1f;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .categoriesGrid, .benefitsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .bannerHero {
+    height: 200px;
+  }
+  
+  .bannerTitle {
+    font-size: 32px;
+  }
+  
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .banner {
+    height: 250px;
+  }
+  
+  .bannerContent h1 {
+    font-size: 32px;
+  }
+  
+  .bannerContent p {
+    font-size: 16px;
+  }
+  
+  .categoriesGrid, .benefitsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sectionTitle {
+    font-size: 24px;
+  }
+}

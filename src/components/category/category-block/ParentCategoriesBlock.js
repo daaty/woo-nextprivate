@@ -27,7 +27,7 @@ const ParentCategoriesBlock = ({ productCategories }) => {
                         
                         return (
                             <div key={category.id} className="product-category-wrapper w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-3">
-                                <Link href={`/category/${category.slug}`}>
+                                <Link href={`/marca/${category.slug}`}>
                                     <a className="product-category-block relative overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow">
                                         <div className="product-image-container relative h-40 md:h-64">
                                             {/* Imagem com tamanho controlado */}

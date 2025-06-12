@@ -1,121 +1,97 @@
-import React from 'react';
-import Layout from '../src/components/Layout';
-import Banner from '../src/components/Banner/Banner';
-import client from '../src/components/ApolloClient';
-import PRODUCTS_AND_CATEGORIES_QUERY from "../src/queries/product-and-categories";
-import FeaturedProducts from "../src/components/home/featured-products";
-import CategoryGrid from "../src/components/home/category-grid";
-import BenefitsBanner from "../src/components/BenefitsBar/BenefitsBanner";
-import PromoBanner from "../src/components/home/promo-banner";
-import ProductGrid from "../src/components/home/product-grid";
-import CountdownOffers from '../src/components/ExclusiveOffers/CountdownOffers';
+import React, { useEffect } from 'react';
+import Layout from "../src/components/Layout";
+import client from "../src/components/ApolloClient";
+import { PRODUCTS_AND_CATEGORIES_QUERY } from "../src/queries/product-and-categories";
+import HeroCarousel from "../src/components/home/hero-carousel";
+import CountdownOffers from "../src/components/ExclusiveOffers/CountdownOffers";
+import FeaturedProducts from "../src/components/FeaturedProducts/FeaturedProducts";
+import SEO from "../src/components/seo/SEO";
+
+// Importando os novos componentes
+import SectionContainer from "../src/components/layout/SectionContainer";
+import BrandBanner from "../src/components/home/BrandBanner";
+import WhyChooseUs from "../src/components/home/WhyChooseUs";
+import NewsletterBanner from "../src/components/home/NewsletterBanner";
 
 export default function Home(props) {
   const { products, productCategories } = props || {};
+  
+  // Dados de exemplo para o banner da Apple
+  const appleBrand = {
+    name: "Apple",
+    slug: "apple",
+    logoUrl: "/Custom/Content/Themes/xiaomi/Imagens/apple-logo-white.png",
+    imageUrl: "/Custom/Content/Themes/xiaomi/Imagens/apple-products.png",
+    videoUrl: "/videos/apple-products-showcase.mp4", // URL do vídeo dos produtos Apple
+    title: "Produtos Apple Premium",
+    description: "Descubra nossa seleção exclusiva de produtos Apple, incluindo iPhones, iPads, MacBooks e acessórios premium."
+  };
 
-  // Produtos em destaque (primeiros 4 produtos)
-  const featuredProducts = products.slice(0, 4);
-  // Produtos recentes (próximos 8 produtos)
-  const recentProducts = products.slice(4, 12);
-
-  // Benefícios que serão exibidos na seção de benefícios
-  const benefits = [
-    {
-      icon: "fas fa-check-circle",
-      title: "Produtos Oficiais",
-      description: "Garantia de originalidade"
-    },
-    {
-      icon: "fas fa-truck",
-      title: "Frete Grátis",
-      description: "Nas compras acima de R$ 200"
-    },
-    {
-      icon: "fas fa-shield-alt",
-      title: "Garantia Estendida",
-      description: "Em produtos selecionados"
-    }
-  ];
+  // NOVO: Adicionar no useEffect ou no final do componente
+  useEffect(() => {
+    // Importar e inicializar os botões da homepage
+    import('../src/components/cart/AddToCartButton').then(({ initializeHomepageButtons }) => {
+        initializeHomepageButtons();
+    });
+  }, []);
 
   return (
     <Layout>
-      {/* Banner principal com as imagens webp */}
-      <Banner />
-
-      {/* Nova seção de benefícios/selos */}
-      <BenefitsBanner benefits={benefits} />
-
-      {/* Garantir que CountdownOffers é renderizado apenas uma vez */}
+      {/* SEO com meta tags Open Graph */}
+      <SEO 
+        title="Rota dos Celulares - Smartphones e Acessórios com os Melhores Preços"
+        description="Compre smartphones, fones de ouvido, carregadores e acessórios com os melhores preços. Frete grátis para todo Brasil em compras acima de R$199."
+        image="/banners/home-banner.jpg"
+        type="website"
+      />
+      
+      {/* Banner Carousel principal */}
+      <HeroCarousel />
+      
+      {/* Ofertas Exclusivas */}
       <CountdownOffers />
-
-      {/* Conteúdo existente da página */}
-      <div className="home-content">
-        <h1>Encontre o produto ideal para você</h1>
-        <p>O que você está procurando?</p>
-
-        {/* Categorias */}
-        <section className="category-section">
-          <div className="container">
-            <h2 className="section-title">Categorias em Destaque</h2>
-            <CategoryGrid categories={productCategories.slice(0, 6)} />
-          </div>
-        </section>
-
-        {/* Banner promocional */}
-        <PromoBanner 
-          title="Ofertas Especiais" 
-          subtitle="Até 30% de desconto em produtos selecionados"
-          buttonText="Ver Ofertas"
-          buttonLink="/promocoes"
-          backgroundImage="/promo-banner.jpg"
-        />
-
-        {/* Produtos em Destaque */}
-        <section className="featured-products-section">
-          <div className="container">
-            <h2 className="section-title">Produtos em Destaque</h2>
-            <FeaturedProducts products={featuredProducts} />
-          </div>
-        </section>
-
-        {/* Novidades */}
-        <section className="recent-products-section">
-          <div className="container">
-            <h2 className="section-title">Últimos Lançamentos</h2>
-            <ProductGrid products={recentProducts} />
-          </div>
-        </section>
-
-        {/* Newsletter */}
-        <section className="newsletter-section">
-          <div className="container">
-            <div className="newsletter-container">
-              <div className="newsletter-content">
-                <h2 className="newsletter-title">Receba nossas novidades</h2>
-                <p className="newsletter-text">Cadastre seu e-mail e receba ofertas exclusivas e lançamentos em primeira mão.</p>
-              </div>
-              <div className="newsletter-form">
-                <input type="email" placeholder="Digite seu e-mail" className="newsletter-input" />
-                <button className="newsletter-button">Cadastrar</button>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+      
+      {/* Produtos em Destaque - Usando o componente com layout visual renovado */}
+      <FeaturedProducts />
+      
+      {/* Banner de categoria Apple */}
+      <SectionContainer noPadding>
+        <BrandBanner brand={appleBrand} />
+      </SectionContainer>
+      
+      {/* Seção Por que Comprar Conosco */}
+      <WhyChooseUs />
+      
+      {/* Banner de Newsletter */}
+      <SectionContainer noPadding>
+        <NewsletterBanner />
+      </SectionContainer>
     </Layout>
   );
 }
 
 export async function getStaticProps() {
-  const { data } = await client.query({
-    query: PRODUCTS_AND_CATEGORIES_QUERY,
-  });
+  try {
+    const { data } = await client.query({
+      query: PRODUCTS_AND_CATEGORIES_QUERY,
+    });
 
-  return {
-    props: {
-      productCategories: data?.productCategories?.nodes ? data.productCategories.nodes : [],
-      products: data?.products?.nodes ? data.products.nodes : [],
-    },
-    revalidate: 1
-  };
+    return {
+      props: {
+        productCategories: data?.productCategories?.nodes || [],
+        products: data?.products?.nodes || [],
+      },
+      revalidate: 10,
+    };
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+    // Mesmo com erro, retornamos arrays vazios em vez de mockdata
+    return {
+      props: {
+        productCategories: [],
+        products: [],
+      },
+      revalidate: 10,
+    };
+  }
 }

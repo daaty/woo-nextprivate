@@ -1,0 +1,58 @@
+.favoritesContainer {
+  position: relative;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.favoritesContainer h2 {
+  background: linear-gradient(135deg, #ff7e00, #ff9e2c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Animations for card hover */
+@keyframes subtle-lift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+
+:global(.favorite-item) {
+  transition: all 0.3s ease;
+}
+
+:global(.favorite-item:hover) {
+  animation: subtle-lift 0.3s forwards;
+}
+
+/* Grid and List View Styles */
+:global(.favorites-list) {
+  transition: all 0.3s ease-in-out;
+}
+
+:global(.view-mode button:focus) {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 126, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .favoritesContainer {
+    padding: 0.75rem;
+  }
+  
+  :global(.favorites-list.grid) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+/* Empty state styling */
+:global(.empty-state-container) {
+  border: 2px dashed rgba(255, 126, 0, 0.2);
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+}

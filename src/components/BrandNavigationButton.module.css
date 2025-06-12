@@ -1,0 +1,56 @@
+.brandButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  color: white;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s ease;
+  margin: 0 4px;
+  min-width: 80px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.brandButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.brandButton:active {
+  transform: translateY(0px);
+}
+
+.brandButton.active {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.iconWrapper {
+  margin-bottom: 6px;
+}
+
+.brandName {
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .brandButton {
+    padding: 6px 12px;
+    min-width: 70px;
+  }
+  
+  .iconWrapper {
+    margin-bottom: 4px;
+  }
+  
+  .brandName {
+    font-size: 0.7rem;
+  }
+}

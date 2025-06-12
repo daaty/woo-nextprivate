@@ -1,0 +1,550 @@
+/* Estilos para o carrinho de compras */
+
+/* Estrutura principal */
+.container_basket {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+/* Grid de produtos */
+.wd-checkout-basket-grid table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.wd-checkout-basket-grid th,
+.wd-checkout-basket-grid td {
+  padding: 16px;
+  vertical-align: middle;
+}
+
+.wd-checkout-basket-grid th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+.wd-checkout-basket-grid .product {
+  min-width: 200px;
+}
+
+.wd-checkout-basket-grid .product .photo {
+  float: left;
+  width: 80px;
+  height: 80px;
+  margin-right: 15px;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+  background-color: #f9f9f9;
+  transition: transform 0.2s ease;
+}
+
+.wd-checkout-basket-grid .product .photo:hover {
+  transform: scale(1.05);
+}
+
+.wd-checkout-basket-grid .product .photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wd-checkout-basket-grid .product .data {
+  overflow: hidden;
+}
+
+.wd-checkout-basket-grid .product-name {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 5px;
+  display: block;
+  transition: color 0.2s ease;
+}
+
+.wd-checkout-basket-grid .product-name:hover {
+  color: #f97316;
+}
+
+.wd-checkout-basket-grid .price,
+.wd-checkout-basket-grid .quantity,
+.wd-checkout-basket-grid .subtotal {
+  white-space: nowrap;
+}
+
+/* Controles de quantidade */
+.wd-checkout-basket-grid .quantity .change {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  width: 90px;
+  overflow: hidden;
+}
+
+.wd-checkout-basket-grid .quantity .change button {
+  width: 28px;
+  height: 32px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #4a5568;
+  transition: background-color 0.2s ease;
+}
+
+.wd-checkout-basket-grid .quantity .change button:hover {
+  background-color: #f7fafc;
+}
+
+.wd-checkout-basket-grid .quantity .change button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wd-checkout-basket-grid .quantity .change input {
+  width: 34px;
+  height: 32px;
+  text-align: center;
+  border: none;
+  border-left: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  padding: 0;
+  font-weight: 500;
+}
+
+/* Botão Remover */
+.wd-checkout-basket-grid .remove button {
+  color: #e53e3e;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.wd-checkout-basket-grid .remove button:hover {
+  background-color: #FEF2F2;
+  transform: scale(1.1);
+}
+
+/* Variações de produto */
+.wd-checkout-basket-grid .skuoptions {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+
+.wd-checkout-basket-grid .skuoptions-option {
+  background-color: #f3f4f6;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  color: #4b5563;
+}
+
+/* Resumo do pedido */
+.summary-xiaomi {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.summary-xiaomi:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.summary-xiaomi h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+/* Container de frete grátis */
+#container-delivery-free {
+  background-color: #dcfce7;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+#container-delivery-free_progress {
+  height: 6px;
+  background-color: #22c55e;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+#container-delivery-free_text {
+  color: #15803d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Opções de frete e cupom */
+.wd-checkout-basket-deliveryoptions .header,
+.wd-checkout-basket-discount .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.wd-checkout-basket-deliveryoptions .header:hover,
+.wd-checkout-basket-discount .header:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.wd-checkout-basket-deliveryoptions .header.showing,
+.wd-checkout-basket-discount .header.showing {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.wd-checkout-basket-deliveryoptions .description,
+.wd-checkout-basket-discount .description {
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.container-input-delivery-cart {
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  margin-right: 10px;
+  transition: border-color 0.2s ease;
+  overflow: hidden;
+}
+
+.container-input-delivery-cart:focus-within {
+  border-color: #f97316;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
+}
+
+.container-input-delivery-cart input {
+  border: none;
+  padding: 8px 12px;
+  width: 100%;
+  outline: none;
+}
+
+/* Mensagem de cupom adicionado */
+.new-discount-added {
+  background-color: #dcfce7;
+  color: #15803d;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  text-align: center;
+  opacity: 0;
+  height: 0;
+  transition: all 0.3s ease;
+}
+
+.new-discount-added.show {
+  opacity: 1;
+  height: auto;
+  padding: 10px;
+}
+
+/* Opções de entrega */
+.shipping-options {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.shipping-options > div {
+  transition: all 0.2s ease;
+}
+
+.shipping-options > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Valores */
+.another-values {
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 15px;
+  margin-bottom: 15px;
+}
+
+.another-values .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+/* Total */
+.total {
+  background-color: #f9fafb;
+  padding: 15px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.total:hover {
+  background-color: #f3f4f6;
+}
+
+.total .header {
+  margin-bottom: 10px;
+}
+
+.total .header .title {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.total .price span {
+  font-size: 24px;
+  font-weight: bold;
+  color: #f97316;
+}
+
+.total .savings {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.total .condition {
+  display: block;
+  margin-top: 5px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Botões */
+.wd-checkout-basket-buttons {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.bt-keep-buying {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.bt-keep-buying:hover {
+  background-color: #f3f4f6;
+}
+
+.bt-checkout {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.bt-checkout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
+}
+
+.bt-checkout:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.bt-checkout:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .container_basket {
+    flex-direction: column;
+  }
+  
+  .col-lg-8, .col-lg-4 {
+    width: 100%;
+  }
+  
+  .col-lg-8 {
+    margin-bottom: 20px;
+  }
+  
+  .summary-xiaomi {
+    position: static !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .wd-checkout-basket-grid {
+    overflow-x: auto;
+  }
+  
+  .wd-checkout-basket-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .bt-checkout, .bt-keep-buying {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .wd-checkout-basket-grid .product .photo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .wd-checkout-basket-grid th,
+  .wd-checkout-basket-grid td {
+    padding: 10px 8px;
+  }
+  
+  .wd-checkout-basket-grid th:nth-child(1),
+  .wd-checkout-basket-grid td:nth-child(1) {
+    padding-left: 10px;
+  }
+}
+
+/* Animações úteis */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Add these animations at the end of your cart.css file */
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out forwards;
+}
+
+/* Adicione estas animações ao seu arquivo cart.css existente */
+
+@keyframes fade-in-top {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-top {
+  animation: fade-in-top 0.3s ease-out forwards;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  15%, 45%, 75% {
+    transform: translateX(-4px);
+  }
+  30%, 60%, 90% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.6s ease-in-out;
+}

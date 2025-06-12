@@ -3,15 +3,26 @@ import Link from 'next/link';
 import Script from 'next/script';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import CartIcon from "./cart/CartIcon";
+import { useCart } from '../v2/cart/hooks/useCart'; // Using Cart v2
 import styles from './Header.module.css';
 
 const Header = () => {
+  const { cartCount } = useCart(); // Agora sempre usa REST
     const [searchQuery, setSearchQuery] = useState('');
     const [isMenuVisible, setMenuVisibility] = useState(false);
     const [isMinicartOpen, setIsMinicartOpen] = useState(false);
-    const [cartCount, setCartCount] = useState(0);
     const [promoMessages, setPromoMessages] = useState(['Parcele em até 12x sem juros', 'Frete Grátis acima de R$200*', '8% de desconto à vista**']);
+    
+    const router = useRouter();
+    
+    // Fecha o mini-carrinho quando a rota muda
+    useEffect(() => {
+        setIsMinicartOpen(false);
+    }, [router.pathname]);
+    
+    // Verifica se estamos na página do carrinho
+    const isCartPage = router.pathname === '/cart'; // Removida referência a /carrinho
+
     const [categories, setCategories] = useState([
         {
             name: 'Celulares',
@@ -80,8 +91,6 @@ const Header = () => {
         }
     ]);
 
-    const router = useRouter();
-
     useEffect(() => {
         try {
             const fetchPromos = async () => {
@@ -96,8 +105,12 @@ const Header = () => {
         }
     }, []);
 
-    const closeMinicart = () => {
-        setIsMinicartOpen(false);
+    const toggleMinicart = () => {
+        // Se estiver na página do carrinho, não abre o mini-carrinho
+        if (isCartPage) {
+            return;
+        }
+        setIsMinicartOpen(!isMinicartOpen);
     };
 
     const handleSearchSubmit = (event) => {
@@ -106,6 +119,21 @@ const Header = () => {
             router.push(`/pesquisa?s=${encodeURIComponent(searchQuery)}`);
         }
     };
+
+    // Adicionando estado para controle do menu responsivo
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    
+    // Função para fechar o menu quando a tela é redimensionada para desktop
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return (
         <header id="header" className={styles.header}>
@@ -151,80 +179,52 @@ const Header = () => {
                                     alt="Xiaomi Brasil" 
                                     width={120}
                                     height={30}
+                                    priority
                                 />
                             </Link>
                         </h1>
                     </div>
+                    
+                    {/* Botão do menu mobile */}
+                    <button 
+                        className={styles.mobileMenuToggle}
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        aria-expanded={isMobileMenuOpen}
+                        aria-label="Menu principal"
+                    >
+                        <span className={styles.hamburger}></span>
+                    </button>
 
-                    {/* Menu de Todas as Categorias */}
-                    <div className={styles.allCategories}>
-                        <div className={styles.title} onClick={() => setMenuVisibility(!isMenuVisible)}>
-                            <svg role="img" className="menu-all-categories">
-                                <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#menu-all-categories"></use>
-                            </svg>
-                            Todos os produtos
-                        </div>
+                    {/* Navigation container with mobile responsive classes */}
+                    <div className={`${styles.navigationContainer} ${isMobileMenuOpen ? styles.mobileMenuOpen : ''}`}>
+                        {/* Menu de Todas as Categorias */}
+                        <div className={styles.allCategories}>
+                            <div className={styles.title} onClick={() => setMenuVisibility(!isMenuVisible)}>
+                                <svg role="img" className="menu-all-categories">
+                                    <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#menu-all-categories"></use>
+                                </svg>
+                                Todos os produtos
+                            </div>
 
-                        <div className={styles.categoryMenu}>
-                            <nav>
-                                <ul className="section level-1">
-                                    {categories.map((category, index) => (
-                                        <li key={index} className={`${category.slug} ${index === 0 ? 'first' : ''} ${index === categories.length - 1 ? 'last' : ''} has-children`}>
-                                            <h3>
-                                                <a href={`/${category.slug}`} className={category.slug} title={category.name}>
-                                                    {category.name}
-                                                    <span className="icon">
-                                                        <svg role="img" className="arrow-right">
-                                                            <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#arrow-right"></use>
-                                                        </svg>
-                                                    </span>
-                                                </a>
-                                            </h3>
-                                            
-                                            <a href={`/${category.slug}`} className="ver-tudo">Ver Tudo</a>
-                                            
-                                            <ul className="sub-section level-2">
-                                                {category.subcategories.map((subcategory, subIndex) => (
-                                                    <li key={subIndex} className={`${subIndex === 0 ? 'first' : ''} ${subIndex === category.subcategories.length - 1 ? 'last' : ''}`}>
-                                                        <h4>
-                                                            <a href={`/${category.slug}/${subcategory.slug}`} className={category.slug} title={subcategory.name}>
-                                                                <span className="icon"></span>
-                                                                {subcategory.name}
-                                                            </a>
-                                                        </h4>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <div className="category-banner-all"></div>
-                            </nav>
-                        </div>
-                    </div>
-
-                    {/* Menu principal de categorias horizontal */}
-                    <div className={styles.mainCategories}>
-                        <div className={styles.categoryMenu}>
-                            <nav>
-                                <ul className="section level-1">
-                                    {categories.map((category, index) => (
-                                        <li key={index} className={`${category.slug} menu_topo ${index === 0 ? 'first' : ''} ${index === categories.length - 1 ? 'last' : ''} has-children`}>
-                                            <h3>
-                                                <a href={`/${category.slug}`} className={category.slug} title={category.name}>
-                                                    {category.name}
-                                                    <span className="icon">
-                                                        <svg role="img" className="arrow-right">
-                                                            <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#arrow-right"></use>
-                                                        </svg>
-                                                    </span>
-                                                </a>
-                                            </h3>
-                                            
-                                            <ul className="sub-section level-2">
-                                                <div className="sub-section-content">
-                                                    <a href={`/${category.slug}`} className="ver-tudo">Ver Tudo</a>
-                                                    
+                            <div className={styles.categoryMenu}>
+                                <nav>
+                                    <ul className="section level-1">
+                                        {categories.map((category, index) => (
+                                            <li key={index} className={`${category.slug} ${index === 0 ? 'first' : ''} ${index === categories.length - 1 ? 'last' : ''} has-children`}>
+                                                <h3>
+                                                    <a href={`/${category.slug}`} className={category.slug} title={category.name}>
+                                                        {category.name}
+                                                        <span className="icon">
+                                                            <svg role="img" className="arrow-right">
+                                                                <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#arrow-right"></use>
+                                                            </svg>
+                                                        </span>
+                                                    </a>
+                                                </h3>
+                                                
+                                                <a href={`/${category.slug}`} className="ver-tudo">Ver Tudo</a>
+                                                
+                                                <ul className="sub-section level-2">
                                                     {category.subcategories.map((subcategory, subIndex) => (
                                                         <li key={subIndex} className={`${subIndex === 0 ? 'first' : ''} ${subIndex === category.subcategories.length - 1 ? 'last' : ''}`}>
                                                             <h4>
@@ -235,22 +235,82 @@ const Header = () => {
                                                             </h4>
                                                         </li>
                                                     ))}
-                                                </div>
-                                                
-                                                <div className="category-banner">
-                                                    <img src={`/banners/${category.slug}-banner.jpg`} alt={`Banner ${category.name}`} />
-                                                </div>
-                                            </ul>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </nav>
+                                                </ul>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div className="category-banner-all"></div>
+                                </nav>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Botão de ofertas */}
-                    <div className={styles.saleButton}>
-                        <Link href="/listas/ofertas">Ofertas</Link>
+                        {/* Menu principal de categorias horizontal */}
+                        <div className={styles.mainCategories}>
+                            <div className={styles.categoryMenu}>
+                                <nav>
+                                    <ul className="section level-1">
+                                        {categories.map((category, index) => (
+                                            <li key={index} className={`${category.slug} menu_topo ${index === 0 ? 'first' : ''} ${index === categories.length - 1 ? 'last' : ''} has-children`}>
+                                                <h3>
+                                                    <a href={`/${category.slug}`} className={category.slug} title={category.name}>
+                                                        {category.name}
+                                                        <span className="icon">
+                                                            <svg role="img" className="arrow-right">
+                                                                <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#arrow-right"></use>
+                                                            </svg>
+                                                        </span>
+                                                    </a>
+                                                </h3>
+                                                
+                                                <ul className="sub-section level-2">
+                                                    <div className="sub-section-content">
+                                                        <a href={`/${category.slug}`} className="ver-tudo">Ver Tudo</a>
+                                                        
+                                                        {category.subcategories.map((subcategory, subIndex) => (
+                                                            <li key={subIndex} className={`${subIndex === 0 ? 'first' : ''} ${subIndex === category.subcategories.length - 1 ? 'last' : ''}`}>
+                                                                <h4>
+                                                                    <a href={`/${category.slug}/${subcategory.slug}`} className={category.slug} title={subcategory.name}>
+                                                                        <span className="icon"></span>
+                                                                        {subcategory.name}
+                                                                    </a>
+                                                                </h4>
+                                                            </li>
+                                                        ))}
+                                                    </div>
+                                                    
+                                                    <div className="category-banner">
+                                                        <img src={`/banners/${category.slug}-banner.jpg`} alt={`Banner ${category.name}`} />
+                                                    </div>
+                                                </ul>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+
+                        {/* Botão de ofertas */}
+                        <div className={styles.saleButton}>
+                            <Link href="/listas/ofertas" legacyBehavior={false}>
+                                Ofertas
+                            </Link>
+                        </div>
+
+                        {/* Botões de Marcas */}
+                        <div className={styles.brandsButtons}>
+                            <Link href="/marca/apple" legacyBehavior={false} className={styles.brandButton}>
+                                Apple
+                            </Link>
+                            <Link href="/marca/samsung" legacyBehavior={false} className={styles.brandButton}>
+                                Samsung
+                            </Link>
+                            <Link href="/marca/xiaomi" legacyBehavior={false} className={styles.brandButton}>
+                                Xiaomi
+                            </Link>
+                            <Link href="/marca/motorola" legacyBehavior={false} className={styles.brandButton}>
+                                Motorola
+                            </Link>
+                        </div>
                     </div>
 
                     {/* Busca, conta e carrinho */}
@@ -263,10 +323,11 @@ const Header = () => {
                                         type="text" 
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="O que você está procurando?" 
+                                        placeholder="O que você está procurando?"
+                                        aria-label="Buscar produtos" 
                                     />
-                                    <button type="submit">
-                                        <svg role="img" className="search">
+                                    <button type="submit" aria-label="Buscar">
+                                        <svg role="img" className="search" aria-hidden="true">
                                             <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#search"></use>
                                         </svg>
                                     </button>
@@ -276,55 +337,27 @@ const Header = () => {
 
                         {/* Conta do usuário */}
                         <div className={`account ${styles.account}`}>
-                            <Link href="/minha-conta">
-                                <a title="Minha Conta" className={`account-link ${styles.accountLink}`}>
-                                    <svg role="img" className={styles.accountIcon}>
-                                        <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#user"></use>
-                                    </svg>
-                                </a>
+                            <Link href="/minha-conta" legacyBehavior={false} className={`account-link ${styles.accountLink}`} title="Minha Conta">
+                                <svg role="img" className={styles.accountIcon} aria-hidden="true">
+                                    <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#user"></use>
+                                </svg>
+                                <span className={styles.srOnly}>Minha Conta</span>
                             </Link>
                         </div>
 
-                        {/* Carrinho */}
+                        {/* Carrinho - Usando o componente CartIcon */}
                         <div className={styles.cart}>
-                            <CartIcon />
+                            <CartIcon 
+                                className={styles.cartButton}
+                                onClick={toggleMinicart}
+                            />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Mini Carrinho (aparece quando clicado) */}
-            <div className={`wd-ko wd-checkout-basket-summaryheader size-by-item empty ${isMinicartOpen ? 'open' : ''}`}>
-                <div className="summaryheader-content wd-widget">
-                    <div className="wd-header">
-                        <span className="wd-icon"></span>
-                        <div className="wd-title">Produtos no meu carrinho</div>
-                    </div>
-                    <div className="wd-content">
-                        <div className="empty-cart">
-                            <strong>Você ainda não colocou nenhum produto no carrinho.</strong>
-                        </div>
-                        <div className="header-content">
-                            <svg role="img" className="cart">
-                                <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#cart"></use>
-                            </svg>
-                            <div className="header-title">Minhas compras</div>
-                            <svg role="img" className="close-menu-mobile" onClick={closeMinicart}>
-                                <use xlinkHref="/Custom/Content/Themes/xiaomi/Imagens/svg/svg-symbols.svg#close-menu-mobile"></use>
-                            </svg>
-                        </div>
-                        <ul className="subtotal">
-                            <li className="label">Subtotal</li>
-                            <li className="value">R$ 0,00</li>
-                        </ul>
-                    </div>
-                    <div className="wd-footer">
-                        <span className="wd-icon"></span>
-                        <button data-href="/carrinho" className="go-to-basket btn" title="Finalizar pedido">Finalizar pedido</button>
-                        <button className="go-to-checkout ghost-button" title="Continuar comprando" onClick={closeMinicart}>Continuar comprando</button>
-                    </div>
-                </div>
-            </div>
+            {/* Integração do novo MiniCart - somente renderiza se NÃO estiver na página do carrinho */}
+            {!isCartPage && <MiniCart isOpen={isMinicartOpen} setIsOpen={setIsMinicartOpen} />}
         </header>
     );
 };

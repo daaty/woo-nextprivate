@@ -9,5 +9,88 @@ dist/
 .cache
 .next
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .now
 .qodo
+
+# SQLite
+/data/*.sqlite
+/data/*.sqlite-journal
+/data/*.db
+/data/*.db-journal
+
+# Arquivos de debug e teste
+debug-*.js
+test-*.js
+*-test.js
+*.test.js
+test-*.html
+debug-*.html
+
+# Arquivos específicos de teste do carrinho
+src/components/CartTestComponent.js
+src/components/cart/CartDebugInfo.js
+
+# Arquivos de backup
+backup/
+*-backup.*
+*-backup/
+
+# Arquivos temporários
+temp-*
+*.temp
+
+# Diretórios de teste
+src/v2/cart/tests/
+**/tests/
+
+# Arquivos de documentação de desenvolvimento
+*.instructions.md
+*-PLAN.md
+*-GUIDE.md
+*-REPORT.md
+*-STATUS.md
+*-COMPLETE.md
+*-SOLUTION.md
+*-FIX.md
+
+# Arquivos de diagnóstico
+diagnose-*.js
+
+# SQLite e dados
+/data/*.sqlite
+/data/*.db
+*.sqlite-journal
+
+# Variáveis de ambiente
+.env.*
+.env.local
+.env.development
+.env.production
+!.env.example
+
+# Logs e dados de runtime
+/logs/
+*.log.*
+*-diagnose.js
+diagnosticar-*.html
+
+# Ferramentas de desenvolvimento
+clear-*.js
+clear-*.html
+enable-*.js
+validate-*.js
+verify-*.js
+
+# Páginas de teste
+pages/cart-*.js
+pages/api/v2/cart/test-*.js
+
+# Arquivos públicos de teste
+public/test-*.js
+public/test-*.html
+public/*-fix.js
+public/*-bridge.js
