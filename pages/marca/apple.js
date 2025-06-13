@@ -15,8 +15,22 @@ import { CategorySchema, OrganizationSchema, BreadcrumbSchema } from '../../src/
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import { useMutation } from '@apollo/client';
 import { ADD_TO_FAVORITES } from '../../src/mutations/favorites';
+import { formatPrice } from '../../src/utils/format-price';
 
-export default function ApplePage() {  const [products, setProducts] = useState([]);
+export default function ApplePage() {
+  // Constantes para cálculo de parcelas com juros
+  const MAX_INSTALLMENTS = process.env.NEXT_PUBLIC_MAX_INSTALLMENTS ? parseInt(process.env.NEXT_PUBLIC_MAX_INSTALLMENTS) : 12;
+  const INSTALLMENT_INTEREST_RATE = process.env.NEXT_PUBLIC_INSTALLMENT_INTEREST_RATE ? parseFloat(process.env.NEXT_PUBLIC_INSTALLMENT_INTEREST_RATE) : 1.99;
+
+  // Função para calcular valor da parcela com juros
+  const calculateInstallmentValue = (total) => {
+    const rate = INSTALLMENT_INTEREST_RATE / 100;
+    const coefficient = (rate * Math.pow(1 + rate, MAX_INSTALLMENTS)) / (Math.pow(1 + rate, MAX_INSTALLMENTS) - 1);
+    const installmentValue = total * coefficient;
+    return installmentValue;
+  };
+
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // Estados para filtros - inicialização segura para SSR
@@ -1200,7 +1214,10 @@ export default function ApplePage() {  const [products, setProducts] = useState(
                               <span className={styles.regularPrice} style={{ fontSize: '0.8rem', textDecoration: 'line-through' }}>{formatPrice(product.regular_price)}</span>
                             )}
                             <span className={styles.price} style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatPrice(product.price)}</span>
-                            <span className={styles.installments} style={{ fontSize: '0.75rem', display: 'block', marginTop: '2px' }}>em até <strong>12x</strong> sem juros</span>
+                            <span className={styles.installments} style={{ fontSize: '0.75rem', display: 'block', marginTop: '2px' }}>
+                              em {MAX_INSTALLMENTS}x de <strong>{formatPrice(calculateInstallmentValue(getNumericPrice(product)))}</strong>
+                              <span style={{ fontSize: '0.6rem', opacity: 0.8 }}> com juros de {INSTALLMENT_INTEREST_RATE}% a.m.</span>
+                            </span>
                           </div>
                         </div>
                       </a>

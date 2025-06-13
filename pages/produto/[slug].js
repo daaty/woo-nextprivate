@@ -2050,6 +2050,78 @@ export default function ProdutoDetalhe() {
 
   return (
     <Layout>
+      <Head>
+        {/* Meta Tags Básicas */}
+        <title>{product.name} | Loja Oficial</title>
+        <meta name="description" content={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia`} />
+        
+        {/* Open Graph Meta Tags para WhatsApp, Facebook, Instagram */}
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={`${product.name} | Loja Oficial`} />
+        <meta property="og:description" content={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia. ${formatPrice(product.price)} em até 12x no cartão.`} />
+        <meta property="og:image" content={product.image?.sourceUrl || product.images?.[0]?.src || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/images/placeholder.jpg`} />
+        <meta property="og:image:alt" content={product.image?.altText || product.name} />
+        <meta property="og:image:width" content="800" />
+        <meta property="og:image:height" content="600" />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/produto/${product.slug}`} />
+        <meta property="og:site_name" content="Loja Oficial" />
+        <meta property="og:locale" content="pt_BR" />
+        
+        {/* Dados específicos do produto */}
+        <meta property="product:price:amount" content={priceToNumber(product.price)} />
+        <meta property="product:price:currency" content="BRL" />
+        <meta property="product:availability" content={product.stockStatus === 'IN_STOCK' ? 'in stock' : 'out of stock'} />
+        <meta property="product:condition" content="new" />
+        <meta property="product:brand" content={product.productCategories?.nodes?.[0]?.name || 'Loja Oficial'} />
+        
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${product.name} | Loja Oficial`} />
+        <meta name="twitter:description" content={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia`} />
+        <meta name="twitter:image" content={product.image?.sourceUrl || product.images?.[0]?.src || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/images/placeholder.jpg`} />
+        
+        {/* WhatsApp específico - Schema.org */}
+        <meta property="product:retailer_item_id" content={product.databaseId || product.id} />
+        <meta property="product:item_group_id" content={product.productCategories?.nodes?.[0]?.slug || 'produtos'} />
+        
+        {/* Dados estruturados para WhatsApp Business */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": product.name,
+            "description": product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia`,
+            "image": product.image?.sourceUrl || product.images?.[0]?.src || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/images/placeholder.jpg`,
+            "brand": {
+              "@type": "Brand",
+              "name": product.productCategories?.nodes?.[0]?.name || "Loja Oficial"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": priceToNumber(product.price),
+              "priceCurrency": "BRL",
+              "availability": product.stockStatus === 'IN_STOCK' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/produto/${product.slug}`,
+              "seller": {
+                "@type": "Organization",
+                "name": "Loja Oficial"
+              }
+            },
+            "aggregateRating": product.averageRating ? {
+              "@type": "AggregateRating",
+              "ratingValue": product.averageRating,
+              "reviewCount": product.reviewCount || 1
+            } : undefined
+          })}
+        </script>
+        
+        {/* Meta Tags adicionais para melhor compartilhamento */}
+        <meta property="og:image:secure_url" content={product.image?.sourceUrl || product.images?.[0]?.src || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/images/placeholder.jpg`} />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/produto/${product.slug}`} />
+      </Head>
+
       <SEO 
         title={`${product.name} | Loja Oficial`}
         description={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia`}

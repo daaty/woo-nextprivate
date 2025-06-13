@@ -11,11 +11,87 @@ import { PRODUCTS_BY_CATEGORY_QUERY, PRODUCTS_ON_SALE_QUERY, FEATURED_PRODUCTS_Q
  */
 export default async function handler(req, res) {
   try {
-    const { category, per_page = 4, page = 1, on_sale, featured } = req.query;
+    const { category, per_page = 4, page = 1, on_sale, featured, id } = req.query;
     
     console.group("API Request: /api/products");
-    console.log("Parâmetros:", { category, per_page, page, on_sale, featured });
+    console.log("Parâmetros:", { category, per_page, page, on_sale, featured, id });
     
+    // Caso especial: buscar produto por ID específico
+    if (id) {
+      console.log(`🎯 Buscando produto específico por ID: ${id}`);
+      const PRODUCT_BY_ID_QUERY = gql`
+        query GetProductById($id: ID!) {
+          product(id: $id, idType: DATABASE_ID) {
+            id
+            databaseId
+            name
+            slug
+            description
+            shortDescription
+            type
+            onSale
+            averageRating
+            reviewCount
+            image {
+              id
+              sourceUrl
+              altText
+              title
+            }
+            ... on SimpleProduct {
+              price(format: RAW)
+              regularPrice(format: RAW)
+              salePrice(format: RAW)
+            }
+            ... on VariableProduct {
+              price(format: RAW)
+              regularPrice(format: RAW)
+              salePrice(format: RAW)
+            }
+          }
+        }
+      `;
+      
+      try {
+        const { data } = await client.query({
+          query: PRODUCT_BY_ID_QUERY,
+          variables: { id: parseInt(id) }
+        });
+        
+        if (data?.product) {
+          const product = {
+            id: data.product.databaseId || data.product.id,
+            databaseId: data.product.databaseId,
+            name: data.product.name,
+            slug: data.product.slug,
+            description: data.product.description,
+            shortDescription: data.product.shortDescription,
+            price: data.product.price || data.product.regularPrice || '',
+            regularPrice: data.product.regularPrice || '',
+            salePrice: data.product.salePrice || '',
+            onSale: data.product.onSale || false,
+            averageRating: data.product.averageRating || 0,
+            reviewCount: data.product.reviewCount || 0,
+            image: data.product.image?.sourceUrl || null,
+            imageAlt: data.product.image?.altText || data.product.name
+          };
+          
+          console.log(`✅ Produto encontrado: ${product.name} (${product.slug})`);
+          console.groupEnd();
+          return res.status(200).json([product]); // Retorna array para compatibilidade
+        } else {
+          console.warn(`⚠️ Produto não encontrado para ID: ${id}`);
+          console.groupEnd();
+          return res.status(404).json({ error: 'Produto não encontrado' });
+        }
+      } catch (error) {
+        console.error(`❌ Erro ao buscar produto por ID ${id}:`, error);
+        console.groupEnd();
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+      }
+    }
+    
+    // Lógica original para busca de múltiplos produtos
     // Seleciona a query apropriada baseada nos parâmetros
     let query;
     if (featured === 'true') {

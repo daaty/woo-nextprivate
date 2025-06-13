@@ -47,6 +47,44 @@ const PlusIcon = () => <span>+</span>;
 // Placeholders e constantes
 const DEFAULT_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRjY5MDAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCI+UHJvZHV0bzwvdGV4dD48L3N2Zz4=';
 
+// Cache para armazenar slugs de produtos já buscados (mesma lógica das páginas de marca)
+const productSlugCache = {};
+
+// Função para buscar o slug correto do produto usando a mesma API das páginas de marca
+const fetchProductSlug = async (productId) => {
+  // Verificar se já temos o slug em cache
+  if (productSlugCache[productId]) {
+    console.log(`🎯 [Slug Cache] Usando slug em cache para ID ${productId}:`, productSlugCache[productId]);
+    return productSlugCache[productId];
+  }
+  
+  try {
+    console.log(`🔍 [Slug Fetch] Buscando slug para produto ID: ${productId}`);
+    const response = await fetch(`/api/products?id=${productId}`);
+    
+    if (!response.ok) {
+      throw new Error(`API retornou status ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const productsArray = Array.isArray(data) ? data : data.products || [];
+    const product = productsArray.find(p => p.id === productId || p.databaseId === productId);
+    
+    if (product && product.slug) {
+      // Armazenar no cache para uso futuro
+      productSlugCache[productId] = product.slug;
+      console.log(`✅ [Slug Fetch] Slug encontrado para ID ${productId}:`, product.slug);
+      return product.slug;
+    } else {
+      console.warn(`⚠️ [Slug Fetch] Produto não encontrado ou sem slug para ID: ${productId}`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`❌ [Slug Fetch] Erro ao buscar slug para ID ${productId}:`, error);
+    return null;
+  }
+};
+
 const Cart = () => {
   const router = useRouter();
   const { isLoggedIn, user } = useAuth(); // Obtendo informações de autenticação
@@ -74,6 +112,9 @@ const Cart = () => {
   const [shippingCost, setShippingCost] = useState(0);
   // Manual total calculation for better precision
   const [manualSubtotal, setManualSubtotal] = useState(0);
+  
+  // Estado para armazenar slugs dos produtos do carrinho
+  const [productSlugs, setProductSlugs] = useState({});
   
   // Constantes de configuração - Usando variáveis de ambiente
   const FREE_SHIPPING_THRESHOLD = 199;
@@ -170,6 +211,32 @@ const Cart = () => {
       }
     }
   }, [contextReady, cartItems, clientCartItems]);
+  
+  // 🔧 FIX: Carregar slugs corretos dos produtos (mesma lógica das páginas de marca)
+  useEffect(() => {
+    const loadProductSlugs = async () => {
+      if (!cartItems || cartItems.length === 0) return;
+      
+      console.log('🔍 [Product Slugs] Carregando slugs para produtos do carrinho...');
+      const newSlugs = {};
+      
+      for (const item of cartItems) {
+        if (item.productId && !productSlugs[item.productId]) {
+          const slug = await fetchProductSlug(item.productId);
+          if (slug) {
+            newSlugs[item.productId] = slug;
+          }
+        }
+      }
+      
+      if (Object.keys(newSlugs).length > 0) {
+        console.log('✅ [Product Slugs] Slugs carregados:', newSlugs);
+        setProductSlugs(prevSlugs => ({ ...prevSlugs, ...newSlugs }));
+      }
+    };
+    
+    loadProductSlugs();
+  }, [cartItems]);
     // 🔧 FIX: Sistema de recuperação de carrinho melhorado para Cart v2
   useEffect(() => {
     if (!hydrated) return;
@@ -463,12 +530,15 @@ const Cart = () => {
       .replace(/-+/g, '-')          // Remove hífens duplicados
       .replace(/^-+|-+$/g, '')      // Remove hífens no início e fim
       .trim();                      // Remove espaços no início e fim
-  };// Função para navegar para a página do produto (corrigida para usar o slug real, robusta para WooCommerce)
+  };// Função para navegar para a página do produto (mantida para compatibilidade, mas preferencialmente use Link)
   const handleProductNavigation = (item) => {
     if (!item) {
       notification.warning('Produto não encontrado');
       return;
     }
+    // Debug: vamos ver a estrutura real do item
+    console.log('🔍 DEBUG: Estrutura do item do carrinho:', JSON.stringify(item, null, 2));
+    
     // WooCommerce: o campo correto é item.slug OU item.product.slug OU item.data.slug OU item.product_data?.slug
     const productSlug = item.slug || item.product?.slug || item.data?.slug || item.product_data?.slug || (item.name ? generateProductSlug(item.name) : '');
     if (!productSlug) {
@@ -2138,35 +2208,45 @@ const Cart = () => {
                       console.log(`🔍 [Cart Debug] Alt text: "${altText}"`);
                       console.log(`🔍 [Cart Debug] Usando placeholder? ${imgSrc === DEFAULT_PLACEHOLDER ? 'SIM' : 'NÃO'}`);
                       
+                      // CORRIGIDO: Usar slug correto da API (mesma lógica das páginas de marca)
+                      const correctSlug = productSlugs[item.productId];
+                      const productSlug = correctSlug || item.slug || item.product?.slug || item.data?.slug || item.product_data?.slug || (item.name ? generateProductSlug(item.name) : '');
+                      
                       return (
-                        <img
-                          src={imgSrc}
-                          alt={altText}
-                          className="cart-item-image"
-                          onClick={() => handleProductNavigation(item)}
-                          onLoad={(e) => {
-                            console.log(`✅ [Cart Debug] Imagem carregada com sucesso para "${item.name}": ${e.target.src}`);
-                          }}
-                          onError={e => {
-                            console.error(`❌ [Cart Debug] Erro ao carregar imagem para "${item.name}": ${e.target.src}`);
-                            console.error(`❌ [Cart Debug] Trocando para placeholder: ${DEFAULT_PLACEHOLDER}`);
-                            e.target.onerror = null;
-                            e.target.src = DEFAULT_PLACEHOLDER;
-                          }}
-                          title="Clique para ver detalhes do produto"
-                        />
+                        <Link href={`/produto/${productSlug}`}>
+                          <a>
+                            <img
+                              src={imgSrc}
+                              alt={altText}
+                              className="cart-item-image"
+                              onLoad={(e) => {
+                                console.log(`✅ [Cart Debug] Imagem carregada com sucesso para "${item.name}": ${e.target.src}`);
+                              }}
+                              onError={e => {
+                                console.error(`❌ [Cart Debug] Erro ao carregar imagem para "${item.name}": ${e.target.src}`);
+                                console.error(`❌ [Cart Debug] Trocando para placeholder: ${DEFAULT_PLACEHOLDER}`);
+                                e.target.onerror = null;
+                                e.target.src = DEFAULT_PLACEHOLDER;
+                              }}
+                              title="Clique para ver detalhes do produto"
+                            />
+                          </a>
+                        </Link>
                       );
                     })()}
                     
                     {/* Detalhes do produto */}
                     <div className="cart-item-details">
-                      <h3 
-                        className="cart-item-title"
-                        onClick={() => handleProductNavigation(item)}
-                        title="Clique para ver detalhes do produto"
-                      >
-                        {item.name}
-                      </h3>
+                      <Link href={`/produto/${productSlugs[item.productId] || item.slug || item.product?.slug || item.data?.slug || item.product_data?.slug || (item.name ? generateProductSlug(item.name) : '')}`}>
+                        <a>
+                          <h3 
+                            className="cart-item-title"
+                            title="Clique para ver detalhes do produto"
+                          >
+                            {item.name}
+                          </h3>
+                        </a>
+                      </Link>
                       <div className="text-sm text-gray-600 mt-1">
                         {item.attributes && item.attributes.length > 0 && (
                           <div className="product-attrs">
