@@ -268,9 +268,9 @@ const DashboardTab = ({ user }) => {
   const getProgressToNextLevel = () => {
     const spent = stats.totalSpent;
     const levels = [
-      { name: 'Bronze', min: 0, max: 500, color: '#cd7f32', benefits: 'Frete grátis em compras acima de R$ 199' },
-      { name: 'Prata', min: 500, max: 1500, color: '#c0c0c0', benefits: 'Frete grátis + 5% desconto' },
-      { name: 'Ouro', min: 1500, max: 5000, color: '#ffd700', benefits: 'Frete grátis + 10% desconto + Suporte prioritário' },
+      { name: 'Bronze', min: 0, max: 500, color: '#cd7f32', benefits: 'Frete grátis em compras acima de R$ 1.000 (MT)' },
+      { name: 'Prata', min: 500, max: 1500, color: '#c0c0c0', benefits: 'Frete grátis (MT) + 5% desconto' },
+      { name: 'Ouro', min: 1500, max: 5000, color: '#ffd700', benefits: 'Frete grátis (MT) + 10% desconto + Suporte prioritário' },
       { name: 'Diamante', min: 5000, max: Infinity, color: '#b9f2ff', benefits: 'Todos os benefícios + Acesso antecipado' }
     ];
 
@@ -290,9 +290,9 @@ const DashboardTab = ({ user }) => {
   // Estados de loading e erro
   if (ordersLoading && !ordersData) {
     return (
-      <div className="dashboard-loading">
+      <div className="flex flex-col items-center justify-center py-12 text-center">
         <LoadingSpinner />
-        <p>Carregando seu dashboard...</p>
+        <p className="mt-4 text-gray-600">Carregando seu dashboard...</p>
       </div>
     );
   }

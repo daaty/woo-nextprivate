@@ -311,7 +311,7 @@ const ProductGrid = ({ products }) => {
                         {formatPrice(price)}
                       </span>
                       <div className="text-xs text-gray-500 mt-1">
-                        em até <strong>12x</strong> sem juros
+                        em até <strong>12x</strong> no cartão
                       </div>
                     </div>
                   </div>
@@ -329,8 +329,25 @@ const ProductGrid = ({ products }) => {
                     <button
                       onClick={() => handleAddToCart(product)}
                       disabled={addingToCart}
-                      className="w-full py-2 px-4 rounded text-white font-medium transition-all duration-200 bg-primary hover:bg-primary-dark"
+                      className="w-full py-2 px-4 rounded-lg text-white font-semibold transition-all duration-300 flex items-center justify-center gap-2 hover:transform hover:translateY(-1px) hover:shadow-lg"
+                      style={{
+                        background: 'linear-gradient(135deg, #ff6900 0%, #ff8f00 50%, #00a8e1 100%)',
+                        boxShadow: '0 4px 16px rgba(255, 105, 0, 0.3)',
+                        border: 'none'
+                      }}
                     >
+                      {!wasRecentlyAdded && (
+                        <div style={{
+                          width: '18px',
+                          height: '18px',
+                          backgroundImage: 'url(/icons/add-cart_5733218.png)',
+                          backgroundSize: 'contain',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'center',
+                          filter: 'brightness(0) invert(1)',
+                          transition: 'transform 0.3s ease'
+                        }} />
+                      )}
                       {wasRecentlyAdded ? '✓ Adicionado!' : 'Adicionar ao Carrinho'}
                     </button>
                   )}

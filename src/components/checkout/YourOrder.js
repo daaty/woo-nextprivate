@@ -61,10 +61,10 @@ const YourOrder = ({ cart }) => {    // Função para extrair valor numérico de
 
     // Valores constantes
     const subtotal = calculateSubtotal();
-    const FREE_SHIPPING_THRESHOLD = 199; // Mínimo para frete grátis (R$ 199,00)
+    const FREE_SHIPPING_THRESHOLD = 1000; // Mínimo para frete grátis (R$ 1.000,00)
     const CASH_PAYMENT_DISCOUNT_PERCENT = 8; // Desconto de 8% para pagamento à vista
     const CASH_PAYMENT_MULTIPLIER = (100 - CASH_PAYMENT_DISCOUNT_PERCENT) / 100; // Multiplica por 0.92 para 8% de desconto
-    const MAX_INSTALLMENTS = 12; // Número máximo de parcelas sem juros
+    const MAX_INSTALLMENTS = 12; // Número máximo de parcelas
     const hasFreightFree = subtotal >= FREE_SHIPPING_THRESHOLD;
     
     return (
@@ -108,7 +108,7 @@ const YourOrder = ({ cart }) => {    // Função para extrair valor numérico de
                                     background: 'linear-gradient(90deg, #22c55e, #10b981)'
                                 }}></div>
                                 <span className="text-green-700 text-sm font-medium">
-                                    Você ganhou frete grátis por compras acima de R$ 199,00
+                                    Você ganhou frete grátis por compras acima de R$ 1.000,00 (MT)
                                 </span>
                             </div>
                         )}
@@ -151,7 +151,7 @@ const YourOrder = ({ cart }) => {    // Função para extrair valor numérico de
                             <div className="text-sm text-gray-600 mt-1">
                                 ou em até <span className="font-medium">{MAX_INSTALLMENTS}x</span> de <span className="font-medium">
                                     {formatPrice((subtotal || 0) / MAX_INSTALLMENTS)}
-                                </span> sem juros
+                                </span> no cartão
                             </div>
                         </div>
                     </div>

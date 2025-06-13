@@ -100,7 +100,7 @@ export default function ProductDetail({ product }) {
             )}
             
             <p className="text-sm text-gray-600 mt-2">
-              ou 12x de {formatCurrency(price / 12)} sem juros
+              ou 12x de {formatCurrency(price / 12)} no cartão
             </p>
           </div>
           
@@ -174,7 +174,7 @@ export default function ProductDetail({ product }) {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span>Frete grátis para todo o Brasil</span>
+              <span>Frete grátis para o estado do Mato Grosso (acima de R$1.000)</span>
             </div>
             <div className="flex items-center text-sm text-gray-600">
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

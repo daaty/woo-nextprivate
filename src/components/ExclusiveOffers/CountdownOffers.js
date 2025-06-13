@@ -3,6 +3,7 @@ import Link from 'next/link';
 import styles from './CountdownOffers.module.css';
 import { calculateInstallmentValue, INSTALLMENT_INTEREST_RATE, MAX_INSTALLMENTS } from '../../utils/installment-utils';
 import { priceToNumber, formatPrice } from '../../utils/format-price';
+import LoadingSpinner from '../LoadingSpinner';
 
 // Componente para o cartão do produto
 const ProductCard = ({ product, discount }) => {
@@ -524,15 +525,43 @@ const formattedInstallmentValue = formatPrice(installmentValue);eço: "${price}"
           </div>
         </a>
       </Link>
-      
-      <button 
-        className={styles.addToCart}
+       <button
+        className={`${styles.addToCart} d-flex align-items-center justify-content-center`}
         onClick={handleAddToCart}
         data-product-id={product.id}
         data-product-name={product.name}
         data-product-price={priceData.salePrice}
         data-product-image={getImageUrl()}
+        style={{ 
+          gap: '8px',
+          background: 'linear-gradient(135deg, #ff6900 0%, #ff8f00 50%, #00a8e1 100%)',
+          boxShadow: '0 4px 16px rgba(255, 105, 0, 0.3)',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          fontWeight: '600',
+          transition: 'all 0.3s ease',
+          padding: '8px 16px'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.transform = 'translateY(-1px)';
+          e.target.style.boxShadow = '0 6px 20px rgba(255, 105, 0, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.transform = 'translateY(0)';
+          e.target.style.boxShadow = '0 4px 16px rgba(255, 105, 0, 0.3)';
+        }}
       >
+        <div style={{
+          width: '16px',
+          height: '16px',
+          backgroundImage: 'url(/icons/add-cart_5733218.png)',
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          filter: 'brightness(0) invert(1)',
+          transition: 'transform 0.3s ease'
+        }} />
         Adicionar ao Carrinho
       </button>
     </div>
@@ -726,7 +755,10 @@ const CountdownOffers = () => {
       
       <div className={styles.productGrid}>
         {loading ? (
-          <div className={styles.loading}>Carregando ofertas...</div>
+          <div className="flex flex-col items-center justify-center py-12">
+            <LoadingSpinner />
+            <p className="mt-4 text-gray-600">Carregando ofertas...</p>
+          </div>
         ) : error ? (
           <div className={styles.error}>{error}</div>
         ) : !offerIsActive ? (

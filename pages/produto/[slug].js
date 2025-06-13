@@ -2050,83 +2050,20 @@ export default function ProdutoDetalhe() {
 
   return (
     <Layout>
-      <Head>
-        {/* Meta Tags Básicas */}
-        <title>{product.name} | Loja Oficial</title>
-        <meta name="description" content={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia`} />
-        
-        {/* Open Graph Meta Tags para WhatsApp, Facebook, Instagram */}
-        <meta property="og:type" content="product" />
-        <meta property="og:title" content={`${product.name} | Loja Oficial`} />
-        <meta property="og:description" content={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia. ${formatPrice(product.price)} em até 12x no cartão.`} />
-        <meta property="og:image" content={product.image?.sourceUrl || product.images?.[0]?.src || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/images/placeholder.jpg`} />
-        <meta property="og:image:alt" content={product.image?.altText || product.name} />
-        <meta property="og:image:width" content="800" />
-        <meta property="og:image:height" content="600" />
-        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/produto/${product.slug}`} />
-        <meta property="og:site_name" content="Loja Oficial" />
-        <meta property="og:locale" content="pt_BR" />
-        
-        {/* Dados específicos do produto */}
-        <meta property="product:price:amount" content={priceToNumber(product.price)} />
-        <meta property="product:price:currency" content="BRL" />
-        <meta property="product:availability" content={product.stockStatus === 'IN_STOCK' ? 'in stock' : 'out of stock'} />
-        <meta property="product:condition" content="new" />
-        <meta property="product:brand" content={product.productCategories?.nodes?.[0]?.name || 'Loja Oficial'} />
-        
-        {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${product.name} | Loja Oficial`} />
-        <meta name="twitter:description" content={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia`} />
-        <meta name="twitter:image" content={product.image?.sourceUrl || product.images?.[0]?.src || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/images/placeholder.jpg`} />
-        
-        {/* WhatsApp específico - Schema.org */}
-        <meta property="product:retailer_item_id" content={product.databaseId || product.id} />
-        <meta property="product:item_group_id" content={product.productCategories?.nodes?.[0]?.slug || 'produtos'} />
-        
-        {/* Dados estruturados para WhatsApp Business */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            "name": product.name,
-            "description": product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia`,
-            "image": product.image?.sourceUrl || product.images?.[0]?.src || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/images/placeholder.jpg`,
-            "brand": {
-              "@type": "Brand",
-              "name": product.productCategories?.nodes?.[0]?.name || "Loja Oficial"
-            },
-            "offers": {
-              "@type": "Offer",
-              "price": priceToNumber(product.price),
-              "priceCurrency": "BRL",
-              "availability": product.stockStatus === 'IN_STOCK' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-              "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/produto/${product.slug}`,
-              "seller": {
-                "@type": "Organization",
-                "name": "Loja Oficial"
-              }
-            },
-            "aggregateRating": product.averageRating ? {
-              "@type": "AggregateRating",
-              "ratingValue": product.averageRating,
-              "reviewCount": product.reviewCount || 1
-            } : undefined
-          })}
-        </script>
-        
-        {/* Meta Tags adicionais para melhor compartilhamento */}
-        <meta property="og:image:secure_url" content={product.image?.sourceUrl || product.images?.[0]?.src || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/images/placeholder.jpg`} />
-        <meta property="og:image:type" content="image/jpeg" />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/produto/${product.slug}`} />
-      </Head>
-
-      <SEO 
-        title={`${product.name} | Loja Oficial`}
-        description={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia`}
-        image={product.image?.sourceUrl || '/images/placeholder.jpg'}
-        url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://seusite.com'}/produto/${product.slug}`}
+      {/* SEO Otimizado para Produto */}
+      <SEO
+        title={`${product.name}`}
+        description={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia. Parcele no cartão em até 12x.`}
+        image={product.image?.sourceUrl || product.images?.[0]?.src}
+        type="product"
+        canonical={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://loja.rotadoscelulares.com'}/produto/${product.slug}`}
+        keywords={`${product.name}, ${product.productCategories?.nodes?.map(cat => cat.name).join(', ') || ''}, smartphones, celulares, Nova Canaã do Norte MT`}
+        price={priceToNumber(product.price)}
+        currency="BRL"
+        availability={product.stockStatus === 'IN_STOCK' ? 'in stock' : 'out of stock'}
+        brand={product.productCategories?.nodes?.[0]?.name || 'Rota dos Celulares'}
+        category={product.productCategories?.nodes?.[0]?.name}
+        sku={product.sku || product.databaseId?.toString()}
       />
       
       <div className="product-detail-container">
@@ -2193,7 +2130,7 @@ export default function ProdutoDetalhe() {
                 )}
                 <span className="price">{calculateTotalPrice()}</span>
               </div>              <div className="installment-info">
-                ou em até <strong>12x</strong> de <strong>{getInstallmentPriceWithQuantity()}</strong> no cartão de crédito
+                ou em até <strong>12x</strong> de <strong>{getInstallmentPriceWithQuantity()}</strong> no cartão
               </div>
             </div>
               {/* Métodos de Pagamento */}
@@ -2350,30 +2287,68 @@ export default function ProdutoDetalhe() {
                   +
                 </button>
               </div>
-            </div>            {/* Botão Adicionar ao Carrinho */}
-            <button
-              className="jsx-2605175872 add-to-cart-button"
-              onClick={handleAddToCart}
-              style={{
-                width: '100%',
-                minHeight: '50px',
-                border: 'none',
-                borderRadius: '8px',
-                color: 'white',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, #ff6900 0%, #00a8e1 100%)',
-                transition: 'all 0.3s ease',
+            </div>            
+            {/* Container centralizado para o Botão Adicionar ao Carrinho */}
+            <div className="flex justify-center items-center mb-6">
+              <button
+                className="jsx-2605175872 add-to-cart-button creative-cart-button"
+                onClick={handleAddToCart}
+                style={{
+                  width: '320px', // Largura fixa em vez de 100%
+                  minHeight: '80px',
+                  border: 'none',
+                  borderRadius: '16px',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '16px',
+                  background: 'linear-gradient(135deg, #ff6900 0%, #ff8f00 50%, #00a8e1 100%)',
+                  boxShadow: '0 8px 32px rgba(255, 105, 0, 0.4), 0 4px 16px rgba(0, 168, 225, 0.3)',
+                  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}
+              >
+              {/* Ícone do carrinho */}
+              <div style={{
+                width: '64px',
+                height: '64px',
+                backgroundImage: 'url(/icons/add-cart_5733218.png)',
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                filter: 'brightness(0) invert(1)',
+                transition: 'transform 0.3s ease'
+              }} />
+              
+              {/* Texto do botão */}
+              <span style={{
                 position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              Adicionar ao carrinho
-            </button>
+                zIndex: 2
+              }}>
+                Adicionar ao Carrinho
+              </span>
+              
+              {/* Efeito de brilho animado */}
+              <div style={{
+                position: 'absolute',
+                top: '-50%',
+                left: '-50%',
+                width: '200%',
+                height: '200%',
+                background: 'linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+                transform: 'translateX(-100%)',
+                transition: 'transform 0.6s ease',
+                animation: 'shine 3s infinite'
+              }} />
+              </button>
+            </div>
             
             {/* Benefícios */}
             <div className="benefits-container">
@@ -2522,7 +2497,7 @@ export default function ProdutoDetalhe() {
                             </span>
                           </div>
                           <div className="related-installments">
-                            em até <strong>12x</strong> sem juros
+                            em até <strong>12x</strong> no cartão
                           </div>
                         </div>
                       </div>
@@ -2801,12 +2776,11 @@ export default function ProdutoDetalhe() {
           border-radius: 8px;
           cursor: pointer;
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          width: 100%;
-          max-width: 240px;
-          height: 200px !important;
-          min-height: 40px !important;
-          margin-left: 0;
-          margin-right: auto;
+          width: 320px; /* Largura fixa em vez de 100% */
+          max-width: 100%; /* Para responsividade */
+          height: 80px !important;
+          min-height: 80px !important;
+          margin: 0 auto; /* Centralização automática */
           position: relative;
           overflow: hidden;
           box-shadow: 0 4px 12px rgba(255, 105, 0, 0.3);
@@ -2839,6 +2813,96 @@ export default function ProdutoDetalhe() {
         .add-to-cart-button:disabled {
           opacity: 0.9;
           cursor: not-allowed;
+        }
+
+        /* Estilos para o botão criativo */
+        .creative-cart-button:hover:not(.loading) {
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 12px 40px rgba(255, 105, 0, 0.5), 0 8px 24px rgba(0, 168, 225, 0.4);
+          background: linear-gradient(135deg, #ff8f00 0%, #ffab00 50%, #00c4e8 100%);
+        }
+
+        .creative-cart-button:hover:not(.loading) > div:first-child {
+          transform: scale(1.1) rotate(5deg);
+        }
+
+        .creative-cart-button:active:not(.loading) {
+          transform: translateY(-2px) scale(0.98);
+          transition: all 0.1s ease;
+        }
+
+        .creative-cart-button.loading {
+          background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+          cursor: not-allowed;
+          width: 80px;
+          height: 80px !important;
+          min-height: 80px !important;
+          border-radius: 50%;
+          padding: 0;
+          margin-left: 0;
+          transform: scale(0.9);
+          box-shadow: 0 4px 16px rgba(107, 114, 128, 0.4);
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .creative-cart-button.loading span {
+          display: none;
+        }
+
+        .creative-cart-button.loading > div:first-child {
+          width: 32px;
+          height: 32px;
+          filter: brightness(0) invert(1);
+          animation: cartBounce 1s infinite ease-in-out;
+        }
+
+        /* Animações personalizadas */
+        @keyframes shine {
+          0% {
+            transform: translateX(-100%);
+          }
+          50% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        @keyframes cartBounce {
+          0%, 100% {
+            transform: scale(1) rotate(0deg);
+          }
+          50% {
+            transform: scale(1.1) rotate(3deg);
+          }
+        }
+
+        /* Efeito de pulsação para destacar o botão */
+        .creative-cart-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, rgba(255, 105, 0, 0.1), rgba(0, 168, 225, 0.1));
+          border-radius: inherit;
+          opacity: 0;
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.05);
+          }
         }
           .benefits-container {
           background-color: #f9f9f9;
@@ -3388,12 +3452,28 @@ export default function ProdutoDetalhe() {
           .related-sale-price {
             font-size: 16px;
           }
+          
+          /* Ajustes para o botão em mobile */
+          .add-to-cart-button {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+          }
         }
         
         @media (max-width: 480px) {
           .related-products-grid {
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 16px;
+          }
+          
+          /* Ajustes adicionais para o botão em telas muito pequenas */
+          .add-to-cart-button {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            font-size: 14px !important;
+            gap: 12px !important;
           }
         }
       `}</style>

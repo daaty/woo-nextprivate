@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useCart } from '../../../v2/cart/hooks/useCart';
 import { isEmpty } from 'lodash';
+import LoadingSpinner from '../../LoadingSpinner';
 
 const CartItemsContainer = () => {
 	// Use Cart v2 hook
@@ -74,8 +75,9 @@ const CartItemsContainer = () => {
 	if (cartLoading) {
 		return (
 			<div className="cart product-cart-container container mx-auto my-32 px-4 xl:px-0">
-				<div className="text-center">
-					<p>Carregando carrinho...</p>
+				<div className="flex flex-col items-center justify-center py-12">
+					<LoadingSpinner />
+					<p className="mt-4 text-gray-600">Carregando carrinho...</p>
 				</div>
 			</div>
 		);

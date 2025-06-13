@@ -78,7 +78,7 @@ const Checkout = ({countriesData}) => {
 	const [shippingError, setShippingError] = useState(null);
 	const [shippingCost, setShippingCost] = useState(0); // MOVIDO: Declarado antes de ser usado
 	const [hasFreightFree, setHasFreightFree] = useState(false);	const [isFinalizingOrder, setIsFinalizingOrder] = useState(false);
-	const FREE_SHIPPING_THRESHOLD = 199;
+	const FREE_SHIPPING_THRESHOLD = 1000;
 	
 	// Calcular subtotal manualmente a partir dos itens do carrinho
 	useEffect(() => {

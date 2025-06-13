@@ -104,9 +104,16 @@ const AddToCartButtonV2 = ({
                     </>
                 ) : (
                     <>
-                        <svg className="cart-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5H20.5" />
-                        </svg>
+                        <div style={{
+                            width: '20px',
+                            height: '20px',
+                            backgroundImage: 'url(/icons/add-cart_5733218.png)',
+                            backgroundSize: 'contain',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center',
+                            filter: 'brightness(0) invert(1)',
+                            transition: 'transform 0.3s ease'
+                        }} />
                         <span>Adicionar ao Carrinho</span>
                     </>
                 )}
@@ -138,21 +145,23 @@ const AddToCartButtonV2 = ({
                     justify-content: center;
                     gap: 8px;
                     padding: 12px 24px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, #ff6900 0%, #ff8f00 50%, #00a8e1 100%);
                     color: white;
                     border: none;
-                    border-radius: 8px;
+                    border-radius: 12px;
                     font-size: 16px;
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.3s ease;
                     min-height: 48px;
                     text-decoration: none;
+                    box-shadow: 0 4px 16px rgba(255, 105, 0, 0.3);
                 }
 
                 .add-to-cart-btn-v2:hover:not(.disabled):not(.loading) {
                     transform: translateY(-2px);
-                    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                    box-shadow: 0 8px 25px rgba(255, 105, 0, 0.4);
+                    background: linear-gradient(135deg, #ff8f00 0%, #ffab00 50%, #00c4e8 100%);
                 }
 
                 .add-to-cart-btn-v2:active:not(.disabled):not(.loading) {

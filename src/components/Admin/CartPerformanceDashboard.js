@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import cartPerformanceMonitor from '../../utils/cart-performance-monitor';
+import LoadingSpinner from '../LoadingSpinner';
 
 const CartPerformanceDashboard = () => {
   const [report, setReport] = useState(null);
@@ -59,7 +60,12 @@ const CartPerformanceDashboard = () => {
   };
   
   if (loading) {
-    return <div className="cart-dashboard-loading">Carregando métricas do carrinho...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <LoadingSpinner />
+        <p className="mt-4 text-gray-600">Carregando métricas do carrinho...</p>
+      </div>
+    );
   }
   
   // Status de saúde baseado no score

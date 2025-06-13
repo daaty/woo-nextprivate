@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './AppleProducts.module.css';
+import LoadingSpinner from '../LoadingSpinner';
 
 const AppleProducts = () => {
   const [products, setProducts] = useState([]);
@@ -131,7 +132,10 @@ const AppleProducts = () => {
         </div>
         
         {loading ? (
-          <div className={styles.loading}>Carregando produtos...</div>
+          <div className="flex flex-col items-center justify-center py-12">
+            <LoadingSpinner />
+            <p className="mt-4 text-gray-600">Carregando produtos...</p>
+          </div>
         ) : error ? (
           <div className={styles.error}>{error}</div>
         ) : products.length === 0 ? (
@@ -190,7 +194,17 @@ const AppleProducts = () => {
                     </div>
                     
                     <div className={styles.addToCartWrapper}>
-                      <button className={styles.addToCartBtn}>
+                      <button className={`${styles.addToCartBtn} d-flex align-items-center justify-content-center`} style={{ gap: '8px' }}>
+                        <div style={{
+                          width: '16px',
+                          height: '16px',
+                          backgroundImage: 'url(/icons/add-cart_5733218.png)',
+                          backgroundSize: 'contain',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'center',
+                          filter: 'brightness(0) invert(1)',
+                          transition: 'transform 0.3s ease'
+                        }} />
                         Adicionar ao Carrinho
                       </button>
                     </div>

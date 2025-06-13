@@ -5,11 +5,22 @@ export default function LoadingSpinner({ size = 'normal' }) {
   const borderWidth = isSmall ? 3 : 4;
   
   return (
-    <div className="loading-spinner-container">
-      <div className="loading-spinner"></div>
-      <div className="loading-ring"></div>
-      <div className="loading-inner-ring"></div>
+    <div className="loading-spinner-wrapper">
+      <div className="loading-spinner-container">
+        <div className="loading-spinner"></div>
+        <div className="loading-ring"></div>
+        <div className="loading-inner-ring"></div>
+      </div>
       <style jsx>{`
+        .loading-spinner-wrapper {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          min-height: ${containerSize}px;
+        }
+        
         .loading-spinner-container {
           position: relative;
           width: ${containerSize}px;

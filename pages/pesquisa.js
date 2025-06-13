@@ -252,7 +252,7 @@ export default function SearchPage() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong> no cartão</span>
                         </div>
                       </div>
                     </a>

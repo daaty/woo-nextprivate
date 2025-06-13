@@ -187,7 +187,8 @@
   color: white;
 }
 
-/* Spinner de carregamento */
+/* Spinner de carregamento - DEPRECATED: Agora usando LoadingSpinner.js */
+/*
 .loading {
   text-align: center;
   padding: 40px;
@@ -208,6 +209,7 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+*/
 
 .error {
   color: #ff3e3e;
@@ -876,4 +878,60 @@
     scroll-snap-align: start;
     flex: 0 0 auto;
   }
+}
+
+/* Loading, Error e Spinner */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  min-height: 400px;
+}
+
+/* Spinner - DEPRECATED: Agora usando LoadingSpinner.js */
+/*
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #ff6900;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+*/
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.retryButton {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ff6900 0%, #00a8e1 100%);
+  color: white;
+}
+
+.retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 105, 0, 0.4);
 }

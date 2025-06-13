@@ -96,7 +96,7 @@ const ProductCard = ({ product, className = '' }) => {
           </div>
           
           <div className={styles.productInstallment}>
-            em até <strong>12x</strong> sem juros
+            em até <strong>12x</strong> no cartão
           </div>
           
           <button className={styles.addToCartBtn} onClick={(e) => {

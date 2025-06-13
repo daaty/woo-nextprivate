@@ -11,7 +11,7 @@ const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isMenuVisible, setMenuVisibility] = useState(false);
     const [isMinicartOpen, setIsMinicartOpen] = useState(false);
-    const [promoMessages, setPromoMessages] = useState(['Parcele em até 12x sem juros', 'Frete Grátis acima de R$200*', '8% de desconto à vista**']);
+    const [promoMessages, setPromoMessages] = useState(['Parcele em até 12x no cartão', 'Frete Grátis acima de R$1.000* (MT)', '8% de desconto à vista**']);
     
     const router = useRouter();
     

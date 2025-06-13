@@ -4,6 +4,7 @@ import styles from './FeaturedProducts.module.css';
 import { useCartContext } from '../../contexts/CartContext';
 import { calculateInstallmentValue, INSTALLMENT_INTEREST_RATE, MAX_INSTALLMENTS } from '../../utils/installment-utils';
 import { priceToNumber, formatPrice } from '../../utils/format-price';
+import LoadingSpinner from '../LoadingSpinner';
 
 const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
@@ -125,7 +126,10 @@ const FeaturedProducts = () => {
         </div>
         
         {loading ? (
-          <div className={styles.loading}>Carregando produtos...</div>
+          <div className="flex flex-col items-center justify-center py-12">
+            <LoadingSpinner />
+            <p className="mt-4 text-gray-600">Carregando produtos...</p>
+          </div>
         ) : error ? (
           <div className={styles.error}>{error}</div>
         ) : products.length === 0 ? (
@@ -213,11 +217,36 @@ const FeaturedProducts = () => {
                                 data-product-image={product.images[0]?.src}
                               >
                                 {addingProductId === product.id && isAddingToCart ? (
-                                  <span>Adicionando...</span>
+                                  <>
+                                    <div style={{
+                                      width: '16px',
+                                      height: '16px',
+                                      border: '2px solid #ffffff',
+                                      borderTop: '2px solid transparent',
+                                      borderRadius: '50%',
+                                      animation: 'spin 1s linear infinite'
+                                    }} />
+                                    <span>Adicionando...</span>
+                                  </>
                                 ) : addingProductId === product.id && addToCartSuccess ? (
-                                  <span>✓ Adicionado</span>
+                                  <>
+                                    <span>✓</span>
+                                    <span>Adicionado</span>
+                                  </>
                                 ) : (
-                                  <span>Adicionar ao Carrinho</span>
+                                  <>
+                                    <div style={{
+                                      width: '18px',
+                                      height: '18px',
+                                      backgroundImage: 'url(/icons/add-cart_5733218.png)',
+                                      backgroundSize: 'contain',
+                                      backgroundRepeat: 'no-repeat',
+                                      backgroundPosition: 'center',
+                                      filter: 'brightness(0) invert(1)',
+                                      transition: 'transform 0.3s ease'
+                                    }} />
+                                    <span>Adicionar ao Carrinho</span>
+                                  </>
                                 )}
                               </button>
                             </div>

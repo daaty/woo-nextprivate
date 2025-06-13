@@ -44,19 +44,40 @@ const StandardAddToCartButton = ({
     large: 'px-6 py-3 text-lg'
   };
 
-  // Variant classes
+  // Variant classes - Updated to match [slug].js style
   const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-    secondary: 'bg-gray-600 hover:bg-gray-700 text-white',
-    outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white',
-    ghost: 'text-blue-600 hover:bg-blue-50'
+    primary: 'text-white',
+    secondary: 'text-white', 
+    outline: 'border-2 text-orange-600 hover:text-white',
+    ghost: 'text-orange-600 hover:text-white'
+  };
+
+  // Generate gradient background style based on variant
+  const getBackgroundStyle = () => {
+    if (variant === 'outline') {
+      return {
+        background: 'transparent',
+        border: '2px solid #ff6900'
+      };
+    }
+    if (variant === 'ghost') {
+      return {
+        background: 'transparent'
+      };
+    }
+    return {
+      background: 'linear-gradient(135deg, #ff6900 0%, #ff8f00 50%, #00a8e1 100%)',
+      boxShadow: '0 4px 16px rgba(255, 105, 0, 0.3)',
+      border: 'none'
+    };
   };
 
   const baseClasses = `
-    inline-flex items-center justify-center
-    font-medium rounded-md transition-all duration-200
-    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+    inline-flex items-center justify-center gap-2
+    font-semibold rounded-lg transition-all duration-300
+    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500
     disabled:opacity-50 disabled:cursor-not-allowed
+    hover:transform hover:translateY(-1px) hover:shadow-lg
     ${sizeClasses[size]}
     ${variantClasses[variant]}
     ${fullWidth ? 'w-full' : ''}
@@ -78,6 +99,7 @@ const StandardAddToCartButton = ({
         onClick={handleClick}
         disabled={isDisabled}
         className={baseClasses}
+        style={getBackgroundStyle()}
         aria-label={`Add ${product?.name || 'product'} to cart`}
         type="button"
       >
@@ -87,6 +109,20 @@ const StandardAddToCartButton = ({
             className="mr-2" 
             color="currentColor" 
           />
+        )}
+        
+        {!loading && (
+          <div style={{
+            width: size === 'small' ? '16px' : size === 'large' ? '24px' : '20px',
+            height: size === 'small' ? '16px' : size === 'large' ? '24px' : '20px',
+            backgroundImage: 'url(/icons/add-cart_5733218.png)',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            filter: variant === 'outline' || variant === 'ghost' ? 'none' : 'brightness(0) invert(1)',
+            marginRight: '8px',
+            transition: 'transform 0.3s ease'
+          }} />
         )}
         
         <span>{getButtonText()}</span>

@@ -13,7 +13,7 @@ const WhyChooseUs = () => {
     {
       icon: '/icons/shipping.svg',
       title: 'Frete Grátis',
-      description: 'Para compras acima de R$200 em todo o Brasil.'
+      description: 'Para compras acima de R$1.000,00 no estado do Mato Grosso.'
     },
     {
       icon: '/icons/warranty.svg',
@@ -23,7 +23,7 @@ const WhyChooseUs = () => {
     {
       icon: '/icons/payment.svg',
       title: 'Pagamento Seguro',
-      description: 'Parcelamento em até 12x sem juros no cartão.'
+      description: 'Parcelamento em até 12x no cartão.'
     }
   ];
 

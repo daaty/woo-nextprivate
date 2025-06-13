@@ -117,7 +117,7 @@ const Cart = () => {
   const [productSlugs, setProductSlugs] = useState({});
   
   // Constantes de configuração - Usando variáveis de ambiente
-  const FREE_SHIPPING_THRESHOLD = 199;
+  const FREE_SHIPPING_THRESHOLD = 1000;
   const MAX_INSTALLMENTS = process.env.NEXT_PUBLIC_MAX_INSTALLMENTS ? parseInt(process.env.NEXT_PUBLIC_MAX_INSTALLMENTS) : 12;
   const INSTALLMENT_INTEREST_RATE = process.env.NEXT_PUBLIC_INSTALLMENT_INTEREST_RATE ? parseFloat(process.env.NEXT_PUBLIC_INSTALLMENT_INTEREST_RATE) : 1.99;
   const CASH_PAYMENT_DISCOUNT_PERCENT = process.env.NEXT_PUBLIC_CASH_PAYMENT_DISCOUNT ? parseFloat(process.env.NEXT_PUBLIC_CASH_PAYMENT_DISCOUNT) : 8;
@@ -1164,9 +1164,11 @@ const Cart = () => {
   if (!hydrated || (isInitialLoading && loading && !Array.isArray(clientCartItems))) {
     return (
       <Layout>
-        <div className="container mx-auto py-12 px-6 text-center">
-          <Spinner />
-          <p className="text-lg mt-2">Carregando seu carrinho...</p>
+        <div className="container mx-auto py-12 px-6">
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <Spinner />
+            <p className="text-lg mt-4 text-gray-600">Carregando seu carrinho...</p>
+          </div>
         </div>
       </Layout>
     );

@@ -75,7 +75,7 @@ const ProductCard = ({ product, discount }) => {
               </div>
               
               <div className={styles.installments}>
-                em até <strong>12x</strong> sem juros
+                em até <strong>12x</strong> no cartão
               </div>
 
               {isLimitedStock && (
@@ -94,10 +94,21 @@ const ProductCard = ({ product, discount }) => {
             </div>
           ) : (
             <button 
-              className={styles.addToCart}
+              className={`${styles.addToCart} d-flex align-items-center justify-content-center`}
               onClick={handleAddToCart}
               disabled={isAddingToCart}
+              style={{ gap: '8px' }}
             >
+              <div style={{
+                width: '16px',
+                height: '16px',
+                backgroundImage: 'url(/icons/add-cart_5733218.png)',
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                filter: 'brightness(0) invert(1)',
+                transition: 'transform 0.3s ease'
+              }} />
               Adicionar ao Carrinho
             </button>
           )}

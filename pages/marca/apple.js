@@ -1237,18 +1237,40 @@ export default function ApplePage() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: 'linear-gradient(135deg, #ff6900 0%, #00a8e1 100%)',
+                          gap: '8px',
+                          background: 'linear-gradient(135deg, #ff6900 0%, #ff8f00 50%, #00a8e1 100%)',
                           transition: 'all 0.3s ease',
                           border: 'none',
-                          borderRadius: '8px',
+                          borderRadius: '12px',
                           color: 'white',
                           fontWeight: '600',
                           fontSize: '14px',
                           cursor: 'pointer',
                           width: '100%',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          boxShadow: '0 4px 16px rgba(255, 105, 0, 0.3)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.transform = 'translateY(-2px)';
+                          e.target.style.boxShadow = '0 8px 25px rgba(255, 105, 0, 0.4)';
+                          e.target.style.background = 'linear-gradient(135deg, #ff8f00 0%, #ffab00 50%, #00c4e8 100%)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.transform = 'translateY(0)';
+                          e.target.style.boxShadow = '0 4px 16px rgba(255, 105, 0, 0.3)';
+                          e.target.style.background = 'linear-gradient(135deg, #ff6900 0%, #ff8f00 50%, #00a8e1 100%)';
                         }}
                       >
+                        <div style={{
+                          width: '16px',
+                          height: '16px',
+                          backgroundImage: 'url(/icons/add-cart_5733218.png)',
+                          backgroundSize: 'contain',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'center',
+                          filter: 'brightness(0) invert(1)',
+                          transition: 'transform 0.3s ease'
+                        }} />
                         Adicionar ao carrinho
                       </button>
                     </div>

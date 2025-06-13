@@ -357,7 +357,7 @@ const Cart = () => {
                   </div>
                   
                   <p className="text-xs text-gray-500 mt-1 text-right">
-                    ou até 12x de {formatPrice((cartTotal || 0) / 12)} sem juros
+                    ou até 12x de {formatPrice((cartTotal || 0) / 12)} no cartão
                   </p>
                 </div>
                 

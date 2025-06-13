@@ -14,6 +14,7 @@ import BrandNavigationButton from '../src/components/BrandNavigationButton';
 import { CategorySchema, OrganizationSchema, BreadcrumbSchema } from '../src/components/seo/SchemaOrg';
 import FilterToggleButton from '../src/components/FilterToggleButton';
 import { formatPrice } from '../src/utils/format-price';
+import LoadingSpinner from '../src/components/LoadingSpinner';
 
 // Carregar o carrossel dinamicamente para otimizar o carregamento
 const Carousel = dynamic(() => import('../src/components/Carousel'), { ssr: false });
@@ -618,7 +619,7 @@ const VerTodos = () => {
     <Layout>
       <Head>
         <title>Smartphones de Todas as Marcas | Compre Online</title>
-        <meta name="description" content="Encontre smartphones de várias marcas como Apple, Samsung, Motorola e Xiaomi com os melhores preços. Compre online com frete grátis e parcelamento." />
+        <meta name="description" content="Encontre smartphones de várias marcas como Apple, Samsung, Motorola e Xiaomi com os melhores preços. Compre online com frete grátis (MT acima de R$1.000) e parcelamento." />
         
         {/* OpenGraph tags para compartilhamento em redes sociais */}
         <meta property="og:title" content="Smartphones de Todas as Marcas | Loja Oficial" />
@@ -1186,9 +1187,9 @@ const VerTodos = () => {
             </div>
             
             {loading ? (
-              <div className={styles.loading}>
-                <div className={styles.spinner}></div>
-                <p>Carregando produtos...</p>
+              <div className="flex flex-col items-center justify-center py-12">
+                <LoadingSpinner />
+                <p className="mt-4 text-gray-600">Carregando produtos...</p>
               </div>
             ) : error ? (
               <div className={styles.error}>
@@ -1283,6 +1284,7 @@ const VerTodos = () => {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          gap: '8px',
                           background: 'linear-gradient(135deg, #ff6900 0%, #00a8e1 100%)',
                           transition: 'all 0.3s ease',
                           border: 'none',
@@ -1294,6 +1296,16 @@ const VerTodos = () => {
                           width: '100%',
                           textAlign: 'center'
                         }}                      >
+                        <div style={{
+                          width: '16px',
+                          height: '16px',
+                          backgroundImage: 'url(/icons/add-cart_5733218.png)',
+                          backgroundSize: 'contain',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'center',
+                          filter: 'brightness(0) invert(1)',
+                          transition: 'transform 0.3s ease'
+                        }} />
                         Adicionar ao carrinho
                       </button>
                     </div>

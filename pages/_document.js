@@ -20,7 +20,7 @@ class MyDocument extends Document {
           
           {/* Twitter Card meta tags padrão */}
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:site" content="@rotadoscelulares" />
+          <meta name="twitter:site" content="@rotadoscelulares66" />
           
           {/* Favicon */}
           <link rel="icon" href="/favicon.ico" />

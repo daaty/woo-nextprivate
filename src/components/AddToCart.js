@@ -97,9 +97,43 @@ const AddToCart = ({
       {/* Botão de adicionar ao carrinho */}
       <button
         onClick={handleAddToCart}
-        className={buttonClass}
+        className={`${buttonClass} d-flex align-items-center justify-content-center`}
         disabled={isLoading}
+        style={{ 
+          gap: '8px',
+          background: 'linear-gradient(135deg, #ff6900 0%, #ff8f00 50%, #00a8e1 100%)',
+          boxShadow: '0 4px 16px rgba(255, 105, 0, 0.3)',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          fontWeight: '600',
+          transition: 'all 0.3s ease'
+        }}
+        onMouseEnter={(e) => {
+          if (!isLoading) {
+            e.target.style.transform = 'translateY(-1px)';
+            e.target.style.boxShadow = '0 6px 20px rgba(255, 105, 0, 0.4)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isLoading) {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 4px 16px rgba(255, 105, 0, 0.3)';
+          }
+        }}
       >
+        {!isLoading && (
+          <div style={{
+            width: '18px',
+            height: '18px',
+            backgroundImage: 'url(/icons/add-cart_5733218.png)',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            filter: 'brightness(0) invert(1)',
+            transition: 'transform 0.3s ease'
+          }} />
+        )}
         {isLoading ? 'Adicionando...' : buttonText}
       </button>
 

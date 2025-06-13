@@ -6,6 +6,7 @@ import { sanitize } from '../../utils/miscellaneous';
 import ProductCard from '../ProductCard/ProductCard';
 import styles from './AppleProducts.module.css';
 import Slider from 'react-slick';
+import LoadingSpinner from '../LoadingSpinner';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -72,8 +73,9 @@ const AppleProducts = () => {
             </div>
 
             {loading && (
-                <div className={styles.loading}>
-                    Carregando produtos Apple...
+                <div className="flex flex-col items-center justify-center py-12">
+                    <LoadingSpinner />
+                    <p className="mt-4 text-gray-600">Carregando produtos Apple...</p>
                 </div>
             )}
 

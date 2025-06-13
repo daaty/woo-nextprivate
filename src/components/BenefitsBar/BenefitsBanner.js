@@ -19,13 +19,13 @@ const BenefitsBanner = () => {
       id: 3,
       icon: '/Custom/Content/Themes/xiaomi/Imagens/svg/Frete_gratis.png',
       title: '*Frete Grátis',
-      description: 'Nas compras acima de R$ 200,00.',
+      description: 'Nas compras acima de R$ 1.000,00 no MT.',
     },
     {
       id: 4,
       icon: '/Custom/Content/Themes/xiaomi/Imagens/svg/desconto_a_vista.png',
       title: '**8% de desconto à vista',
-      description: 'Parcele em 12X sem juros',
+      description: 'Parcele em 12X no cartão',
       extraInfo: 'Não cumulativo com outras ofertas, exceto Frete Grátis.'
     },
   ];

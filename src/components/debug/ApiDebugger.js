@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_PRODUCTS_BY_BRAND_ROBUST } from '../../queries/product-queries';
+import LoadingSpinner from '../LoadingSpinner';
 
 const ApiDebugger = ({ brand = "apple" }) => {
   const [debugInfo, setDebugInfo] = useState({
@@ -49,7 +50,12 @@ const ApiDebugger = ({ brand = "apple" }) => {
     }
   }, [loading, error, data]);
 
-  if (loading) return <p>Carregando dados para debug...</p>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-12">
+      <LoadingSpinner />
+      <p className="mt-4 text-gray-600">Carregando dados para debug...</p>
+    </div>
+  );
   
   if (error) return <p>Erro ao buscar produtos: {error.message}</p>;
 

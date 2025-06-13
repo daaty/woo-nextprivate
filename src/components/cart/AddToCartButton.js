@@ -622,7 +622,7 @@ const AddToCartButton = ({ product, buttonClassName, showQuantity = false }) => 
                             disabled={showSpinner}
                             onClick={handleAddToCartClick}
                             className={buttonClassName || cx(
-                                'px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-md transition-all duration-200',
+                                'px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-md transition-all duration-200 flex items-center gap-2',
                                 {
                                     'opacity-50 cursor-not-allowed': showSpinner,
                                     'transform hover:scale-105': !showSpinner,
@@ -630,12 +630,17 @@ const AddToCartButton = ({ product, buttonClassName, showQuantity = false }) => 
                             )}
                             aria-label={`Adicionar ${product?.name || 'produto'} ao carrinho`}
                         >
-                            <span className="flex items-center">
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5H20.5" />
-                                </svg>
-                                Adicionar ao Carrinho
-                            </span>
+                            <div style={{
+                                width: '20px',
+                                height: '20px',
+                                backgroundImage: 'url(/icons/add-cart_5733218.png)',
+                                backgroundSize: 'contain',
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: 'center',
+                                filter: 'brightness(0) invert(1)',
+                                transition: 'transform 0.3s ease'
+                            }} />
+                            <span>Adicionar ao Carrinho</span>
                         </button>
                     </div>
                 )}
