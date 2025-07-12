@@ -472,7 +472,7 @@ export default function ProdutoDetalhe() {
   // Verificar se é uma solicitação para a página de promocoes ou lancamentos
     if (slug === 'promocoes') {
       // Buscar produtos em promoção
-      fetch('/api/products?on_sale=true&per_page=12')
+      fetch('/api/products?on_sale=true&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -495,7 +495,7 @@ export default function ProdutoDetalhe() {
     // Verificar se é uma solicitação para a página de lançamentos
     if (slug === 'lancamentos') {
       // Buscar produtos ordenados por data (mais recentes primeiro)
-      fetch('/api/products?orderby=date&order=desc&per_page=12')
+      fetch('/api/products?orderby=date&order=desc&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -515,9 +515,87 @@ export default function ProdutoDetalhe() {
       return;
     }
     
-    // Acessórios - Carregadores e Power Banks
+    // Categoria Seminóvos - Buscar produtos seminóvos de todas as marcas
+    if (slug === 'seminovos') {
+      // Buscar produtos em ambas as categorias de seminóvos
+      const fetchSeminovos = fetch('/api/products?category=seminovos&per_page=50');
+      const fetchSeminovosIphone = fetch('/api/products?category=seminovos-iphone&per_page=50');
+      
+      Promise.all([fetchSeminovos, fetchSeminovosIphone])
+        .then(async ([resSeminovos, resSeminovosIphone]) => {
+          if (!resSeminovos.ok) throw new Error(`API seminovos retornou status ${resSeminovos.status}`);
+          if (!resSeminovosIphone.ok) throw new Error(`API seminovos-iphone retornou status ${resSeminovosIphone.status}`);
+          
+          const dataSeminovos = await resSeminovos.json();
+          const dataSeminovosIphone = await resSeminovosIphone.json();
+          
+          // Garantir que temos arrays de produtos
+          const seminovosArray = Array.isArray(dataSeminovos) ? dataSeminovos : dataSeminovos.products || [];
+          const seminovosIphoneArray = Array.isArray(dataSeminovosIphone) ? dataSeminovosIphone : dataSeminovosIphone.products || [];
+          
+          // Unificar os produtos e remover duplicatas por ID
+          const allProducts = [...seminovosArray, ...seminovosIphoneArray];
+          const uniqueProducts = allProducts.reduce((acc, product) => {
+            if (!acc.find(p => p.id === product.id)) {
+              acc.push(product);
+            }
+            return acc;
+          }, []);
+          
+          console.log(`✓ ${seminovosArray.length} produtos seminovos (categoria geral) encontrados`);
+          console.log(`✓ ${seminovosIphoneArray.length} produtos seminovos iPhone encontrados`);
+          console.log(`✓ Total unificado: ${uniqueProducts.length} aparelhos seminóvos únicos`);
+          
+          setPromoProducts(uniqueProducts);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error('❌ Erro ao buscar aparelhos seminóvos:', err);
+          setError(err.message);
+          setLoading(false);
+        });
+      return;
+    }
+    
+    // Acessórios - Carregadores e Cabos (UNIFICADO)
+    if (slug === 'carregadores-e-cabos') {
+      // Buscar produtos de ambas as categorias
+      const fetchCarregadores = fetch('/api/products?category=carregadores-power-banks&per_page=50');
+      const fetchCabos = fetch('/api/products?category=cabos&per_page=50');
+      
+      Promise.all([fetchCarregadores, fetchCabos])
+        .then(async ([resCarregadores, resCabos]) => {
+          if (!resCarregadores.ok) throw new Error(`API carregadores retornou status ${resCarregadores.status}`);
+          if (!resCabos.ok) throw new Error(`API cabos retornou status ${resCabos.status}`);
+          
+          const dataCarregadores = await resCarregadores.json();
+          const dataCabos = await resCabos.json();
+          
+          // Garantir que temos arrays de produtos
+          const carregadoresArray = Array.isArray(dataCarregadores) ? dataCarregadores : dataCarregadores.products || [];
+          const cabosArray = Array.isArray(dataCabos) ? dataCabos : dataCabos.products || [];
+          
+          // Unificar os produtos
+          const allProducts = [...carregadoresArray, ...cabosArray];
+          
+          console.log(`✓ ${carregadoresArray.length} carregadores e power banks encontrados`);
+          console.log(`✓ ${cabosArray.length} cabos encontrados`);
+          console.log(`✓ Total unificado: ${allProducts.length} produtos`);
+          
+          setPromoProducts(allProducts);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error('❌ Erro ao buscar carregadores e cabos:', err);
+          setError(err.message);
+          setLoading(false);
+        });
+      return;
+    }
+
+    // MANTER TEMPORARIAMENTE para compatibilidade - Carregadores e Power Banks
     if (slug === 'carregadores-power-banks') {
-      fetch('/api/products?category=carregadores-power-banks&per_page=12')
+      fetch('/api/products?category=carregadores-power-banks&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -537,9 +615,9 @@ export default function ProdutoDetalhe() {
       return;
     }
     
-    // Acessórios - Cabos
+    // MANTER TEMPORARIAMENTE para compatibilidade - Cabos
     if (slug === 'cabos') {
-      fetch('/api/products?category=cabos&per_page=12')
+      fetch('/api/products?category=cabos&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -561,7 +639,7 @@ export default function ProdutoDetalhe() {
     
     // Acessórios - Capas
     if (slug === 'capas') {
-      fetch('/api/products?category=capas&per_page=12')
+      fetch('/api/products?category=capas&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -583,7 +661,7 @@ export default function ProdutoDetalhe() {
     
     // Acessórios - Películas
     if (slug === 'peliculas') {
-      fetch('/api/products?category=peliculas&per_page=12')
+      fetch('/api/products?category=peliculas&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -605,7 +683,7 @@ export default function ProdutoDetalhe() {
     
     // Acessórios - Ver todos
     if (slug === 'acessórios') {
-      fetch('/api/products?category=acessorios&per_page=12')
+      fetch('/api/products?category=acessorios&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -627,7 +705,7 @@ export default function ProdutoDetalhe() {
     
     // Áudio - Fones sem Fio
     if (slug === 'fone-sem-fio') {
-      fetch('/api/products?category=fone-sem-fio&per_page=12')
+      fetch('/api/products?category=fone-sem-fio&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -649,7 +727,7 @@ export default function ProdutoDetalhe() {
     
     // Áudio - Fones com Fio
     if (slug === 'fone-com-fio') {
-      fetch('/api/products?category=fone-com-fio&per_page=12')
+      fetch('/api/products?category=fone-com-fio&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -671,7 +749,7 @@ export default function ProdutoDetalhe() {
     
     // Áudio - Caixas de Som
     if (slug === 'caixa-som') {
-      fetch('/api/products?category=caixa-som&per_page=12')
+      fetch('/api/products?category=caixa-som&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -693,7 +771,7 @@ export default function ProdutoDetalhe() {
     
     // Áudio - Assistentes Virtuais
     if (slug === 'assistente-virtual') {
-      fetch('/api/products?category=assistente-virtual&per_page=12')
+      fetch('/api/products?category=assistente-virtual&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -715,7 +793,7 @@ export default function ProdutoDetalhe() {
     
     // Áudio - Ver todos
     if (slug === 'áudio') {
-      fetch('/api/products?category=audio&per_page=12')
+      fetch('/api/products?category=audio&per_page=50')
         .then(async (res) => {
           if (!res.ok) throw new Error(`API retornou status ${res.status}`);
           
@@ -849,6 +927,8 @@ export default function ProdutoDetalhe() {
     );
   }  // Verificar se é a página de promocoes
   if ((slug === 'promocoes' || 
+      slug === 'seminovos' ||
+      slug === 'carregadores-e-cabos' ||
       slug === 'carregadores-power_banks' || 
       slug === 'cabos' || 
       slug === 'capas' || 
@@ -873,6 +953,16 @@ export default function ProdutoDetalhe() {
         pageTitle = 'Produtos em Promoção';
         tagLabel = 'OFERTA';
         tagClass = productGridStyles.saleTag;
+        break;
+      case 'seminovos':
+        pageTitle = 'Aparelhos Seminóvos';
+        tagLabel = 'SEMINÓVO';
+        tagClass = productGridStyles.specialTag;
+        break;
+      case 'carregadores-e-cabos':
+        pageTitle = 'Carregadores e Cabos';
+        tagLabel = 'ACESSÓRIO';
+        tagClass = productGridStyles.categoryTag;
         break;
       case 'carregadores-power-banks':
         pageTitle = 'Carregadores e Power Banks';
@@ -978,7 +1068,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1051,8 +1141,79 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
+                      </div>
+                    </a>
+                  </Link>
+                  <div className={productGridStyles.productActions}>
+                    <Link href={`/produto/${product.slug}`}>
+                      <a className={productGridStyles.addToCartButton}>
+                        Ver detalhes
+                      </a>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Layout>
+    );
+  }
+
+  // Verificar se é a página unificada de carregadores e cabos
+  if (slug === 'carregadores-e-cabos' && !loading) {
+    // Importe estilos no início do arquivo
+    const productGridStyles = require('../../styles/ProductGrid.module.css');
+    
+    return (
+      <Layout>
+        <div className="container mx-auto py-10">
+          <h1 className="text-3xl font-bold mb-8 text-center">Carregadores e Cabos</h1>
+          
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+              <p>{error}</p>
+            </div>
+          )}
+          
+          {promoProducts.length === 0 && !error ? (
+            <div className="text-center py-10">
+              <p className="text-xl text-gray-600">Nenhum carregador ou cabo disponível no momento.</p>
+            </div>
+          ) : (
+            <div className={productGridStyles.productsGrid}>
+              {promoProducts.map(product => (
+                <div key={product.id} className={productGridStyles.productCard}>
+                  <Link href={`/produto/${product.slug}`}>
+                    <a className={productGridStyles.productLink}>
+                      <div className={productGridStyles.productImage}>
+                        {product.image?.sourceUrl || product.images?.[0]?.src ? (
+                          <Image
+                            src={product.image?.sourceUrl || product.images?.[0]?.src}
+                            alt={product.name}
+                            width={240}
+                            height={240}
+                            quality={75}
+                            placeholder="blur"
+                            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                          />
+                        ) : (
+                          <div className={productGridStyles.placeholderImage}>
+                            <span>Sem imagem</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className={productGridStyles.productInfo}>
+                        <h3 className={productGridStyles.productName}>{product.name}</h3>
+                        {product.price && (
+                          <div className={productGridStyles.priceContainer}>
+                            <span className={productGridStyles.currentPrice}>
+                              R$ {product.price}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </a>
                   </Link>
@@ -1124,7 +1285,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1197,7 +1358,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1270,7 +1431,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1343,7 +1504,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1416,7 +1577,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1489,7 +1650,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1562,7 +1723,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1635,7 +1796,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1708,7 +1869,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -1781,7 +1942,7 @@ export default function ProdutoDetalhe() {
                           <span className={productGridStyles.price}>
                             {formatPrice(product.price)}
                           </span>
-                          <span className={productGridStyles.installments}>em até <strong>12x</strong> sem juros</span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
                         </div>
                       </div>
                     </a>
@@ -2053,7 +2214,7 @@ export default function ProdutoDetalhe() {
       {/* SEO Otimizado para Produto */}
       <SEO
         title={`${product.name}`}
-        description={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia. Parcele no cartão em até 12x.`}
+        description={product.shortDescription?.replace(/(<([^>]+)>)/gi, '') || `${product.name} - Compre online com entrega rápida e garantia.`}
         image={product.image?.sourceUrl || product.images?.[0]?.src}
         type="product"
         canonical={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://loja.rotadoscelulares.com'}/produto/${product.slug}`}

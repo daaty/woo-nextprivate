@@ -235,7 +235,7 @@ export async function getRelatedProducts(categoryId, excludeId) {
 export async function getAllSmartphones() {
   const query = `
     query GetAllSmartphones {
-      products(where: {categoryIn: "smartphones"}, first: 24) {
+      products(where: {categoryIn: "smartphones"}, first: 50) {
         nodes {
           id
           databaseId
@@ -321,7 +321,7 @@ export async function getProductsByBrand(brand) {
 
   const query = `
     query GetProductsByBrand($brand: String!) {
-      products(where: {productBrand: $brand}, first: 24) {
+      products(where: {productBrand: $brand}, first: 50) {
         nodes {
           id
           databaseId

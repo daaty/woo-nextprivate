@@ -9,7 +9,7 @@ import client from '../../src/components/ApolloClient';
  */
 export default async function handler(req, res) {
   try {
-    const { query, per_page = 12, page = 1 } = req.query;
+    const { query, per_page = 50, page = 1 } = req.query;
     
     if (!query || query.trim() === '') {
       return res.status(400).json({ 

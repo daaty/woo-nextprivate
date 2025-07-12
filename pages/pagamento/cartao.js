@@ -187,7 +187,7 @@ export default function PagamentoCartao() {
 				value: i,
 				label: i === 1 
 					? `À vista - R$ ${total.toFixed(2)}`
-					: `${i}x de R$ ${finalValue.toFixed(2)} ${hasInterest ? 'com juros' : 'sem juros'}`
+					: `${i}x de R$ ${finalValue.toFixed(2)} com juros`
 			});
 		}
 		

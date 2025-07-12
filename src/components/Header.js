@@ -11,7 +11,7 @@ const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isMenuVisible, setMenuVisibility] = useState(false);
     const [isMinicartOpen, setIsMinicartOpen] = useState(false);
-    const [promoMessages, setPromoMessages] = useState(['Parcele em até 12x no cartão', 'Frete Grátis acima de R$1.000* (MT)', '8% de desconto à vista**']);
+    const [promoMessages, setPromoMessages] = useState(['Frete Grátis acima de R$1.000* (MT)', '8% de desconto à vista**']);
     
     const router = useRouter();
     
@@ -29,9 +29,9 @@ const Header = () => {
             slug: 'celulares',
             subcategories: [
                 { name: 'Smartphones', slug: 'smartphones' },
+                { name: 'Seminóvos', slug: 'seminovos' },
                 { name: 'Tablets', slug: 'tablets' },
-                { name: 'Carregadores e Power Banks', slug: 'carregador' },
-                { name: 'Cabos', slug: 'cabos' },
+                { name: 'Carregadores e Cabos', slug: 'carregadores-e-cabos' },
                 { name: 'Capas', slug: 'capinha-para-celular' },
                 { name: 'Películas', slug: 'pelicula-para-celular' }
             ]

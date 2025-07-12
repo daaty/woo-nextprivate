@@ -25,7 +25,7 @@ const BenefitsBanner = () => {
       id: 4,
       icon: '/Custom/Content/Themes/xiaomi/Imagens/svg/desconto_a_vista.png',
       title: '**8% de desconto à vista',
-      description: 'Parcele em 12X no cartão',
+      description: 'Nas compras à vista',
       extraInfo: 'Não cumulativo com outras ofertas, exceto Frete Grátis.'
     },
   ];

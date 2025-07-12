@@ -2474,10 +2474,6 @@ const processOtherPayment = async (orderData) => {
 											)}
 										</span>
 									</div>
-									<div className="flex justify-between mb-3">
-										<span className="text-sm text-gray-600">Descontos:</span>
-										<span className="text-sm text-green-600">R$ 0,00</span>
-									</div>
 									
 									<div className="flex justify-between text-lg font-bold border-t pt-3">
 										<span>Total:</span>
@@ -2502,18 +2498,7 @@ const processOtherPayment = async (orderData) => {
 									
 									{/* Opções de pagamento - MODIFICADAS para usar valor mais confiável */}
 									<div className="mt-3 p-3 bg-gray-50 rounded-lg">
-										<div className="text-xs text-gray-600">											<p>💳 À vista: <span className="font-medium text-green-600">
-												{(() => {
-													// Garantir que o valor seja calculado corretamente
-													const baseValue = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
-													
-													// Garantir que o frete seja um número válido
-													const freightValue = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
-													
-													// Calcular total com desconto (8% à vista)
-													const total = baseValue + freightValue;
-													return formatPrice(total * 0.92);
-												})()}											</span> (8% desc.)</p>											<p>📅 Em 12x de <span className="font-medium">
+										<div className="text-xs text-gray-600">											<p> Em 12x de <span className="font-medium">
 												{(() => {
 													const baseValue = typeof manualSubtotal === 'number' ? manualSubtotal : 0;
 													const freightValue = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);

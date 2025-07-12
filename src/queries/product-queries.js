@@ -152,7 +152,7 @@ export const GET_PRODUCTS_BY_BRAND = gql`
       where: {
         tagIn: [$brand]
       },
-      first: 24
+      first: 50
     ) {
       nodes {
         id
@@ -192,7 +192,7 @@ export const GET_PRODUCTS_BY_BRAND_ROBUST = gql`
       where: {
         tagIn: [$brand]
       },
-      first: 24
+      first: 50
     ) {
       nodes {
         id
@@ -228,7 +228,7 @@ export const GET_PRODUCTS_BY_BRAND_ROBUST = gql`
       where: {
         search: $brand
       },
-      first: 24
+      first: 50
     ) {
       nodes {
         id
@@ -268,7 +268,7 @@ export const GET_PRODUCTS_BY_BRAND_ROBUST = gql`
           operator: IN
         }
       },
-      first: 24
+      first: 50
     ) {
       nodes {
         id

@@ -1092,6 +1092,7 @@ export default function SamsungPage() {
                   >
                     <span className={styles.gridIcon}>▦</span>
                   </button>
+                  {/* TEMPORARIAMENTE COMENTADO - Item 6 do Plano de Ação
                   <button 
                     className={`${styles.viewButton} ${viewMode === 'list' ? styles.active : ''}`}
                     onClick={() => handleViewModeChange('list')}
@@ -1101,6 +1102,7 @@ export default function SamsungPage() {
                   >
                     <span className={styles.listIcon}>≡</span>
                   </button>
+                  */}
                 </div>
                 
                 {/* Opções de ordenação com melhorias de acessibilidade */}

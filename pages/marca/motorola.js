@@ -1116,6 +1116,7 @@ export default function MotorolaPage() {
                   >
                     <span className={styles.gridIcon}>▦</span>
                   </button>
+                  {/* TEMPORARIAMENTE COMENTADO - Item 6 do Plano de Ação
                   <button 
                     className={`${styles.viewButton} ${viewMode === 'list' ? styles.active : ''}`}
                     onClick={() => handleViewModeChange('list')}
@@ -1125,6 +1126,7 @@ export default function MotorolaPage() {
                   >
                     <span className={styles.listIcon}>≡</span>
                   </button>
+                  */}
                 </div>
                 
                 {/* Opções de ordenação com melhorias de acessibilidade */}
@@ -1161,13 +1163,13 @@ export default function MotorolaPage() {
                 </button>
               </div>
             ) : filteredProducts.length > 0 ? (
-              <div className={viewMode === 'grid' ? styles.productsGrid : styles.productsList}>
+              <div className={styles.productsGrid}>
                 {filteredProducts.slice(0, visibleItems).map(product => (
-                  <div key={product.id} className={viewMode === 'grid' ? styles.productCard : styles.productCardList}>
+                  <div key={product.id} className={styles.productCard}>
                     <Link href={`/produto/${product.slug}`}>
                       <a className={styles.productLink}>
                         <div className={styles.productImage} style={{ 
-                          height: viewMode === 'grid' ? '240px' : '260px', 
+                          height: '240px', 
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',

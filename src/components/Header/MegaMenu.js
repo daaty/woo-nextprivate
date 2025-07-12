@@ -29,6 +29,7 @@ const MegaMenu = () => {
       title: 'Eletrônicos',
       items: [
         { name: 'Smartphones', slug: 'smartphones' },
+        { name: 'Seminóvos', slug: 'seminovos' },
         { name: 'Laptops', slug: 'laptops' },
         { name: 'Tablets', slug: 'tablets' },
         { name: 'Acessórios', slug: 'acessorios-eletronicos' }

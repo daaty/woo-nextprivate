@@ -50,7 +50,7 @@ const AppleProducts = () => {
     useEffect(() => {
         setLoading(true);
         
-        fetch('/api/brand?brand=Apple&per_page=12')
+        fetch('/api/brand?brand=Apple&per_page=50')
             .then(response => response.json())
             .then(data => {
                 setProducts(data);

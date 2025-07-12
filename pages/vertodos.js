@@ -1155,6 +1155,7 @@ const VerTodos = () => {
                   >
                     <span className={styles.gridIcon}>▦</span>
                   </button>
+                  {/* TEMPORARIAMENTE COMENTADO - Item 6 do Plano de Ação
                   <button 
                     className={`${styles.viewButton} ${viewMode === 'list' ? styles.active : ''}`}
                     onClick={() => handleViewModeChange('list')}
@@ -1164,6 +1165,7 @@ const VerTodos = () => {
                   >
                     <span className={styles.listIcon}>≡</span>
                   </button>
+                  */}
                 </div>
                 
                 <div className={styles.sortingOptions}>

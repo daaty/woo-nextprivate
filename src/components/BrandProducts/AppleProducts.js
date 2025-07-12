@@ -17,7 +17,7 @@ const AppleProducts = () => {
         
         // Buscar produtos da marca Apple
         console.log("Buscando produtos Apple...");
-        const response = await fetch('/api/brand?brand=apple&per_page=12');
+        const response = await fetch('/api/brand?brand=apple&per_page=50');
         
         if (!response.ok) {
           throw new Error(`API retornou status ${response.status}`);

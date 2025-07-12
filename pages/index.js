@@ -40,7 +40,7 @@ export default function Home(props) {
       {/* SEO com meta tags Open Graph */}
       <SEO 
         title="Rota dos Celulares - Smartphones e Acessórios com os Melhores Preços"
-        description="Compre smartphones, fones de ouvido, carregadores e acessórios com os melhores preços. Frete grátis para MT em compras acima de R$1.000. Parcele no cartão em até 12x."
+        description="Compre smartphones, fones de ouvido, carregadores e acessórios com os melhores preços. Frete grátis para MT em compras acima de R$1.000."
         image="/banners/home-banner.jpg"
         type="website"
       />

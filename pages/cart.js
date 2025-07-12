@@ -120,8 +120,6 @@ const Cart = () => {
   const FREE_SHIPPING_THRESHOLD = 1000;
   const MAX_INSTALLMENTS = process.env.NEXT_PUBLIC_MAX_INSTALLMENTS ? parseInt(process.env.NEXT_PUBLIC_MAX_INSTALLMENTS) : 12;
   const INSTALLMENT_INTEREST_RATE = process.env.NEXT_PUBLIC_INSTALLMENT_INTEREST_RATE ? parseFloat(process.env.NEXT_PUBLIC_INSTALLMENT_INTEREST_RATE) : 1.99;
-  const CASH_PAYMENT_DISCOUNT_PERCENT = process.env.NEXT_PUBLIC_CASH_PAYMENT_DISCOUNT ? parseFloat(process.env.NEXT_PUBLIC_CASH_PAYMENT_DISCOUNT) : 8;
-  const CASH_PAYMENT_MULTIPLIER = (100 - CASH_PAYMENT_DISCOUNT_PERCENT) / 100;
 
   // Função para calcular valor da parcela com juros
   const calculateInstallmentValue = (total) => {
@@ -2483,14 +2481,6 @@ const Cart = () => {
                 </span>
               </div>
               
-              {appliedCoupon && (
-                <div className="summary-row">
-                  <span className="text-gray-600">Desconto:</span>
-                  <span className="text-green-600">
-                    -{appliedCoupon.discount}
-                  </span>
-                </div>
-              )}
                 <div className="summary-row total">                
                 <span className="text-orange-600 font-semibold">Total:</span>                <span className="text-orange-600">
                   {(Array.isArray(clientCartItems) && clientCartItems.length > 0 && manualSubtotal > 0)
@@ -2528,32 +2518,7 @@ const Cart = () => {
                     <span className="ml-2">Opções de pagamento:</span>
                   </h3>
                   
-                  <div className="space-y-2 text-xs text-gray-600">                    <p className="flex items-center">
-                      <CheckIcon />                      <span className="ml-2">
-                        <strong className="text-green-600">À vista:</strong> {' '}                        {(() => {
-                          // Calcular o valor à vista com desconto
-                          let subtotal = 0;
-                          if (typeof cartTotal === 'string') {
-                            subtotal = priceToNumber(cartTotal);
-                          } else {
-                            subtotal = cartTotal || 0;
-                          }
-                          
-                          // Garantir que o frete seja um número
-                          const shipping = typeof shippingCost === 'number' ? shippingCost : priceToNumber(shippingCost || 0);
-                          const discount = typeof discountAmount === 'number' ? discountAmount : priceToNumber(discountAmount || 0);
-                          
-                          const totalBeforeDiscount = subtotal + shipping - discount;
-                          const cashTotal = totalBeforeDiscount * CASH_PAYMENT_MULTIPLIER;
-                          
-                          return formatPrice(cashTotal);
-                        })()}
-                        <span className="text-green-600 ml-1">
-                          ({CASH_PAYMENT_DISCOUNT_PERCENT}% de desconto)
-                        </span>
-                      </span>
-                    </p>
-                      <p className="flex items-center">
+                  <div className="space-y-2 text-xs text-gray-600">                      <p className="flex items-center">
                       <CheckIcon />
                       <span className="ml-2">
                         <strong>Parcelado:</strong>

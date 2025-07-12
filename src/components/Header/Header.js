@@ -66,13 +66,13 @@ const Header = () => {
         { name: 'Xiaomi', slug: 'xiaomi' },
         { name: 'Samsung', slug: 'samsung' },
         { name: 'Motorola', slug: 'motorola' },
+        { name: 'Seminóvos', slug: 'seminovos' },
       ]
     },
     {
       title: 'Acessórios',
       items: [
-        { name: 'Carregadores e Power Banks', slug: 'carregadores-power-banks' },
-        { name: 'Cabos', slug: 'cabos' },
+        { name: 'Carregadores Powerbanks e Cabos', slug: 'carregadores-e-cabos' },
         { name: 'Capas', slug: 'capas' },
         { name: 'Películas', slug: 'peliculas' },
       ]
@@ -176,9 +176,15 @@ const Header = () => {
                       {category.items.map((item, itemIdx) => (
                         <li key={itemIdx} className={styles.megaItem}>
                           {category.title === 'Smartphones' ? (
-                            <Link href={`/marca/${item.slug}`}>
-                              <a className={styles.megaLink}>{item.name}</a>
-                            </Link>
+                            item.slug === 'seminovos' ? (
+                              <Link href={`/produto/${item.slug}`}>
+                                <a className={styles.megaLink}>{item.name}</a>
+                              </Link>
+                            ) : (
+                              <Link href={`/marca/${item.slug}`}>
+                                <a className={styles.megaLink}>{item.name}</a>
+                              </Link>
+                            )
                           ) : category.title === 'Acessórios' || category.title === 'Áudio' ? (
                             <Link href={`/produto/${item.slug}`}>
                               <a className={styles.megaLink}>{item.name}</a>
@@ -260,9 +266,15 @@ const Header = () => {
                           {category.items.map((item, itemIdx) => (
                             <li key={itemIdx} className={styles.megaItem}>
                               {category.title === 'Smartphones' ? (
-                                <Link href={`/marca/${item.slug}`}>
-                                  <a className={styles.megaLink}>{item.name}</a>
-                                </Link>
+                                item.slug === 'seminovos' ? (
+                                  <Link href={`/produto/${item.slug}`}>
+                                    <a className={styles.megaLink}>{item.name}</a>
+                                  </Link>
+                                ) : (
+                                  <Link href={`/marca/${item.slug}`}>
+                                    <a className={styles.megaLink}>{item.name}</a>
+                                  </Link>
+                                )
                               ) : category.title === 'Acessórios' || category.title === 'Áudio' ? (
                                 <Link href={`/produto/${item.slug}`}>
                                   <a className={styles.megaLink}>{item.name}</a>
