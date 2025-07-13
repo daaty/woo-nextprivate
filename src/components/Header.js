@@ -33,7 +33,9 @@ const Header = () => {
                 { name: 'Tablets', slug: 'tablets' },
                 { name: 'Carregadores e Cabos', slug: 'carregadores-e-cabos' },
                 { name: 'Capas', slug: 'capinha-para-celular' },
-                { name: 'Películas', slug: 'pelicula-para-celular' }
+                { name: 'Películas', slug: 'pelicula-para-celular' },
+                { name: 'Suportes', slug: 'suportes' },
+                { name: 'Acessórios', slug: 'acessorios' }
             ]
         },
         {

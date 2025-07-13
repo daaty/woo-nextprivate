@@ -517,34 +517,56 @@ export default function ProdutoDetalhe() {
     
     // Categoria Seminóvos - Buscar produtos seminóvos de todas as marcas
     if (slug === 'seminovos') {
-      // Buscar produtos em ambas as categorias de seminóvos
-      const fetchSeminovos = fetch('/api/products?category=seminovos&per_page=50');
-      const fetchSeminovosIphone = fetch('/api/products?category=seminovos-iphone&per_page=50');
+      // Buscar produtos de todas as marcas e filtrar por "seminovo" no nome
+      const brands = ['apple', 'samsung', 'motorola', 'xiaomi'];
+      const brandPromises = brands.map(brand => 
+        fetch(`/api/products?category=${brand}&per_page=50`)
+          .then(res => res.ok ? res.json() : [])
+          .catch(() => [])
+      );
       
-      Promise.all([fetchSeminovos, fetchSeminovosIphone])
-        .then(async ([resSeminovos, resSeminovosIphone]) => {
-          if (!resSeminovos.ok) throw new Error(`API seminovos retornou status ${resSeminovos.status}`);
-          if (!resSeminovosIphone.ok) throw new Error(`API seminovos-iphone retornou status ${resSeminovosIphone.status}`);
+      // Também buscar das categorias específicas de seminóvos
+      const fetchSeminovos = fetch('/api/products?category=seminovos&per_page=50')
+        .then(res => res.ok ? res.json() : [])
+        .catch(() => []);
+      const fetchSeminovosIphone = fetch('/api/products?category=seminovos-iphone&per_page=50')
+        .then(res => res.ok ? res.json() : [])
+        .catch(() => []);
+      
+      Promise.all([...brandPromises, fetchSeminovos, fetchSeminovosIphone])
+        .then(async (responses) => {
+          // Processar todas as respostas
+          const allProductArrays = responses.map(data => 
+            Array.isArray(data) ? data : data.products || []
+          );
           
-          const dataSeminovos = await resSeminovos.json();
-          const dataSeminovosIphone = await resSeminovosIphone.json();
+          // Unificar todos os produtos
+          const allProducts = allProductArrays.flat();
           
-          // Garantir que temos arrays de produtos
-          const seminovosArray = Array.isArray(dataSeminovos) ? dataSeminovos : dataSeminovos.products || [];
-          const seminovosIphoneArray = Array.isArray(dataSeminovosIphone) ? dataSeminovosIphone : dataSeminovosIphone.products || [];
+          // Filtrar apenas produtos que contêm "seminovo" no nome
+          const seminovosProducts = allProducts.filter(product => {
+            const productName = product.name?.toLowerCase() || '';
+            return productName.includes('seminovo') || productName.includes('seminóvo');
+          });
           
-          // Unificar os produtos e remover duplicatas por ID
-          const allProducts = [...seminovosArray, ...seminovosIphoneArray];
-          const uniqueProducts = allProducts.reduce((acc, product) => {
+          // Remover duplicatas por ID
+          const uniqueProducts = seminovosProducts.reduce((acc, product) => {
             if (!acc.find(p => p.id === product.id)) {
               acc.push(product);
             }
             return acc;
           }, []);
           
-          console.log(`✓ ${seminovosArray.length} produtos seminovos (categoria geral) encontrados`);
-          console.log(`✓ ${seminovosIphoneArray.length} produtos seminovos iPhone encontrados`);
-          console.log(`✓ Total unificado: ${uniqueProducts.length} aparelhos seminóvos únicos`);
+          console.log(`✓ Total de produtos seminóvos encontrados: ${uniqueProducts.length}`);
+          console.log(`✓ Produtos por marca:`);
+          brands.forEach((brand, index) => {
+            const brandProducts = Array.isArray(responses[index]) ? responses[index] : responses[index].products || [];
+            const brandSeminovos = brandProducts.filter(p => {
+              const name = p.name?.toLowerCase() || '';
+              return name.includes('seminovo') || name.includes('seminóvo');
+            });
+            console.log(`  - ${brand}: ${brandSeminovos.length} seminóvos`);
+          });
           
           setPromoProducts(uniqueProducts);
           setLoading(false);
@@ -697,6 +719,50 @@ export default function ProdutoDetalhe() {
         })
         .catch((err) => {
           console.error('❌ Erro ao buscar acessórios:', err);
+          setError(err.message);
+          setLoading(false);
+        });
+      return;
+    }
+    
+    // Acessórios - Acessórios Gerais
+    if (slug === 'acessorios') {
+      fetch('/api/products?category=acessorios&per_page=50')
+        .then(async (res) => {
+          if (!res.ok) throw new Error(`API retornou status ${res.status}`);
+          
+          const data = await res.json();
+          console.log(`✓ ${Array.isArray(data) ? data.length : 0} acessórios encontrados`);
+          
+          // Garantir que temos um array de produtos
+          const productArray = Array.isArray(data) ? data : data.products || [];
+          setPromoProducts(productArray);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error('❌ Erro ao buscar acessórios:', err);
+          setError(err.message);
+          setLoading(false);
+        });
+      return;
+    }
+    
+    // Suportes
+    if (slug === 'suportes') {
+      fetch('/api/products?category=suportes&per_page=50')
+        .then(async (res) => {
+          if (!res.ok) throw new Error(`API retornou status ${res.status}`);
+          
+          const data = await res.json();
+          console.log(`✓ ${Array.isArray(data) ? data.length : 0} suportes encontrados`);
+          
+          // Garantir que temos um array de produtos
+          const productArray = Array.isArray(data) ? data : data.products || [];
+          setPromoProducts(productArray);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error('❌ Erro ao buscar suportes:', err);
           setError(err.message);
           setLoading(false);
         });
@@ -934,6 +1000,7 @@ export default function ProdutoDetalhe() {
       slug === 'capas' || 
       slug === 'peliculas' || 
       slug === 'acessórios' || 
+      slug === 'suportes' ||
       slug === 'fone-sem-fio' || 
       slug === 'fone-com-fio' || 
       slug === 'caixa-som' || 
@@ -987,6 +1054,11 @@ export default function ProdutoDetalhe() {
       case 'acessórios':
         pageTitle = 'Todos os Acessórios';
         tagLabel = 'ACESSÓRIO';
+        tagClass = productGridStyles.categoryTag;
+        break;
+      case 'suportes':
+        pageTitle = 'Suportes';
+        tagLabel = 'SUPORTE';
         tagClass = productGridStyles.categoryTag;
         break;
       case 'fone-sem-fio':
@@ -1544,6 +1616,79 @@ export default function ProdutoDetalhe() {
           {promoProducts.length === 0 && !error ? (
             <div className="text-center py-10">
               <p className="text-xl text-gray-600">Nenhum acessório disponível no momento.</p>
+            </div>
+          ) : (
+            <div className={productGridStyles.productsGrid}>
+              {promoProducts.map(product => (
+                <div key={product.id} className={productGridStyles.productCard}>
+                  <Link href={`/produto/${product.slug}`}>
+                    <a className={productGridStyles.productLink}>
+                      <div className={productGridStyles.productImage}>
+                        {product.image?.sourceUrl || product.images?.[0]?.src ? (
+                          <Image
+                            src={product.image?.sourceUrl || product.images?.[0]?.src}
+                            alt={product.name}
+                            width={240}
+                            height={240}
+                            className="object-contain"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                            <span className="text-gray-400">Sem imagem</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className={productGridStyles.productInfo}>
+                        <h2 className={productGridStyles.productName}>{product.name}</h2>
+                        <div className={productGridStyles.productPricing}>
+                          {(product.onSale || product.on_sale) && (
+                            <span className={productGridStyles.regularPrice}>
+                              {formatPrice(product.regularPrice || product.regular_price)}
+                            </span>
+                          )}
+                          <span className={productGridStyles.price}>
+                            {formatPrice(product.price)}
+                          </span>
+                          <span className={productGridStyles.installments}>em até <strong>12x</strong></span>
+                        </div>
+                      </div>
+                    </a>
+                  </Link>
+                  <div className={productGridStyles.productActions}>
+                    <Link href={`/produto/${product.slug}`}>
+                      <a className={productGridStyles.addToCartButton}>
+                        Ver detalhes
+                      </a>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Layout>
+    );
+  }
+
+  // Verificar se é a página de suportes
+  if (slug === 'suportes' && !loading) {
+    // Importe estilos no início do arquivo
+    const productGridStyles = require('../../styles/ProductGrid.module.css');
+    
+    return (
+      <Layout>
+        <div className="container mx-auto py-10">
+          <h1 className="text-3xl font-bold mb-8 text-center">Suportes</h1>
+          
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+              <p>{error}</p>
+            </div>
+          )}
+          
+          {promoProducts.length === 0 && !error ? (
+            <div className="text-center py-10">
+              <p className="text-xl text-gray-600">Nenhum suporte disponível no momento.</p>
             </div>
           ) : (
             <div className={productGridStyles.productsGrid}>

@@ -154,8 +154,16 @@ export default function SamsungPage() {
     // Filtro de disponibilidade
     if (selectedAvailability !== 'all') {
       filtered = filtered.filter(product => {
-        const isInStock = product.stock_status === 'instock' || product.in_stock;
-        return selectedAvailability === 'in-stock' ? isInStock : !isInStock;
+        if (selectedAvailability === 'seminovos') {
+          // Para seminóvos, filtramos apenas produtos que são realmente seminóvos da Samsung
+          // Verifica se o nome contém "seminovo" E se é produto Samsung
+          const productName = product.name?.toLowerCase() || '';
+          const isSamsungSeminovo = productName.includes('seminovo') || productName.includes('seminóvo');
+          return isSamsungSeminovo;
+        } else {
+          const isInStock = product.stock_status === 'instock' || product.in_stock;
+          return selectedAvailability === 'in-stock' ? isInStock : !isInStock;
+        }
       });
     }
     
@@ -810,6 +818,19 @@ export default function SamsungPage() {
                       />
                       <span>Fora de estoque</span>
                       <span className={styles.count}>({products.filter(p => p.stock_status !== 'instock' && !p.in_stock).length})</span>
+                    </label>
+                    <label className={styles.filterCheckbox}>
+                      <input 
+                        type="radio" 
+                        name="availability" 
+                        checked={selectedAvailability === 'seminovos'}
+                        onChange={() => setSelectedAvailability('seminovos')} 
+                      />
+                      <span>Seminóvos</span>
+                      <span className={styles.count}>({products.filter(p => {
+                        const productName = p.name?.toLowerCase() || '';
+                        return productName.includes('seminovo') || productName.includes('seminóvo');
+                      }).length})</span>
                     </label>
                   </div>
                 </div>

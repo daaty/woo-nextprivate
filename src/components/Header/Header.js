@@ -75,6 +75,8 @@ const Header = () => {
         { name: 'Carregadores Powerbanks e Cabos', slug: 'carregadores-e-cabos' },
         { name: 'Capas', slug: 'capas' },
         { name: 'Películas', slug: 'peliculas' },
+        { name: 'Suportes', slug: 'suportes' },
+        { name: 'Acessórios Gerais', slug: 'acessorios' },
       ]
     },
     {
